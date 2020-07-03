@@ -1,4 +1,4 @@
-# Julius ![](res/julius_48.png)
+# Octavius ![](res/octavius_48.png)
 
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/bvschaik/julius?branch=master&svg=true)](https://ci.appveyor.com/project/bvschaik/julius) [![Travis](https://api.travis-ci.com/bvschaik/julius.svg?branch=master)](https://travis-ci.com/github/bvschaik/julius)
 
@@ -12,7 +12,7 @@ Chat: [Gitter](https://gitter.im/julius-game/community) or [Discord](http://www.
 | PS Vita | [![Download](https://api.bintray.com/packages/bvschaik/julius/vita/images/download.svg)](https://bintray.com/bvschaik/julius/vita/_latestVersion) | [![Download](https://api.bintray.com/packages/bvschaik/julius-dev/vita/images/download.svg)](https://bintray.com/bvschaik/julius-dev/vita/_latestVersion#files) |
 | Nintendo Switch | [![Download](https://api.bintray.com/packages/bvschaik/julius/switch/images/download.svg)](https://bintray.com/bvschaik/julius/switch/_latestVersion) | [![Download](https://api.bintray.com/packages/bvschaik/julius-dev/switch/images/download.svg)](https://bintray.com/bvschaik/julius-dev/switch/_latestVersion#files) |
 
-## Julius: an open source re-implementation of Caesar III
+## Octavius: an open source re-implementation of Caesar III derived from [Julius](https://github.com/bvschaik/julius)
 
 Julius is a fully working open-source version of Caesar 3, with the same logic
 as the original, but with some UI enhancements, that is able to be played on multiple platforms.

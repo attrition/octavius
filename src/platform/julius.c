@@ -85,7 +85,7 @@ static void write_log(void *userdata, int category, SDL_LogPriority priority, co
 
 static void setup_logging(void)
 {
-    log_file = file_open("julius-log.txt", "wt");
+    log_file = file_open("octavius-log.txt", "wt");
     SDL_LogSetOutputFunction(write_log, NULL);
 }
 
@@ -366,7 +366,7 @@ static const char* ask_for_data_dir(int again)
 {
     if (again) {
         int result = tinyfd_messageBox("Wrong folder selected",
-            "Julius requires the original files from Caesar 3 to run.\n\n"
+            "Octavius requires the original files from Caesar 3 to run.\n\n"
             "The selected folder is not a proper Caesar 3 folder.\n\n"
             "Press OK to select another folder or Cancel to exit.",
             "okcancel", "warning", 1);
@@ -430,9 +430,9 @@ static int pre_init(const char *custom_data_dir)
         }
     #else
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-            "Julius requires the original files from Caesar 3 to run.",
-            "Move the Julius executable to the directory containing an existing "
-            "Caesar 3 installation, or run:\njulius path-to-c3-directory",
+            "Octavius requires the original files from Caesar 3 to run.",
+            "Move the Octavius executable to the directory containing an existing "
+            "Caesar 3 installation, or run:\octavius path-to-c3-directory",
             NULL);
     #endif
 

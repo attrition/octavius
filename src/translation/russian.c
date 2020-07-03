@@ -26,7 +26,7 @@ static translation_string all_strings[] = {
     {TR_BUTTON_CANCEL, "Отмена"},
     {TR_BUTTON_RESET_DEFAULTS, "Все по умолчанию"},
     {TR_BUTTON_CONFIGURE_HOTKEYS, "Горячие клавиши "},
-    {TR_CONFIG_TITLE, "Настройки Julius"},
+    {TR_CONFIG_TITLE, "Настройки Octavius"},
     {TR_CONFIG_LANGUAGE_LABEL, "Язык:"},
     {TR_CONFIG_LANGUAGE_DEFAULT, "(по умолчанию)"},
     {TR_CONFIG_HEADER_UI_CHANGES, "Настройки интерфейса"},

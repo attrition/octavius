@@ -26,7 +26,7 @@ static translation_string all_strings[] = {
     {TR_BUTTON_CANCEL, "Anuluj"},
     {TR_BUTTON_RESET_DEFAULTS, "Ustaw domyślne"},
     {TR_BUTTON_CONFIGURE_HOTKEYS, "Skróty klawiszowe"},
-    {TR_CONFIG_TITLE, "Julius - konfiguracja"},
+    {TR_CONFIG_TITLE, "Octavius - konfiguracja"},
     {TR_CONFIG_LANGUAGE_LABEL, "Język:"},
     {TR_CONFIG_LANGUAGE_DEFAULT, "(domyślny)"},
     {TR_CONFIG_HEADER_UI_CHANGES, "Zmiany interfejsu użytkownika"},

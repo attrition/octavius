@@ -26,7 +26,7 @@ static translation_string all_strings[] = {
     {TR_BUTTON_CANCEL, "取消"},
     {TR_BUTTON_RESET_DEFAULTS, "重置默認"},
     {TR_BUTTON_CONFIGURE_HOTKEYS, "熱鍵綁定"},
-    {TR_CONFIG_TITLE, "Julius 配置設定"},
+    {TR_CONFIG_TITLE, "Octavius 配置設定"},
     {TR_CONFIG_LANGUAGE_LABEL, "語言包:"},
     {TR_CONFIG_LANGUAGE_DEFAULT, "默認"},
     {TR_CONFIG_HEADER_UI_CHANGES, "使用者介面更變"},

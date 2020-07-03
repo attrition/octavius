@@ -21,7 +21,7 @@ static translation_string all_strings[] = {
     {TR_BUTTON_CANCEL, "취소"},
     {TR_BUTTON_RESET_DEFAULTS, "기본값으로 초기화"},
     {TR_BUTTON_CONFIGURE_HOTKEYS, "단축키 설정"},
-    {TR_CONFIG_TITLE, "Julius 설정 옵션"},
+    {TR_CONFIG_TITLE, "Octavius 설정 옵션"},
     {TR_CONFIG_LANGUAGE_LABEL, "언어:"},
     {TR_CONFIG_LANGUAGE_DEFAULT, "(기본)"},
     {TR_CONFIG_HEADER_UI_CHANGES, "사용자 인터페이스 변경"},
