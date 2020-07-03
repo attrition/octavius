@@ -37,7 +37,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_FIX_IMMIGRATION_BUG, "매우 어려움 난이도 이주 문제 수정"},
     {TR_CONFIG_FIX_100_YEAR_GHOSTS, "100세 이상 고령 주민 문제 수정"},
     {TR_CONFIG_FIX_EDITOR_EVENTS, "맞춤형 임무에서 황제 교체와 생존 시간 문제 수정"},
-    {TR_HOTKEY_TITLE, "Octavius 단축키 설정"},
+    {TR_HOTKEY_TITLE, "Julius 단축키 설정"},
     {TR_HOTKEY_LABEL, "단축키"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "대체"},
     {TR_HOTKEY_HEADER_ARROWS, "화살표키"},

@@ -41,7 +41,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_FIX_IMMIGRATION_BUG, "Исправить баг иммиграции в режиме \"Очень сложный\""},
     {TR_CONFIG_FIX_100_YEAR_GHOSTS, "Исправить баг 100-летних жителей"},
     {TR_CONFIG_FIX_EDITOR_EVENTS, "Исправить баг Императора и времени выживания в режиме конструктора"},
-    {TR_HOTKEY_TITLE, "Горячие клавиши Octavius"},
+    {TR_HOTKEY_TITLE, "Горячие клавиши Julius"},
     {TR_HOTKEY_LABEL, "Горячие клавиши"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Альтернативные"},
     {TR_HOTKEY_HEADER_ARROWS, "Клавиши стрелок"},
