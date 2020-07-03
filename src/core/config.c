@@ -8,7 +8,7 @@
 
 #define MAX_LINE 100
 
-static const char *INI_FILENAME = "julius.ini";
+static const char *INI_FILENAME = "octavius.ini";
 
 // Keep this in the same order as the config_keys in config.h
 static const char *ini_keys[] = {

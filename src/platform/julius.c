@@ -444,7 +444,7 @@ static void setup(const julius_args *args)
     signal(SIGSEGV, handler);
     setup_logging();
 
-    SDL_Log("Julius version %s", system_version());
+    SDL_Log("Octavius version %s", system_version());
 
     if (!init_sdl()) {
         SDL_Log("Exiting: SDL init failed");

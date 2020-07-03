@@ -27,12 +27,12 @@ if(SWITCH_BUILD AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     endif()
 endif()
 
-set(SHORT_NAME julius)
+set(SHORT_NAME octavius)
 project(${SHORT_NAME} C)
 
 if (VITA_BUILD)
     include("${VITASDK}/share/vita.cmake" REQUIRED)
-    set(VITA_TITLEID  "JULIUS001")
+    set(VITA_TITLEID  "OCTAVIUS001")
 endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/")
@@ -560,7 +560,7 @@ set(TRANSLATION_FILES
 
 set(MACOSX_FILES "")
 if(APPLE)
-    set(MACOSX_FILES ${PROJECT_SOURCE_DIR}/res/julius.icns)
+    set(MACOSX_FILES ${PROJECT_SOURCE_DIR}/res/octavius.icns)
 endif()
 
 set(SOURCE_FILES
@@ -582,7 +582,7 @@ set(SOURCE_FILES
     ${EDITOR_FILES}
     ${TRANSLATION_FILES}
     ${TINYFD_FILES}
-    ${PROJECT_SOURCE_DIR}/res/julius.rc
+    ${PROJECT_SOURCE_DIR}/res/octavius.rc
     ${MACOSX_FILES}
 )
 
@@ -618,33 +618,33 @@ endif()
 
 if(APPLE)
     # generating a macOS icns file (see https://stackoverflow.com/a/20703594)
-    add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/res/julius.icns
-        COMMAND mkdir -p julius.iconset
-        COMMAND sips -z 16 16    julius_256.png --out julius.iconset/icon_16x16.png
-        COMMAND sips -z 32 32    julius_256.png --out julius.iconset/icon_16x16@2x.png
-        COMMAND sips -z 32 32    julius_256.png --out julius.iconset/icon_32x32.png
-        COMMAND sips -z 64 64    julius_256.png --out julius.iconset/icon_32x32@2x.png
-        COMMAND sips -z 128 128  julius_256.png --out julius.iconset/icon_128x128.png
-        COMMAND sips -z 256 256  julius_256.png --out julius.iconset/icon_128x128@2x.png
-        COMMAND sips -z 256 256  julius_256.png --out julius.iconset/icon_256x256.png
-        COMMAND sips -z 512 512  julius_512.png --out julius.iconset/icon_256x256@2x.png
-        COMMAND iconutil -c icns julius.iconset
-        COMMAND rm -R julius.iconset
+    add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/res/octavius.icns
+        COMMAND mkdir -p octavius.iconset
+        COMMAND sips -z 16 16    octavius_256.png --out octavius.iconset/icon_16x16.png
+        COMMAND sips -z 32 32    octavius_256.png --out octavius.iconset/icon_16x16@2x.png
+        COMMAND sips -z 32 32    octavius_256.png --out octavius.iconset/icon_32x32.png
+        COMMAND sips -z 64 64    octavius_256.png --out octavius.iconset/icon_32x32@2x.png
+        COMMAND sips -z 128 128  octavius_256.png --out octavius.iconset/icon_128x128.png
+        COMMAND sips -z 256 256  octavius_256.png --out octavius.iconset/icon_128x128@2x.png
+        COMMAND sips -z 256 256  octavius_256.png --out octavius.iconset/icon_256x256.png
+        COMMAND sips -z 512 512  octavius_512.png --out octavius.iconset/icon_256x256@2x.png
+        COMMAND iconutil -c icns octavius.iconset
+        COMMAND rm -R octavius.iconset
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/res)
-    set_source_files_properties(${PROJECT_SOURCE_DIR}/res/julius.icns PROPERTIES
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/res/octavius.icns PROPERTIES
         MACOSX_PACKAGE_LOCATION "Resources")
 
     # setting variables that will populate Info.plist
-    set(MACOSX_BUNDLE_GUI_IDENTIFIER "nl.biancavanschaik.julius")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.attrition.octavius")
     set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.10" CACHE STRING "Minimum OS X deployment version" FORCE)
-    set(MACOSX_BUNDLE_ICON_FILE "julius.icns")
+    set(MACOSX_BUNDLE_ICON_FILE "octavius.icns")
     set(MACOSX_BUNDLE_BUNDLE_VERSION
         "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING ${MACOSX_BUNDLE_BUNDLE_VERSION})
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${MACOSX_BUNDLE_BUNDLE_VERSION})
 
-    set_target_properties(julius PROPERTIES
+    set_target_properties(octavius PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/res/Info.plist.in")
 
@@ -805,11 +805,11 @@ else()
     endif()
 
     if(UNIX AND NOT APPLE)
-        install(FILES "res/julius.desktop" DESTINATION "share/applications" RENAME "com.github.bvschaik.julius.desktop")
-        install(FILES "res/julius.metainfo.xml" DESTINATION "share/metainfo" RENAME "com.github.bvschaik.julius.metainfo.xml")
-        install(FILES "res/julius_48.png" DESTINATION "share/icons/hicolor/48x48/apps" RENAME "com.github.bvschaik.julius.png")
-        install(FILES "res/julius_256.png" DESTINATION "share/icons/hicolor/256x256/apps" RENAME "com.github.bvschaik.julius.png")
-        install(FILES "res/julius_512.png" DESTINATION "share/icons/hicolor/512x512/apps" RENAME "com.github.bvschaik.julius.png")
+        install(FILES "res/octavius.desktop" DESTINATION "share/applications" RENAME "com.github.attrition.octavius.desktop")
+        install(FILES "res/octavius.metainfo.xml" DESTINATION "share/metainfo" RENAME "com.github.attrition.octavius.metainfo.xml")
+        install(FILES "res/octavius_48.png" DESTINATION "share/icons/hicolor/48x48/apps" RENAME "com.github.attrition.octavius.png")
+        install(FILES "res/octavius_256.png" DESTINATION "share/icons/hicolor/256x256/apps" RENAME "com.github.attrition.octavius.png")
+        install(FILES "res/octavius_512.png" DESTINATION "share/icons/hicolor/512x512/apps" RENAME "com.github.attrition.octavius.png")
     endif()
 
     # Unit tests
