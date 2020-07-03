@@ -23,6 +23,9 @@ typedef struct {
     int go_to_bookmark;
     int load_file;
     int save_file;
+    int build_clear;
+    int build_vacant_house;
+    int build_road;
 } hotkeys;
 
 void hotkey_install_mapping(hotkey_mapping *mappings, int num_mappings);
