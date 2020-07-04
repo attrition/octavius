@@ -210,12 +210,15 @@ static void handle_hotkeys(const hotkeys *h)
         window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE);
     }
     if (h->build_clear) {
+        building_construction_cancel();
         building_construction_set_type(building_menu_type(BUILD_MENU_CLEAR_LAND, 0));
     }
     if (h->build_vacant_house) {
+        building_construction_cancel();
         building_construction_set_type(building_menu_type(BUILD_MENU_VACANT_HOUSE, 0));
     }
     if (h->build_road) {
+        building_construction_cancel();
         building_construction_set_type(building_menu_type(BUILD_MENU_ROAD, 0));
     }
 }
