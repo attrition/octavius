@@ -161,7 +161,9 @@ static void clone_building_at_current_tile(void)
     // if there exists a building at the currently hovered tile,
     // begin construction of that type of building.
     // there are some special cases for houses and forts to select
-    // the correct starting type
+    // the correct starting type. Also Triumphal archs don't
+    // seem to have any protection around making more than you've
+    // earned, so check that too
     int building_id = widget_city_building_at_current_tile();
     if (building_id) {
         building* target_building = building_main(building_get(building_id));
@@ -176,6 +178,10 @@ static void clone_building_at_current_tile(void)
                 clone = BUILDING_FORT_JAVELIN;
             } else if (target_building->subtype.fort_figure_type == FIGURE_FORT_MOUNTED) {
                 clone = BUILDING_FORT_MOUNTED;
+            }
+        } else if (clone == BUILDING_TRIUMPHAL_ARCH) {
+            if (!city_buildings_triumphal_arch_available()) {
+                return;
             }
         }
 
