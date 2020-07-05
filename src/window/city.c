@@ -1,5 +1,6 @@
 #include "city.h"
 
+#include "building/building.h"
 #include "building/construction.h"
 #include "city/message.h"
 #include "city/victory.h"
@@ -155,6 +156,30 @@ static void cycle_legion(void)
     }
 }
 
+static void clone_building_at_current_tile(void)
+{
+    int building_id = widget_city_building_at_current_tile();
+    if (building_id) {
+        building* target_building = building_main(building_get(building_id));
+        short clone = target_building->type;
+
+        if (building_is_house(clone)) {
+            clone = BUILDING_HOUSE_VACANT_LOT;
+        } else if (clone == BUILDING_FORT) {
+            if (target_building->subtype.fort_figure_type == FIGURE_FORT_LEGIONARY) {
+                clone = BUILDING_FORT_LEGIONARIES;
+            } else if (target_building->subtype.fort_figure_type == FIGURE_FORT_JAVELIN) {
+                clone = BUILDING_FORT_JAVELIN;
+            } else if (target_building->subtype.fort_figure_type == FIGURE_FORT_MOUNTED) {
+                clone = BUILDING_FORT_MOUNTED;
+            }
+        }
+
+        building_construction_cancel();
+        building_construction_set_type(clone);
+    }
+}
+
 static void toggle_pause(void)
 {
     game_state_toggle_paused();
@@ -214,6 +239,10 @@ static void handle_hotkeys(const hotkeys *h)
             building_construction_cancel();
             building_construction_set_type(h->building);
         }
+    }
+
+    if (h->clone_building) {
+        clone_building_at_current_tile();
     }
 }
 
