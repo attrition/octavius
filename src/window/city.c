@@ -1,7 +1,6 @@
 #include "city.h"
 
 #include "building/construction.h"
-#include "building/menu.h"
 #include "city/message.h"
 #include "city/victory.h"
 #include "city/view.h"
@@ -19,6 +18,7 @@
 #include "map/bookmark.h"
 #include "map/grid.h"
 #include "scenario/criteria.h"
+#include "scenario/building.h"
 #include "widget/city.h"
 #include "widget/city_with_overlay.h"
 #include "widget/top_menu.h"
@@ -210,13 +210,10 @@ static void handle_hotkeys(const hotkeys *h)
         window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE);
     }
     if (h->building) {
-        building_construction_cancel();
-        // we reserve 8 bits for the submenu selection, which should be overkill
-        // the menu item is decremented by 1 because one of the valid values
-        // (BUILD_MENU_VACANT_HOUSE) is 0, shifting it up would still give us 0
-        int menu = (h->building >> 8) - 1;
-        int submenu = h->building & 0xff;
-        building_construction_set_type(building_menu_type(menu, submenu));
+        if (scenario_building_allowed(h->building)) {
+            building_construction_cancel();
+            building_construction_set_type(h->building);
+        }
     }
 }
 
