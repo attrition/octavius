@@ -158,6 +158,10 @@ static void cycle_legion(void)
 
 static void clone_building_at_current_tile(void)
 {
+    // if there exists a building at the currently hovered tile,
+    // begin construction of that type of building.
+    // there are some special cases for houses and forts to select
+    // the correct starting type
     int building_id = widget_city_building_at_current_tile();
     if (building_id) {
         building* target_building = building_main(building_get(building_id));
