@@ -210,6 +210,7 @@ static void add_definition(const hotkey_mapping *mapping)
         case HOTKEY_SAVE_CITY_SCREENSHOT:
             def->action = &data.global_hotkey_state.save_city_screenshot;
             break;
+<<<<<<< HEAD
         case HOTKEY_BUILD_VACANT_HOUSE:
             def->action = &data.hotkey_state.building;
             def->value = BUILDING_HOUSE_VACANT_LOT;
@@ -246,7 +247,7 @@ static void add_definition(const hotkey_mapping *mapping)
             def->action = &data.hotkey_state.building;
             def->value = BUILDING_WAREHOUSE;
             break;
-        case HOTKEY_CLONE_BUILDING:
+        case HOTKEY_BUILD_CLONE:
             def->action = &data.hotkey_state.clone_building;
             break;
         default:
