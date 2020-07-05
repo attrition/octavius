@@ -11,7 +11,7 @@
 #define MAX_LINE 100
 #define MAX_MAPPINGS HOTKEY_MAX_ITEMS * 2
 
-static const char *INI_FILENAME = "octavius-hotkeys.ini";
+static const char *INI_FILENAME = "julius-hotkeys.ini";
 
 // Keep this in the same order as the actions in hotkey_config.h
 static const char *ini_keys[] = {
@@ -29,6 +29,12 @@ static const char *ini_keys[] = {
     "build_vacant_house",
     "build_clear",
     "build_road",
+    "build_wall",
+    "build_prefecture",
+    "build_gatehouse",
+    "build_engineers_post",
+    "build_granary",
+    "build_warehouse",
     "show_advisor_labor",
     "show_advisor_military",
     "show_advisor_imperial",

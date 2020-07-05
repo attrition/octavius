@@ -209,17 +209,14 @@ static void handle_hotkeys(const hotkeys *h)
     if (h->save_file) {
         window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE);
     }
-    if (h->build_clear) {
+    if (h->building) {
         building_construction_cancel();
-        building_construction_set_type(building_menu_type(BUILD_MENU_CLEAR_LAND, 0));
-    }
-    if (h->build_vacant_house) {
-        building_construction_cancel();
-        building_construction_set_type(building_menu_type(BUILD_MENU_VACANT_HOUSE, 0));
-    }
-    if (h->build_road) {
-        building_construction_cancel();
-        building_construction_set_type(building_menu_type(BUILD_MENU_ROAD, 0));
+        // we reserve 8 bits for the submenu selection, which should be overkill
+        // the menu item is decremented by 1 because one of the valid values
+        // (BUILD_MENU_VACANT_HOUSE) is 0, shifting it up would still give us 0
+        int menu = (h->building >> 8) - 1;
+        int submenu = h->building & 0xff;
+        building_construction_set_type(building_menu_type(menu, submenu));
     }
 }
 
