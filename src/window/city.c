@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "building/construction.h"
+#include "city/buildings.h"
 #include "city/message.h"
 #include "city/victory.h"
 #include "city/view.h"
@@ -167,26 +168,31 @@ static void clone_building_at_current_tile(void)
     int building_id = widget_city_building_at_current_tile();
     if (building_id) {
         building* target_building = building_main(building_get(building_id));
-        short clone = target_building->type;
+        short clone_type = target_building->type;
 
-        if (building_is_house(clone)) {
-            clone = BUILDING_HOUSE_VACANT_LOT;
-        } else if (clone == BUILDING_FORT) {
-            if (target_building->subtype.fort_figure_type == FIGURE_FORT_LEGIONARY) {
-                clone = BUILDING_FORT_LEGIONARIES;
-            } else if (target_building->subtype.fort_figure_type == FIGURE_FORT_JAVELIN) {
-                clone = BUILDING_FORT_JAVELIN;
-            } else if (target_building->subtype.fort_figure_type == FIGURE_FORT_MOUNTED) {
-                clone = BUILDING_FORT_MOUNTED;
+        if (building_is_house(clone_type)) {
+            clone_type = BUILDING_HOUSE_VACANT_LOT;
+        } else if (clone_type == BUILDING_FORT) {
+            short figure_type = target_building->subtype.fort_figure_type;
+            if (figure_type == FIGURE_FORT_LEGIONARY) {
+                clone_type = BUILDING_FORT_LEGIONARIES;
+            } else if (figure_type == FIGURE_FORT_JAVELIN) {
+                clone_type = BUILDING_FORT_JAVELIN;
+            } else if (figure_type == FIGURE_FORT_MOUNTED) {
+                clone_type = BUILDING_FORT_MOUNTED;
             }
-        } else if (clone == BUILDING_TRIUMPHAL_ARCH) {
-            if (!city_buildings_triumphal_arch_available()) {
-                return;
-            }
+        } else if (clone_type == BUILDING_TRIUMPHAL_ARCH &&
+            !city_buildings_triumphal_arch_available()) {
+            return;
+        } else if (clone_type == BUILDING_NATIVE_CROPS ||
+            clone_type == BUILDING_NATIVE_HUT ||
+            clone_type == BUILDING_NATIVE_MEETING ||
+            clone_type == BUILDING_BURNING_RUIN) {
+            return;
         }
 
         building_construction_cancel();
-        building_construction_set_type(clone);
+        building_construction_set_type(clone_type);
     }
 }
 
