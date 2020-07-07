@@ -2,8 +2,8 @@
 #define WINDOW_INTERMEZZO_H
 
 typedef enum {
-    INTERMEZZO_MISSION_BRIEFING = 0,
-    INTERMEZZO_FIRED = 1,
+    INTERMEZZO_FIRED = 0,
+    INTERMEZZO_MISSION_BRIEFING = 1,
     INTERMEZZO_WON = 2,
 } intermezzo_type;
 
