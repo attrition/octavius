@@ -275,7 +275,6 @@ static void handle_hotkeys(const hotkeys *h)
             building_construction_set_type(h->building);
         }
     }
-
     if (h->clone_building) {
         clone_building_at_current_tile();
     }
