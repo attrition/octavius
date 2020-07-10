@@ -133,8 +133,10 @@ static int draw_figure(int x_view, int y_view, int grid_offset)
 
 static void draw_minimap_tile(int x_view, int y_view, int grid_offset)
 {
-    if (grid_offset < 0 && !config_get(CONFIG_UI_OCTAVIUS_UI)) {
-        image_draw(image_group(GROUP_MINIMAP_BLACK), x_view, y_view);
+    if (grid_offset < 0) {
+        if (!config_get(CONFIG_UI_OCTAVIUS_UI)) {
+            image_draw(image_group(GROUP_MINIMAP_BLACK), x_view, y_view);
+        }
         return;
     }
 
