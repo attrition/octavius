@@ -32,6 +32,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HEADER_UI_CHANGES, "User interface changes"},
     {TR_CONFIG_HEADER_GAMEPLAY_CHANGES, "Gameplay changes"},
     {TR_CONFIG_SHOW_INTRO_VIDEO, "Play intro videos"},
+    {TR_CONFIG_OCTAVIUS_UI, "Use Octavius UI"},
     {TR_CONFIG_SIDEBAR_INFO, "Extra information in the control panel"},
     {TR_CONFIG_SMOOTH_SCROLLING, "Enable smooth scrolling"},
     {TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE, "Improve visual feedback when clearing land"},

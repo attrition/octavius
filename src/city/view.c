@@ -1,10 +1,12 @@
 #include "view.h"
 
 #include "core/direction.h"
+#include "core/config.h"
 #include "graphics/menu.h"
 #include "map/grid.h"
 #include "map/image.h"
 #include "widget/minimap.h"
+#include "widget/octavius_ui/city.h"
 
 #define TILE_WIDTH_PIXELS 60
 #define TILE_HEIGHT_PIXELS 30
@@ -154,9 +156,46 @@ static void adjust_camera_position_for_pixels(void)
     }
 }
 
+static void set_viewport(int x_offset, int y_offset, int width, int height)
+{
+    data.viewport.x = x_offset;
+    data.viewport.y = y_offset;
+    data.viewport.width_pixels = width - 2;
+    data.viewport.height_pixels = height;
+    data.viewport.width_tiles = width / TILE_WIDTH_PIXELS;
+    data.viewport.height_tiles = height / HALF_TILE_HEIGHT_PIXELS;
+}
+
+static void set_viewport_with_sidebar(void)
+{
+    set_viewport(0, TOP_MENU_HEIGHT, data.screen_width - 160, data.screen_height - TOP_MENU_HEIGHT);
+}
+
+static void set_viewport_without_sidebar(void)
+{
+    set_viewport(0, TOP_MENU_HEIGHT, data.screen_width - 40, data.screen_height - TOP_MENU_HEIGHT);
+}
+
+static void set_viewport_octavius_ui(void)
+{
+    set_viewport(0, 0, data.screen_width, data.screen_height);
+}
+
+void reset_viewport()
+{
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        set_viewport_octavius_ui();
+    } else if (data.sidebar_collapsed) {
+        set_viewport_without_sidebar();
+    } else {
+        set_viewport_with_sidebar();
+    }
+}
+
 void city_view_init(void)
 {
     calculate_lookup();
+    reset_viewport();
     check_camera_boundaries();
     widget_minimap_invalidate();
 }
@@ -349,35 +388,11 @@ void city_view_rotate_right(void)
     check_camera_boundaries();
 }
 
-static void set_viewport(int x_offset, int y_offset, int width, int height)
-{
-    data.viewport.x = x_offset;
-    data.viewport.y = y_offset;
-    data.viewport.width_pixels = width - 2;
-    data.viewport.height_pixels = height;
-    data.viewport.width_tiles = width / TILE_WIDTH_PIXELS;
-    data.viewport.height_tiles = height / HALF_TILE_HEIGHT_PIXELS;
-}
-
-static void set_viewport_with_sidebar(void)
-{
-    set_viewport(0, TOP_MENU_HEIGHT, data.screen_width - 160, data.screen_height - TOP_MENU_HEIGHT);
-}
-
-static void set_viewport_without_sidebar(void)
-{
-    set_viewport(0, TOP_MENU_HEIGHT, data.screen_width - 40, data.screen_height - TOP_MENU_HEIGHT);
-}
-
 void city_view_set_viewport(int screen_width, int screen_height)
 {
     data.screen_width = screen_width;
     data.screen_height = screen_height;
-    if (data.sidebar_collapsed) {
-        set_viewport_without_sidebar();
-    } else {
-        set_viewport_with_sidebar();
-    }
+    reset_viewport();
     check_camera_boundaries();
 }
 

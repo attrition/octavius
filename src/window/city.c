@@ -7,6 +7,7 @@
 #include "city/victory.h"
 #include "city/view.h"
 #include "city/warning.h"
+#include "core/config.h"
 #include "figure/formation.h"
 #include "game/orientation.h"
 #include "game/settings.h"
@@ -27,6 +28,7 @@
 #include "scenario/criteria.h"
 #include "widget/city.h"
 #include "widget/city_with_overlay.h"
+#include "widget/octavius_ui/city.h"
 #include "widget/top_menu.h"
 #include "widget/sidebar/city.h"
 #include "window/advisors.h"
@@ -36,8 +38,12 @@ static int selected_legion_formation_id;
 
 static void draw_background(void)
 {
-    widget_sidebar_city_draw_background();
-    widget_top_menu_draw(1);
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        widget_octavius_ui_city_draw_background();
+    } else {
+        widget_sidebar_city_draw_background();
+        widget_top_menu_draw(1);
+    }
 }
 
 static int center_in_city(int element_width_pixels)
@@ -94,9 +100,15 @@ static void draw_cancel_construction(void)
 
 static void draw_foreground(void)
 {
-    widget_top_menu_draw(0);
     window_city_draw();
-    widget_sidebar_city_draw_foreground();
+
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        widget_octavius_ui_city_draw_foreground();
+    } else {
+        widget_top_menu_draw(0);
+        widget_sidebar_city_draw_foreground();
+    }
+
     if (window_is(WINDOW_CITY) || window_is(WINDOW_CITY_MILITARY)) {
         draw_paused_and_time_left();
         draw_cancel_construction();
@@ -109,9 +121,15 @@ static void draw_foreground(void)
 
 static void draw_foreground_military(void)
 {
-    widget_top_menu_draw(0);
     window_city_draw();
-    widget_sidebar_city_draw_foreground_military();
+
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        widget_octavius_ui_city_draw_foreground_military();
+    } else {
+        widget_top_menu_draw(0);
+        widget_sidebar_city_draw_foreground_military();
+    }
+
     draw_paused_and_time_left();
 }
 
@@ -322,11 +340,17 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     handle_hotkeys(h);
     if (!building_construction_in_progress()) {
-        if (widget_top_menu_handle_input(m, h)) {
-            return;
-        }
-        if (widget_sidebar_city_handle_mouse(m)) {
-            return;
+        if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+            if (widget_octavius_ui_city_handle_mouse(m)) {
+                return;
+            }
+        } else {
+            if (widget_top_menu_handle_input(m, h)) {
+                return;
+            }
+            if (widget_sidebar_city_handle_mouse(m)) {
+                return;
+            }
         }
     }
     widget_city_handle_input(m, h);
@@ -340,14 +364,18 @@ static void handle_input_military(const mouse *m, const hotkeys *h)
 
 static void get_tooltip(tooltip_context *c)
 {
-    int text_id = widget_top_menu_get_tooltip_text(c);
-    if (!text_id) {
-        text_id = widget_sidebar_city_get_tooltip_text();
-    }
-    if (text_id) {
-        c->type = TOOLTIP_BUTTON;
-        c->text_id = text_id;
-        return;
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        widget_octavius_ui_city_get_tooltip_text();
+    } else {
+        int text_id = widget_top_menu_get_tooltip_text(c);
+        if (!text_id) {
+            text_id = widget_sidebar_city_get_tooltip_text();
+        }
+        if (text_id) {
+            c->type = TOOLTIP_BUTTON;
+            c->text_id = text_id;
+            return;
+        }
     }
     widget_city_get_tooltip(c);
 }

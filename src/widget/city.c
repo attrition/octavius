@@ -5,6 +5,7 @@
 #include "city/finance.h"
 #include "city/view.h"
 #include "city/warning.h"
+#include "core/config.h"
 #include "core/direction.h"
 #include "core/string.h"
 #include "figure/formation_legion.h"
@@ -464,7 +465,8 @@ void widget_city_handle_input_military(const mouse *m, const hotkeys *h, int leg
 {
     map_tile *tile = &data.current_tile;
     update_city_view_coords(m->x, m->y, tile);
-    if (!city_view_is_sidebar_collapsed() && widget_minimap_handle_mouse(m)) {
+    if (config_get(CONFIG_UI_OCTAVIUS_UI) ||
+        !city_view_is_sidebar_collapsed() && widget_minimap_handle_mouse(m)) {
         return;
     }
     if (m->is_touch) {
