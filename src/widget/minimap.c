@@ -2,6 +2,7 @@
 
 #include "building/building.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "figure/figure.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
@@ -132,7 +133,7 @@ static int draw_figure(int x_view, int y_view, int grid_offset)
 
 static void draw_minimap_tile(int x_view, int y_view, int grid_offset)
 {
-    if (grid_offset < 0) {
+    if (grid_offset < 0 && !config_get(CONFIG_UI_OCTAVIUS_UI)) {
         image_draw(image_group(GROUP_MINIMAP_BLACK), x_view, y_view);
         return;
     }
@@ -281,9 +282,13 @@ void widget_minimap_draw(int x_offset, int y_offset, int width_tiles, int height
         } else {
             draw_using_cache(x_offset, y_offset, width_tiles, height_tiles, scroll_in_progress());
         }
-        graphics_draw_horizontal_line(x_offset - 1, x_offset - 1 + width_tiles * 2, y_offset - 1, COLOR_MINIMAP_DARK);
-        graphics_draw_vertical_line(x_offset - 1, y_offset, y_offset + height_tiles, COLOR_MINIMAP_DARK);
-        graphics_draw_vertical_line(x_offset - 1 + width_tiles * 2, y_offset, y_offset + height_tiles, COLOR_MINIMAP_LIGHT);
+
+        if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        } else {
+            graphics_draw_horizontal_line(x_offset - 1, x_offset - 1 + width_tiles * 2, y_offset - 1, COLOR_MINIMAP_DARK);
+            graphics_draw_vertical_line(x_offset - 1, y_offset, y_offset + height_tiles, COLOR_MINIMAP_DARK);
+            graphics_draw_vertical_line(x_offset - 1 + width_tiles * 2, y_offset, y_offset + height_tiles, COLOR_MINIMAP_LIGHT);
+        }
     }
 }
 
