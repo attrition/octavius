@@ -1,6 +1,7 @@
 #include "core/encoding.h"
 
 #include "core/encoding_korean.h"
+#include "core/encoding_simp_chinese.h"
 #include "core/encoding_trad_chinese.h"
 #include "core/locale.h"
 #include "core/string.h"
@@ -593,6 +594,10 @@ encoding_type encoding_determine(language_type language)
         encoding_trad_chinese_init();
         data.to_utf8_table = NULL;
         data.encoding = ENCODING_TRADITIONAL_CHINESE;
+    } else if (language == LANGUAGE_SIMPLIFIED_CHINESE) {
+        encoding_simp_chinese_init();
+        data.to_utf8_table = NULL;
+        data.encoding = ENCODING_SIMPLIFIED_CHINESE;
     } else if (language == LANGUAGE_KOREAN) {
         encoding_korean_init();
         data.to_utf8_table = NULL;
@@ -642,6 +647,8 @@ void encoding_to_utf8(const uint8_t *input, char *output, int output_length, int
             encoding_korean_to_utf8(input, output, output_length);
         } else if (data.encoding == ENCODING_TRADITIONAL_CHINESE) {
             encoding_trad_chinese_to_utf8(input, output, output_length);
+        } else if (data.encoding == ENCODING_SIMPLIFIED_CHINESE) {
+            encoding_simp_chinese_to_utf8(input, output, output_length);
         } else {
             *output = 0;
         }
@@ -689,6 +696,9 @@ void encoding_from_utf8(const char *input, uint8_t *output, int output_length)
             return;
         } else if (data.encoding == ENCODING_TRADITIONAL_CHINESE) {
             encoding_trad_chinese_from_utf8(input, output, output_length);
+            return;
+        } else if (data.encoding == ENCODING_SIMPLIFIED_CHINESE) {
+            encoding_simp_chinese_from_utf8(input, output, output_length);
             return;
         }
     }
@@ -744,7 +754,7 @@ int encoding_get_utf8_character_bytes(const char input)
     }
 }
 
-void encoding_utf16_to_utf8(uint16_t *input, uint8_t *output)
+void encoding_utf16_to_utf8(const uint16_t *input, char *output)
 {
     for (int i = 0; input[i]; i++) {
         if ((input[i] & 0xff80) == 0) {
@@ -768,7 +778,7 @@ void encoding_utf16_to_utf8(uint16_t *input, uint8_t *output)
     *output = '\0';
 }
 
-void encoding_utf8_to_utf16(uint8_t *input, uint16_t *output)
+void encoding_utf8_to_utf16(const char *input, uint16_t *output)
 {
     for (int i = 0; input[i];) {
         if ((input[i] & 0xe0) == 0xe0) {
