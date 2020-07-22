@@ -34,18 +34,18 @@ static image_button buttons_build[] = {
 };
 
 static generic_button buttons_construct[] = {
-    {39 * 0,  0, 39, 26, button_build, button_none, BUILD_MENU_VACANT_HOUSE,    0},
-    {39 * 1,  0, 39, 26, button_build, button_none, BUILD_MENU_CLEAR_LAND,      0},
-    {39 * 2,  0, 39, 26, button_build, button_none, BUILD_MENU_ROAD,            0},
-    {39 * 3,  0, 39, 26, button_build, button_none, BUILD_MENU_WATER,           0},
-    {39 * 4,  0, 39, 26, button_build, button_none, BUILD_MENU_HEALTH,          0},
-    {39 * 5,  0, 39, 26, button_build, button_none, BUILD_MENU_TEMPLES,         0},
-    {39 * 6,  0, 39, 26, button_build, button_none, BUILD_MENU_EDUCATION,       0},
-    {39 * 7,  0, 39, 26, button_build, button_none, BUILD_MENU_ENTERTAINMENT,   0},
-    {39 * 8,  0, 39, 26, button_build, button_none, BUILD_MENU_ADMINISTRATION,  0},
-    {39 * 9,  0, 39, 26, button_build, button_none, BUILD_MENU_ENGINEERING,     0},
-    {39 * 10, 0, 39, 26, button_build, button_none, BUILD_MENU_SECURITY,        0},
-    {39 * 11, 0, 39, 26, button_build, button_none, BUILD_MENU_INDUSTRY,        0},
+    {50 * 0,  0, 50, 40, button_build, button_none, BUILD_MENU_VACANT_HOUSE,    0},
+    {50 * 1,  0, 50, 40, button_build, button_none, BUILD_MENU_CLEAR_LAND,      0},
+    {50 * 2,  0, 50, 40, button_build, button_none, BUILD_MENU_ROAD,            0},
+    {50 * 3,  0, 50, 40, button_build, button_none, BUILD_MENU_WATER,           0},
+    {50 * 4,  0, 50, 40, button_build, button_none, BUILD_MENU_HEALTH,          0},
+    {50 * 5,  0, 50, 40, button_build, button_none, BUILD_MENU_TEMPLES,         0},
+    {50 * 6,  0, 50, 40, button_build, button_none, BUILD_MENU_EDUCATION,       0},
+    {50 * 7,  0, 50, 40, button_build, button_none, BUILD_MENU_ENTERTAINMENT,   0},
+    {50 * 8,  0, 50, 40, button_build, button_none, BUILD_MENU_ADMINISTRATION,  0},
+    {50 * 9,  0, 50, 40, button_build, button_none, BUILD_MENU_ENGINEERING,     0},
+    {50 * 10, 0, 50, 40, button_build, button_none, BUILD_MENU_SECURITY,        0},
+    {50 * 11, 0, 50, 40, button_build, button_none, BUILD_MENU_INDUSTRY,        0},
 };
 
 static struct {
