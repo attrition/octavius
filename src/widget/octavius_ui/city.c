@@ -14,8 +14,8 @@ static void button_build(int submenu, int param2);
 
 const int buttons_width = 39;
 const int buttons_height = 26;
-static int buttons_x_offset = 0;
-static int buttons_y_offset = 0;
+int buttons_x_offset = 0;
+int buttons_y_offset = 0;
 
 static image_button buttons_build[] = {
     
@@ -54,8 +54,8 @@ static void enable_building_buttons(void)
 
 static void calculate_offsets()
 {
-    buttons_y_offset = screen_height() - buttons_height;
     buttons_x_offset = (screen_width() / 2) - ((buttons_width * 12) / 2);
+    buttons_y_offset = screen_height() - buttons_height;
 }
 
 void widget_octavius_ui_city_draw_foreground(void)
@@ -66,14 +66,13 @@ void widget_octavius_ui_city_draw_foreground(void)
         enable_building_buttons();
     }
 
-    int map_height = map_grid_height() * 2;
-
     if (scroll_in_progress()) {
         widget_minimap_invalidate();
     }
 
     image_buttons_draw(buttons_x_offset, buttons_y_offset, buttons_build, 12);
 
+    int map_height = map_grid_height() * 2;
     widget_minimap_draw(0, screen_height() - map_height, map_grid_width(), map_height, 1);
 }
 
