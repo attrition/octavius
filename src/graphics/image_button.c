@@ -1,5 +1,6 @@
 #include "image_button.h"
 
+#include "core/config.h"
 #include "graphics/image.h"
 #include "sound/effect.h"
 
@@ -88,7 +89,13 @@ int image_buttons_handle_mouse(const mouse *m, int x, int y, image_button *butto
         }
     } else if (hit_button->button_type == IB_BUILD || hit_button->button_type == IB_NORMAL) {
         if (!m->left.went_up && !m->right.went_up) {
-            return 0;
+            if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+                // do nothing...
+                // not sure why the above check triggers for octavius buttons
+                // possibly something with the buttons being in the city viewport
+            } else {
+                return 0;
+            }
         }
     }
     if (m->left.went_up) {

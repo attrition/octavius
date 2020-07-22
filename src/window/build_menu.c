@@ -4,6 +4,7 @@
 #include "building/menu.h"
 #include "building/model.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
@@ -13,6 +14,7 @@
 #include "input/input.h"
 #include "scenario/property.h"
 #include "widget/city.h"
+#include "widget/octavius_ui/city.h"
 #include "widget/sidebar/city.h"
 #include "window/city.h"
 
@@ -198,8 +200,11 @@ static int handle_build_submenu(const mouse *m)
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
+    int octavius_ui = config_get(CONFIG_UI_OCTAVIUS_UI);
     if (handle_build_submenu(m) ||
-        widget_sidebar_city_handle_mouse_build_menu(m)) {
+        (octavius_ui
+            ? widget_octavius_ui_city_handle_mouse_build_menu(m)
+            : widget_sidebar_city_handle_mouse_build_menu(m))) {
         return;
     }
     if (input_go_back_requested(m, h)) {

@@ -371,18 +371,19 @@ static void handle_input_military(const mouse *m, const hotkeys *h)
 
 static void get_tooltip(tooltip_context *c)
 {
+    int text_id = 0;
     if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
-        widget_octavius_ui_city_get_tooltip_text();
+        text_id = widget_octavius_ui_city_get_tooltip_text();
     } else {
-        int text_id = widget_top_menu_get_tooltip_text(c);
+        text_id = widget_top_menu_get_tooltip_text(c);
         if (!text_id) {
             text_id = widget_sidebar_city_get_tooltip_text();
         }
-        if (text_id) {
-            c->type = TOOLTIP_BUTTON;
-            c->text_id = text_id;
-            return;
-        }
+    }
+    if (text_id) {
+        c->type = TOOLTIP_BUTTON;
+        c->text_id = text_id;
+        return;
     }
     widget_city_get_tooltip(c);
 }
