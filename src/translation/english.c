@@ -68,6 +68,7 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_BUILD_CLONE, "Clone selected building"},
     {TR_HOTKEY_LOAD_FILE, "Load file"},
     {TR_HOTKEY_SAVE_FILE, "Save file"},
+    {TR_HOTKEY_TOGGLE_OCTAVIUS_UI, "Toggle Octavius UI"},
     {TR_HOTKEY_INCREASE_GAME_SPEED, "Increase game speed"},
     {TR_HOTKEY_DECREASE_GAME_SPEED, "Decrease game speed"},
     {TR_HOTKEY_TOGGLE_PAUSE, "Toggle pause"},

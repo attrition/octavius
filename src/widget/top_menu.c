@@ -8,7 +8,6 @@
 #include "game/state.h"
 #include "game/system.h"
 #include "game/time.h"
-#include "game/undo.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "graphics/menu.h"
@@ -22,7 +21,6 @@
 #include "window/difficulty_options.h"
 #include "window/display_options.h"
 #include "window/file_dialog.h"
-#include "window/main_menu.h"
 #include "window/message_dialog.h"
 #include "window/mission_briefing.h"
 #include "window/popup_dialog.h"
@@ -372,10 +370,7 @@ int widget_top_menu_get_tooltip_text(tooltip_context *c)
 static void menu_file_new_game(int param)
 {
     clear_state();
-    building_construction_clear_type();
-    game_undo_disable();
-    game_state_reset_overlay();
-    window_main_menu_show(1);
+    game_state_new_game();
 }
 
 static void replay_map_confirmed(int confirmed)

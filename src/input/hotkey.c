@@ -277,6 +277,9 @@ static void add_definition(const hotkey_mapping *mapping)
         case HOTKEY_BUILD_CLONE:
             def->action = &data.hotkey_state.clone_building;
             break;
+        case HOTKEY_TOGGLE_OCTAVIUS_UI:
+            def->action = &data.hotkey_state.toggle_octavius_ui;
+            break;
         default:
             def->action = 0;
     }

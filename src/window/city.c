@@ -336,6 +336,11 @@ static void handle_hotkeys(const hotkeys *h)
     if (h->clone_building) {
         clone_building_at_current_grid_offset();
     }
+    if (h->toggle_octavius_ui) {
+        config_set(CONFIG_UI_OCTAVIUS_UI, !config_get(CONFIG_UI_OCTAVIUS_UI));
+        city_view_init();
+        window_city_show();
+    }
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)

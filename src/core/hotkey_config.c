@@ -77,7 +77,8 @@ static const char *ini_keys[] = {
     "resize_to_1024",
     "save_screenshot",
     "save_city_screenshot",
-    "clone_building"
+    "clone_building",
+    "toggle_octavius_ui"
 };
 
 static struct {
