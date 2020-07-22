@@ -192,17 +192,17 @@ static void add_definition(const hotkey_mapping *mapping)
         case HOTKEY_TOGGLE_FULLSCREEN:
             def->action = &data.global_hotkey_state.toggle_fullscreen;
             break;
-        case HOTKEY_RESIZE_TO_640:
+        case HOTKEY_RESIZE_TO_720:
             def->action = &data.global_hotkey_state.resize_to;
-            def->value = 640;
+            def->value = 720;
             break;
-        case HOTKEY_RESIZE_TO_800:
+        case HOTKEY_RESIZE_TO_1080:
             def->action = &data.global_hotkey_state.resize_to;
-            def->value = 800;
+            def->value = 1080;
             break;
-        case HOTKEY_RESIZE_TO_1024:
+        case HOTKEY_RESIZE_TO_1440:
             def->action = &data.global_hotkey_state.resize_to;
-            def->value = 1024;
+            def->value = 1440;
             break;
         case HOTKEY_SAVE_SCREENSHOT:
             def->action = &data.global_hotkey_state.save_screenshot;
@@ -444,9 +444,9 @@ void hotkey_handle_global_keys(void)
     }
     if (data.global_hotkey_state.resize_to) {
         switch (data.global_hotkey_state.resize_to) {
-            case 640: system_resize(640, 480); break;
-            case 800: system_resize(800, 600); break;
-            case 1024: system_resize(1024, 768); break;
+            case 720: system_resize(1280, 720); break;
+            case 1080: system_resize(1920, 1080); break;
+            case 1440: system_resize(2560, 1440); break;
         }
     }
     if (data.global_hotkey_state.toggle_fullscreen) {

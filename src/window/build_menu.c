@@ -187,7 +187,11 @@ static void draw_menu_buttons(void)
 
 static void draw_foreground(void)
 {
-    window_city_draw();
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        window_city_draw_all();
+    } else {
+        window_city_draw();
+    }
     draw_menu_buttons();
 }
 

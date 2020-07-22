@@ -60,9 +60,9 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_ARROW_RIGHT, "Right"},
     {TR_HOTKEY_TOGGLE_FULLSCREEN, "Toggle fullscreen"},
     {TR_HOTKEY_CENTER_WINDOW, "Center window"},
-    {TR_HOTKEY_RESIZE_TO_640, "Resize window to 640x480"},
-    {TR_HOTKEY_RESIZE_TO_800, "Resize window to 800x600"},
-    {TR_HOTKEY_RESIZE_TO_1024, "Resize window to 1024x768"},
+    {TR_HOTKEY_RESIZE_TO_720, "Resize window to 1280x720"},
+    {TR_HOTKEY_RESIZE_TO_1080, "Resize window to 1920x1080"},
+    {TR_HOTKEY_RESIZE_TO_1440, "Resize window to 2560x1440"},
     {TR_HOTKEY_SAVE_SCREENSHOT, "Save screenshot"},
     {TR_HOTKEY_SAVE_CITY_SCREENSHOT, "Save full city screenshot"},
     {TR_HOTKEY_BUILD_CLONE, "Clone selected building"},
@@ -118,7 +118,10 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SET_BOOKMARK_3, "Set bookmark 3"},
     {TR_HOTKEY_SET_BOOKMARK_4, "Set bookmark 4"},
     {TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, "Toggle battle info"},
-    {TR_HOTKEY_EDIT_TITLE, "Press new hotkey"}
+    {TR_HOTKEY_EDIT_TITLE, "Press new hotkey"},
+    {TR_DISPLAY_SIZE_720, "1280x720"},
+    {TR_DISPLAY_SIZE_1080, "1920x1080"},
+    {TR_DISPLAY_SIZE_1440, "2560x1440"},
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

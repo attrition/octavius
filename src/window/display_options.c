@@ -6,8 +6,10 @@
 #include "graphics/graphics.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
+#include "translation/translation.h"
 
 static void button_fullscreen(int param1, int param2);
 static void button_set_resolution(int id, int param2);
@@ -48,9 +50,10 @@ static void draw_foreground(void)
 
     lang_text_draw_centered(42, setting_fullscreen() ? 2 : 1, 128, 140, 224, FONT_NORMAL_GREEN);
 
-    lang_text_draw_centered(42, 3, 128, 164, 224, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(42, 4, 128, 188, 224, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(42, 5, 128, 212, 224, FONT_NORMAL_GREEN);
+    text_draw_centered(translation_for(TR_DISPLAY_SIZE_720),  128, 164, 224, FONT_NORMAL_GREEN, 0); // 720p
+    text_draw_centered(translation_for(TR_DISPLAY_SIZE_1080), 128, 188, 224, FONT_NORMAL_GREEN, 0); // 1080p
+    text_draw_centered(translation_for(TR_DISPLAY_SIZE_1440), 128, 212, 224, FONT_NORMAL_GREEN, 0); // 1440p
+
     lang_text_draw_centered(42, 6, 128, 236, 224, FONT_NORMAL_GREEN);
 
     graphics_reset_dialog();
@@ -75,9 +78,9 @@ static void button_fullscreen(int param1, int param2)
 static void button_set_resolution(int id, int param2)
 {
     switch (id) {
-        case 1: system_resize(640, 480); break;
-        case 2: system_resize(800, 600); break;
-        case 3: system_resize(1024, 768); break;
+        case 1: system_resize(1280, 720); break;
+        case 2: system_resize(1920, 1080); break;
+        case 3: system_resize(2560, 1440); break;
     }
     data.close_callback();
 }

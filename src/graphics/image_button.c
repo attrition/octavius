@@ -91,8 +91,8 @@ int image_buttons_handle_mouse(const mouse *m, int x, int y, image_button *butto
         if (!m->left.went_up && !m->right.went_up) {
             if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
                 // do nothing...
-                // not sure why the above check triggers for octavius buttons
-                // possibly something with the buttons being in the city viewport
+                // there seems to be some conflict when clicking over city viewport
+                // if a tile is clickable it takes precedence over the button click
             } else {
                 return 0;
             }
