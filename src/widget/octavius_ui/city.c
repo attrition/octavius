@@ -52,17 +52,13 @@ void widget_octavius_ui_city_draw_background(void)
 
 }
 
-static void enable_building_buttons(int force)
+static void enable_building_buttons(void)
 {
-    static int done = 0;
-    if (force || !done) {
-        for (int i = 0; i < 12; i++) {
-            buttons_build[i].enabled = 1;
-            if (building_menu_count_items(buttons_build[i].parameter1) <= 0) {
-                buttons_build[i].enabled = 0;
-            }
+    for (int i = 0; i < 12; i++) {
+        buttons_build[i].enabled = 1;
+        if (building_menu_count_items(buttons_build[i].parameter1) <= 0) {
+            buttons_build[i].enabled = 0;
         }
-        done = 1;
     }
 }
 
@@ -129,17 +125,16 @@ void draw_minimap(void)
     int map_offset_x = 160 - map_grid_width();
     int map_offset_y = screen_height() - 160 - map_grid_height();
     widget_minimap_invalidate();
-    widget_minimap_draw(map_offset_x, map_offset_y, map_grid_width(), map_grid_height() * 2, 1);
+    widget_minimap_draw(map_offset_x, map_offset_y, map_grid_width(), map_grid_height() * 2);
 }
 
 void widget_octavius_ui_city_draw_foreground(void)
 {
     calculate_offsets();
-    enable_building_buttons(0);
 
-    if (building_menu_has_changed()) {
-        enable_building_buttons(1);
-    }
+    //if (building_menu_has_changed()) {
+        enable_building_buttons();
+    //}
 
     draw_info_bar();
 
@@ -156,7 +151,7 @@ void widget_octavius_ui_city_draw_foreground_military(void)
 int widget_octavius_ui_city_handle_mouse(const mouse *m)
 {
     int handled = 0;
-    int button_id;
+    int button_id = 0;
     data.focus_button_for_tooltip = 0;
 
     if (widget_minimap_handle_mouse(m)) {
@@ -168,7 +163,10 @@ int widget_octavius_ui_city_handle_mouse(const mouse *m)
         data.focus_button_for_tooltip = button_id + 19;
     }
 
-    return (m->left.is_down || m->right.is_down ? handled : 0);
+    return (m->left.is_down || m->right.is_down ||
+            m->left.went_down || m->right.went_down ||
+            m->left.went_up || m->right.went_up
+        ? handled : 0);
 }
 
 int widget_octavius_ui_city_handle_mouse_build_menu(const mouse *m)
