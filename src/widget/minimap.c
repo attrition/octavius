@@ -239,7 +239,11 @@ static void draw_minimap(void)
 {
     graphics_set_clip_rectangle(data.x_offset, data.y_offset, data.width, data.height);
     foreach_map_tile(draw_minimap_tile);
-    cache_minimap();
+    
+    if (!config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        cache_minimap();
+    }
+
     draw_viewport_rectangle();
     graphics_reset_clip_rectangle();
 }
@@ -247,7 +251,9 @@ static void draw_minimap(void)
 static void draw_uncached(int x_offset, int y_offset, int width_tiles, int height_tiles)
 {
     data.enemy_color = ENEMY_COLOR_BY_CLIMATE[scenario_property_climate()];
-    prepare_minimap_cache(2 * width_tiles, height_tiles);
+    if (!config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        prepare_minimap_cache(2 * width_tiles, height_tiles);
+    }
     set_bounds(x_offset, y_offset, width_tiles, height_tiles);
     draw_minimap();
 }
@@ -275,9 +281,9 @@ void draw_using_cache(int x_offset, int y_offset, int width_tiles, int height_ti
     graphics_reset_clip_rectangle();
 }
 
-void widget_minimap_draw(int x_offset, int y_offset, int width_tiles, int height_tiles, int force)
+void widget_minimap_draw(int x_offset, int y_offset, int width_tiles, int height_tiles)
 {
-    if (data.refresh_requested || scroll_in_progress() || force) {
+    if (data.refresh_requested || scroll_in_progress()) {
         if (data.refresh_requested) {
             draw_uncached(x_offset, y_offset, width_tiles, height_tiles);
             data.refresh_requested = 0;

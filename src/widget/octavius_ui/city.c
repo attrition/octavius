@@ -1,10 +1,16 @@
 #include "city.h"
 
 #include "building/menu.h"
+#include "city/finance.h"
+#include "city/population.h"
+#include "game/time.h"
 #include "graphics/generic_button.h"
+#include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/image_button.h"
+#include "graphics/lang_text.h"
 #include "graphics/screen.h"
+#include "graphics/text.h"
 #include "input/scroll.h"
 #include "map/grid.h"
 #include "widget/city.h"
@@ -13,40 +19,29 @@
 
 static void button_build(int submenu, int param2);
 
-const int buttons_width = 50;
-const int buttons_height = 40;
-int buttons_x_offset = 0;
-int buttons_y_offset = 0;
+const int buttons_width = 52;
+const int buttons_height = 80;
+int buttons_offset_x = 0;
+int buttons_offset_y = 0;
+
+const int offset_funds = 0;
+const int offset_population = 52 * 12 / 2 - 60;
+const int offset_date = 52 * 12 - 120;
 
 static image_button buttons_build[] = {
-    {50 * 0,  0, 50, 40, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 0,  button_build, button_none, BUILD_MENU_VACANT_HOUSE,   0, 1},
-    {50 * 1,  0, 50, 40, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8,  button_build, button_none, BUILD_MENU_CLEAR_LAND,     0, 1},
-    {50 * 2,  0, 50, 40, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD,           0, 1},
-    {50 * 3,  0, 50, 40, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 4,  button_build, button_none, BUILD_MENU_WATER,          0, 1},
-    {50 * 4,  0, 50, 40, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH,         0, 1},
-    {50 * 5,  0, 50, 40, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES,        0, 1},
-    {50 * 6,  0, 50, 40, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION,      0, 1},
-    {50 * 7,  0, 50, 40, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT,  0, 1},
-    {50 * 8,  0, 50, 40, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 16, button_build, button_none, BUILD_MENU_ADMINISTRATION, 0, 1},
-    {50 * 9,  0, 50, 40, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 44, button_build, button_none, BUILD_MENU_ENGINEERING,    0, 1},
-    {50 * 10, 0, 50, 40, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 36, button_build, button_none, BUILD_MENU_SECURITY,       0, 1},
-    {50 * 11, 0, 50, 40, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 32, button_build, button_none, BUILD_MENU_INDUSTRY,       0, 1},
+    {52 * 0  + 7, 7, 46, 74, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 0,  button_build, button_none, BUILD_MENU_VACANT_HOUSE,   0, 1},
+    {52 * 1  + 7, 7, 46, 74, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8,  button_build, button_none, BUILD_MENU_CLEAR_LAND,     0, 1},
+    {52 * 2  + 7, 7, 46, 74, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD,           0, 1},
+    {52 * 3  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 4,  button_build, button_none, BUILD_MENU_WATER,          0, 1},
+    {52 * 4  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH,         0, 1},
+    {52 * 5  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES,        0, 1},
+    {52 * 6  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION,      0, 1},
+    {52 * 7  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT,  0, 1},
+    {52 * 8  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 16, button_build, button_none, BUILD_MENU_ADMINISTRATION, 0, 1},
+    {52 * 9  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 44, button_build, button_none, BUILD_MENU_ENGINEERING,    0, 1},
+    {52 * 10 + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 36, button_build, button_none, BUILD_MENU_SECURITY,       0, 1},
+    {52 * 11 + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 32, button_build, button_none, BUILD_MENU_INDUSTRY,       0, 1},
 };
-
-//static generic_button buttons_construct[] = {
-//    {50 * 0,  0, 50, 40, button_build, button_none, BUILD_MENU_VACANT_HOUSE,    0},
-//    {50 * 1,  0, 50, 40, button_build, button_none, BUILD_MENU_CLEAR_LAND,      0},
-//    {50 * 2,  0, 50, 40, button_build, button_none, BUILD_MENU_ROAD,            0},
-//    {50 * 3,  0, 50, 40, button_build, button_none, BUILD_MENU_WATER,           0},
-//    {50 * 4,  0, 50, 40, button_build, button_none, BUILD_MENU_HEALTH,          0},
-//    {50 * 5,  0, 50, 40, button_build, button_none, BUILD_MENU_TEMPLES,         0},
-//    {50 * 6,  0, 50, 40, button_build, button_none, BUILD_MENU_EDUCATION,       0},
-//    {50 * 7,  0, 50, 40, button_build, button_none, BUILD_MENU_ENTERTAINMENT,   0},
-//    {50 * 8,  0, 50, 40, button_build, button_none, BUILD_MENU_ADMINISTRATION,  0},
-//    {50 * 9,  0, 50, 40, button_build, button_none, BUILD_MENU_ENGINEERING,     0},
-//    {50 * 10, 0, 50, 40, button_build, button_none, BUILD_MENU_SECURITY,        0},
-//    {50 * 11, 0, 50, 40, button_build, button_none, BUILD_MENU_INDUSTRY,        0},
-//};
 
 static struct {
     int focus_button_for_tooltip;
@@ -73,8 +68,68 @@ static void enable_building_buttons(int force)
 
 static void calculate_offsets()
 {
-    buttons_x_offset = (screen_width() / 2) - ((buttons_width * 12) / 2);
-    buttons_y_offset = screen_height() - buttons_height;
+    buttons_offset_x = (screen_width() / 2) - ((buttons_width * 12) / 2);
+    buttons_offset_y = screen_height() - buttons_height;
+}
+
+void draw_info_bar()
+{
+    int image_base = image_group(GROUP_TOP_MENU_SIDEBAR);
+    int blocks_wide = (buttons_width * 12) / 16;
+    int top_bar_y_offset = buttons_offset_y - 24;
+
+    graphics_set_clip_rectangle(buttons_offset_x, top_bar_y_offset, buttons_width * 12, 24);
+
+    for (int i = 0; i < blocks_wide; ++i) {
+        image_draw(image_base + i % 8, buttons_offset_x + i * 24, top_bar_y_offset);
+    }
+    image_draw(image_base + 14, buttons_offset_x + offset_funds, top_bar_y_offset);
+    image_draw(image_base + 14, buttons_offset_x + offset_population, top_bar_y_offset);
+    image_draw(image_base + 14, buttons_offset_x + offset_date, top_bar_y_offset);
+
+    color_t treasury_color = COLOR_WHITE;
+    int treasury = city_finance_treasury();
+    if (treasury < 0) {
+        treasury_color = COLOR_FONT_RED;
+    }
+    int width = lang_text_draw_colored(6, 0, buttons_offset_x + offset_funds + 12, top_bar_y_offset + 5, FONT_NORMAL_PLAIN, treasury_color);
+    text_draw_number_colored(treasury, '@', " ", buttons_offset_x + 8 + width, top_bar_y_offset + 5, FONT_NORMAL_PLAIN, treasury_color);
+
+    width = lang_text_draw_colored(6, 1, buttons_offset_x + offset_population + 12, top_bar_y_offset + 5, FONT_NORMAL_PLAIN, COLOR_WHITE);
+    text_draw_number_colored(city_population(), '@', " ", buttons_offset_x + offset_population + 8 + width, top_bar_y_offset + 5, FONT_NORMAL_PLAIN, COLOR_WHITE);
+
+    lang_text_draw_month_year_max_width(game_time_month(), game_time_year(), buttons_offset_x + offset_date + 12, top_bar_y_offset + 5, 100, FONT_NORMAL_PLAIN, COLOR_FONT_YELLOW);
+
+    graphics_reset_clip_rectangle();
+}
+
+void draw_button_bar()
+{
+    graphics_set_clip_rectangle(buttons_offset_x, buttons_offset_y, buttons_width * 12, buttons_height);
+    for (int i = 0; i < 12; ++i) {
+        int offset_x = buttons_offset_x + i * buttons_width;
+        image_draw(image_group(GROUP_EMPIRE_PANELS) + 3, offset_x, buttons_offset_y);
+        image_draw(image_group(GROUP_EMPIRE_PANELS) + 3, offset_x, buttons_offset_y + 32);
+        image_draw(image_group(GROUP_EMPIRE_PANELS) + 3, offset_x, buttons_offset_y + 64);
+
+        int focus = (data.focus_button_for_tooltip - 19 == i + 1);
+        button_border_draw(buttons_offset_x + i * buttons_width, buttons_offset_y, buttons_width, buttons_height, focus);
+    }
+    graphics_reset_clip_rectangle();
+
+    image_buttons_draw(buttons_offset_x, buttons_offset_y, buttons_build, 12);
+}
+
+void draw_minimap()
+{
+    //image_draw(image_group(GROUP_SIDE_PANEL) + 4, 0, screen_height() - 160);
+    //image_draw(image_group(GROUP_SIDE_PANEL) + 4, 158, screen_height() - 160);
+
+    // 160 being the largest map size possible
+    int map_offset_x = 160 - map_grid_width();
+    int map_offset_y = screen_height() - 160 - map_grid_height();
+    widget_minimap_invalidate();
+    widget_minimap_draw(map_offset_x, map_offset_y, map_grid_width(), map_grid_height() * 2, 1);
 }
 
 void widget_octavius_ui_city_draw_foreground(void)
@@ -86,14 +141,11 @@ void widget_octavius_ui_city_draw_foreground(void)
         enable_building_buttons(1);
     }
 
-    if (scroll_in_progress()) {
-        widget_minimap_invalidate();
-    }
+    draw_info_bar();
 
-    image_buttons_draw(buttons_x_offset, buttons_y_offset, buttons_build, 12);
+    draw_button_bar();
 
-    int map_height = map_grid_height() * 2;
-    widget_minimap_draw(0, screen_height() - map_height, map_grid_width(), map_height, 1);
+    draw_minimap();
 }
 
 void widget_octavius_ui_city_draw_foreground_military(void)
@@ -111,19 +163,17 @@ int widget_octavius_ui_city_handle_mouse(const mouse *m)
         return 1;
     }
 
-    handled |= image_buttons_handle_mouse(m, buttons_x_offset, buttons_y_offset, buttons_build, 12, &button_id);
-    //handled |= generic_buttons_handle_mouse(m, buttons_x_offset, buttons_y_offset, buttons_construct, 12, &button_id);
+    handled |= image_buttons_handle_mouse(m, buttons_offset_x, buttons_offset_y, buttons_build, 12, &button_id);
     if (button_id) {
         data.focus_button_for_tooltip = button_id + 19;
     }
 
-    return handled;
+    return (m->left.is_down || m->right.is_down ? handled : 0);
 }
 
 int widget_octavius_ui_city_handle_mouse_build_menu(const mouse *m)
 {
-    return image_buttons_handle_mouse(m, buttons_x_offset, buttons_y_offset, buttons_build, 12, 0);
-    //return generic_buttons_handle_mouse(m, buttons_x_offset, buttons_y_offset, buttons_construct, 12, 0);
+    return image_buttons_handle_mouse(m, buttons_offset_x, buttons_offset_y, buttons_build, 12, 0);
 }
 
 int widget_octavius_ui_city_get_tooltip_text(void)
