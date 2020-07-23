@@ -125,7 +125,7 @@ void draw_minimap(void)
     int map_offset_x = 160 - map_grid_width();
     int map_offset_y = screen_height() - 160 - map_grid_height();
     widget_minimap_invalidate();
-    widget_minimap_draw(map_offset_x, map_offset_y, map_grid_width(), map_grid_height() * 2);
+    widget_minimap_draw(map_offset_x, map_offset_y, map_grid_width(), map_grid_height() * 2, 0);
 }
 
 void widget_octavius_ui_city_draw_foreground(void)

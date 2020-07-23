@@ -281,9 +281,9 @@ void draw_using_cache(int x_offset, int y_offset, int width_tiles, int height_ti
     graphics_reset_clip_rectangle();
 }
 
-void widget_minimap_draw(int x_offset, int y_offset, int width_tiles, int height_tiles)
+void widget_minimap_draw(int x_offset, int y_offset, int width_tiles, int height_tiles, int force)
 {
-    if (data.refresh_requested || scroll_in_progress()) {
+    if (data.refresh_requested || scroll_in_progress() || force) {
         if (data.refresh_requested) {
             draw_uncached(x_offset, y_offset, width_tiles, height_tiles);
             data.refresh_requested = 0;
