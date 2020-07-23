@@ -90,9 +90,7 @@ int image_buttons_handle_mouse(const mouse *m, int x, int y, image_button *butto
     } else if (hit_button->button_type == IB_BUILD || hit_button->button_type == IB_NORMAL) {
         if (!m->left.went_up && !m->right.went_up) {
             if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
-                // do nothing...
-                // there seems to be some conflict when clicking over city viewport
-                // if a tile is clickable it takes precedence over the button click
+                return 1;
             } else {
                 return 0;
             }

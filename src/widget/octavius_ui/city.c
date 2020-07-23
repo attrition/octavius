@@ -33,20 +33,20 @@ static image_button buttons_build[] = {
     {50 * 11, 0, 50, 40, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 32, button_build, button_none, BUILD_MENU_INDUSTRY,       0, 1},
 };
 
-static generic_button buttons_construct[] = {
-    {50 * 0,  0, 50, 40, button_build, button_none, BUILD_MENU_VACANT_HOUSE,    0},
-    {50 * 1,  0, 50, 40, button_build, button_none, BUILD_MENU_CLEAR_LAND,      0},
-    {50 * 2,  0, 50, 40, button_build, button_none, BUILD_MENU_ROAD,            0},
-    {50 * 3,  0, 50, 40, button_build, button_none, BUILD_MENU_WATER,           0},
-    {50 * 4,  0, 50, 40, button_build, button_none, BUILD_MENU_HEALTH,          0},
-    {50 * 5,  0, 50, 40, button_build, button_none, BUILD_MENU_TEMPLES,         0},
-    {50 * 6,  0, 50, 40, button_build, button_none, BUILD_MENU_EDUCATION,       0},
-    {50 * 7,  0, 50, 40, button_build, button_none, BUILD_MENU_ENTERTAINMENT,   0},
-    {50 * 8,  0, 50, 40, button_build, button_none, BUILD_MENU_ADMINISTRATION,  0},
-    {50 * 9,  0, 50, 40, button_build, button_none, BUILD_MENU_ENGINEERING,     0},
-    {50 * 10, 0, 50, 40, button_build, button_none, BUILD_MENU_SECURITY,        0},
-    {50 * 11, 0, 50, 40, button_build, button_none, BUILD_MENU_INDUSTRY,        0},
-};
+//static generic_button buttons_construct[] = {
+//    {50 * 0,  0, 50, 40, button_build, button_none, BUILD_MENU_VACANT_HOUSE,    0},
+//    {50 * 1,  0, 50, 40, button_build, button_none, BUILD_MENU_CLEAR_LAND,      0},
+//    {50 * 2,  0, 50, 40, button_build, button_none, BUILD_MENU_ROAD,            0},
+//    {50 * 3,  0, 50, 40, button_build, button_none, BUILD_MENU_WATER,           0},
+//    {50 * 4,  0, 50, 40, button_build, button_none, BUILD_MENU_HEALTH,          0},
+//    {50 * 5,  0, 50, 40, button_build, button_none, BUILD_MENU_TEMPLES,         0},
+//    {50 * 6,  0, 50, 40, button_build, button_none, BUILD_MENU_EDUCATION,       0},
+//    {50 * 7,  0, 50, 40, button_build, button_none, BUILD_MENU_ENTERTAINMENT,   0},
+//    {50 * 8,  0, 50, 40, button_build, button_none, BUILD_MENU_ADMINISTRATION,  0},
+//    {50 * 9,  0, 50, 40, button_build, button_none, BUILD_MENU_ENGINEERING,     0},
+//    {50 * 10, 0, 50, 40, button_build, button_none, BUILD_MENU_SECURITY,        0},
+//    {50 * 11, 0, 50, 40, button_build, button_none, BUILD_MENU_INDUSTRY,        0},
+//};
 
 static struct {
     int focus_button_for_tooltip;
