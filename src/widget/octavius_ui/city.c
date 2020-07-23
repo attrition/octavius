@@ -66,13 +66,13 @@ static void enable_building_buttons(int force)
     }
 }
 
-static void calculate_offsets()
+static void calculate_offsets(void)
 {
     buttons_offset_x = (screen_width() / 2) - ((buttons_width * 12) / 2);
     buttons_offset_y = screen_height() - buttons_height;
 }
 
-void draw_info_bar()
+void draw_info_bar(void)
 {
     int image_base = image_group(GROUP_TOP_MENU_SIDEBAR);
     int blocks_wide = (buttons_width * 12) / 16;
@@ -103,7 +103,7 @@ void draw_info_bar()
     graphics_reset_clip_rectangle();
 }
 
-void draw_button_bar()
+void draw_button_bar(void)
 {
     graphics_set_clip_rectangle(buttons_offset_x, buttons_offset_y, buttons_width * 12, buttons_height);
     for (int i = 0; i < 12; ++i) {
@@ -120,7 +120,7 @@ void draw_button_bar()
     image_buttons_draw(buttons_offset_x, buttons_offset_y, buttons_build, 12);
 }
 
-void draw_minimap()
+void draw_minimap(void)
 {
     //image_draw(image_group(GROUP_SIDE_PANEL) + 4, 0, screen_height() - 160);
     //image_draw(image_group(GROUP_SIDE_PANEL) + 4, 158, screen_height() - 160);
