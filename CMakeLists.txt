@@ -428,6 +428,7 @@ set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/video.c
     ${PROJECT_SOURCE_DIR}/src/graphics/warning.c
     ${PROJECT_SOURCE_DIR}/src/graphics/window.c
+    ${PROJECT_SOURCE_DIR}/src/graphics/octavius_ui/build_button.c
 )
 set(SOUND_FILES
     ${PROJECT_SOURCE_DIR}/src/sound/city.c
@@ -454,12 +455,12 @@ set(WIDGET_FILES
     ${PROJECT_SOURCE_DIR}/src/widget/minimap.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu.c
     ${PROJECT_SOURCE_DIR}/src/widget/top_menu_editor.c
+    ${PROJECT_SOURCE_DIR}/src/widget/octavius_ui/city.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/city.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/common.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/editor.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/extra.c
     ${PROJECT_SOURCE_DIR}/src/widget/sidebar/slide.c
-    ${PROJECT_SOURCE_DIR}/src/widget/octavius_ui/city.c
 )
 set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/advisors.c
@@ -504,6 +505,7 @@ set(WINDOW_FILES
     ${PROJECT_SOURCE_DIR}/src/window/editor/start_year.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/starting_conditions.c
     ${PROJECT_SOURCE_DIR}/src/window/editor/win_criteria.c
+    ${PROJECT_SOURCE_DIR}/src/window/octavius_ui/build_menu.c
     ${PROJECT_SOURCE_DIR}/src/window/cck_selection.c
     ${PROJECT_SOURCE_DIR}/src/window/city.c
     ${PROJECT_SOURCE_DIR}/src/window/config.c

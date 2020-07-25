@@ -25,6 +25,21 @@ typedef enum {
     BUILD_MENU_MAX = 18
 } build_menu_group;
 
+typedef enum {
+    SIDEBAR_BUTTONS_VACANT_HOUSE = 0,
+    SIDEBAR_BUTTONS_CLEAR_LAND = 8,
+    SIDEBAR_BUTTONS_ROAD = 12,
+    SIDEBAR_BUTTONS_WATER = 4,
+    SIDEBAR_BUTTONS_HEALTH = 40,
+    SIDEBAR_BUTTONS_TEMPLES = 28,
+    SIDEBAR_BUTTONS_EDUCATION = 24,
+    SIDEBAR_BUTTONS_ENTERTAINMENT = 20,
+    SIDEBAR_BUTTONS_ADMINISTRATION = 16,
+    SIDEBAR_BUTTONS_ENGINEERING = 44,
+    SIDEBAR_BUTTONS_SECURITY = 36,
+    SIDEBAR_BUTTONS_INDUSTRY = 32
+} sidebar_buttons_group_index;
+
 void building_menu_enable_all(void);
 
 void building_menu_update(void);

@@ -7,15 +7,15 @@
 #include "graphics/generic_button.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
-#include "graphics/image_button.h"
 #include "graphics/lang_text.h"
+#include "graphics/octavius_ui/build_button.h"
 #include "graphics/screen.h"
 #include "graphics/text.h"
 #include "input/scroll.h"
 #include "map/grid.h"
 #include "widget/city.h"
 #include "widget/minimap.h"
-#include "window/build_menu.h"
+#include "window/octavius_ui/build_menu.h"
 
 static void button_build(int submenu, int param2);
 
@@ -28,19 +28,19 @@ const int offset_funds = 0;
 const int offset_population = 52 * 12 / 2 - 60;
 const int offset_date = 52 * 12 - 120;
 
-static image_button buttons_build[] = {
-    {52 * 0 , 0, 52, 80, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 0,  button_build, button_none, BUILD_MENU_VACANT_HOUSE,   0, 1},
-    {52 * 1 , 0, 52, 80, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8,  button_build, button_none, BUILD_MENU_CLEAR_LAND,     0, 1},
-    {52 * 2 , 0, 52, 80, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD,           0, 1},
-    {52 * 3 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 4,  button_build, button_none, BUILD_MENU_WATER,          0, 1},
-    {52 * 4 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH,         0, 1},
-    {52 * 5 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES,        0, 1},
-    {52 * 6 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION,      0, 1},
-    {52 * 7 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT,  0, 1},
-    {52 * 8 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 16, button_build, button_none, BUILD_MENU_ADMINISTRATION, 0, 1},
-    {52 * 9 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 44, button_build, button_none, BUILD_MENU_ENGINEERING,    0, 1},
-    {52 * 10, 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 36, button_build, button_none, BUILD_MENU_SECURITY,       0, 1},
-    {52 * 11, 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 32, button_build, button_none, BUILD_MENU_INDUSTRY,       0, 1},
+static build_button buttons_build[] = {
+    {52 * 0 , 0, 52, 80, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_VACANT_HOUSE,   button_build, button_none, BUILD_MENU_VACANT_HOUSE,   0, 1},
+    {52 * 1 , 0, 52, 80, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_CLEAR_LAND,     button_build, button_none, BUILD_MENU_CLEAR_LAND,     0, 1},
+    {52 * 2 , 0, 52, 80, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_ROAD,           button_build, button_none, BUILD_MENU_ROAD,           0, 1},
+    {52 * 3 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_WATER,          button_build, button_none, BUILD_MENU_WATER,          0, 1},
+    {52 * 4 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_HEALTH,         button_build, button_none, BUILD_MENU_HEALTH,         0, 1},
+    {52 * 5 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_TEMPLES,        button_build, button_none, BUILD_MENU_TEMPLES,        0, 1},
+    {52 * 6 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_EDUCATION,      button_build, button_none, BUILD_MENU_EDUCATION,      0, 1},
+    {52 * 7 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_ENTERTAINMENT,  button_build, button_none, BUILD_MENU_ENTERTAINMENT,  0, 1},
+    {52 * 8 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_ADMINISTRATION, button_build, button_none, BUILD_MENU_ADMINISTRATION, 0, 1},
+    {52 * 9 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_ENGINEERING,    button_build, button_none, BUILD_MENU_ENGINEERING,    0, 1},
+    {52 * 10, 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_SECURITY,       button_build, button_none, BUILD_MENU_SECURITY,       0, 1},
+    {52 * 11, 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, SIDEBAR_BUTTONS_INDUSTRY,       button_build, button_none, BUILD_MENU_INDUSTRY,       0, 1},
 };
 
 static struct {
@@ -109,7 +109,7 @@ void draw_button_bar(void)
     }
     graphics_reset_clip_rectangle();
 
-    image_buttons_draw(buttons_offset_x + 7, buttons_offset_y + 7, buttons_build, 12);
+    build_buttons_draw(buttons_offset_x + 7, buttons_offset_y + 7, buttons_build, 12);
 }
 
 void draw_minimap(void)
@@ -160,13 +160,16 @@ int widget_octavius_ui_city_handle_mouse(const mouse *m)
         return 1;
     }
 
-    handled = image_buttons_handle_mouse(m, buttons_offset_x, buttons_offset_y, buttons_build, 12, &button_id);
+    handled = build_buttons_handle_mouse(m, buttons_offset_x, buttons_offset_y, buttons_build, 12, &button_id);
     if (button_id) {
         data.focus_button_for_tooltip = button_id + 19;
         data.first_focus = data.focus_button_for_tooltip;
     }
 
-    return ((m->left.is_down || m->left.went_down || m->left.went_up) ? handled : 0);
+    return (m->left.is_down  || m->left.went_down  || m->left.went_up  ||
+            m->right.is_down || m->right.went_down || m->right.went_up
+        ? handled
+        : 0);
 }
 
 int widget_octavius_ui_city_handle_mouse_build_menu(const mouse *m)
@@ -174,7 +177,7 @@ int widget_octavius_ui_city_handle_mouse_build_menu(const mouse *m)
     int handled = 0;
     int button_id = 0;
     int up = m->left.went_up;
-    handled = image_buttons_handle_mouse(m, buttons_offset_x, buttons_offset_y, buttons_build, 12, &button_id);
+    handled = build_buttons_handle_mouse(m, buttons_offset_x, buttons_offset_y, buttons_build, 12, &button_id);
 
     if (handled && m->left.is_down) {
         if (button_id) {
@@ -202,5 +205,5 @@ int widget_octavius_ui_city_get_tooltip_text(void)
 
 static void button_build(int submenu, int param2)
 {
-    window_build_menu_show(submenu);
+    window_octavius_build_menu_show(submenu);
 }
