@@ -29,22 +29,23 @@ const int offset_population = 52 * 12 / 2 - 60;
 const int offset_date = 52 * 12 - 120;
 
 static image_button buttons_build[] = {
-    {52 * 0  + 7, 7, 46, 74, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 0,  button_build, button_none, BUILD_MENU_VACANT_HOUSE,   0, 1},
-    {52 * 1  + 7, 7, 46, 74, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8,  button_build, button_none, BUILD_MENU_CLEAR_LAND,     0, 1},
-    {52 * 2  + 7, 7, 46, 74, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD,           0, 1},
-    {52 * 3  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 4,  button_build, button_none, BUILD_MENU_WATER,          0, 1},
-    {52 * 4  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH,         0, 1},
-    {52 * 5  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES,        0, 1},
-    {52 * 6  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION,      0, 1},
-    {52 * 7  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT,  0, 1},
-    {52 * 8  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 16, button_build, button_none, BUILD_MENU_ADMINISTRATION, 0, 1},
-    {52 * 9  + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 44, button_build, button_none, BUILD_MENU_ENGINEERING,    0, 1},
-    {52 * 10 + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 36, button_build, button_none, BUILD_MENU_SECURITY,       0, 1},
-    {52 * 11 + 7, 7, 46, 74, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 32, button_build, button_none, BUILD_MENU_INDUSTRY,       0, 1},
+    {52 * 0 , 0, 52, 80, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 0,  button_build, button_none, BUILD_MENU_VACANT_HOUSE,   0, 1},
+    {52 * 1 , 0, 52, 80, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 8,  button_build, button_none, BUILD_MENU_CLEAR_LAND,     0, 1},
+    {52 * 2 , 0, 52, 80, IB_NORMAL, GROUP_SIDEBAR_BUTTONS, 12, button_build, button_none, BUILD_MENU_ROAD,           0, 1},
+    {52 * 3 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 4,  button_build, button_none, BUILD_MENU_WATER,          0, 1},
+    {52 * 4 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 40, button_build, button_none, BUILD_MENU_HEALTH,         0, 1},
+    {52 * 5 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 28, button_build, button_none, BUILD_MENU_TEMPLES,        0, 1},
+    {52 * 6 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 24, button_build, button_none, BUILD_MENU_EDUCATION,      0, 1},
+    {52 * 7 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 20, button_build, button_none, BUILD_MENU_ENTERTAINMENT,  0, 1},
+    {52 * 8 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 16, button_build, button_none, BUILD_MENU_ADMINISTRATION, 0, 1},
+    {52 * 9 , 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 44, button_build, button_none, BUILD_MENU_ENGINEERING,    0, 1},
+    {52 * 10, 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 36, button_build, button_none, BUILD_MENU_SECURITY,       0, 1},
+    {52 * 11, 0, 52, 80, IB_BUILD,  GROUP_SIDEBAR_BUTTONS, 32, button_build, button_none, BUILD_MENU_INDUSTRY,       0, 1},
 };
 
 static struct {
     int focus_button_for_tooltip;
+    int first_focus;
 } data;
 
 void widget_octavius_ui_city_draw_background(void)
@@ -113,7 +114,7 @@ void draw_button_bar(void)
     }
     graphics_reset_clip_rectangle();
 
-    image_buttons_draw(buttons_offset_x, buttons_offset_y, buttons_build, 12);
+    image_buttons_draw(buttons_offset_x + 7, buttons_offset_y + 7, buttons_build, 12);
 }
 
 void draw_minimap(void)
@@ -132,9 +133,9 @@ void widget_octavius_ui_city_draw_foreground(void)
 {
     calculate_offsets();
 
-    //if (building_menu_has_changed()) {
+    if (building_menu_has_changed()) {
         enable_building_buttons();
-    //}
+    }
 
     draw_info_bar();
 
@@ -153,25 +154,43 @@ int widget_octavius_ui_city_handle_mouse(const mouse *m)
     int handled = 0;
     int button_id = 0;
     data.focus_button_for_tooltip = 0;
+    data.focus_button_for_tooltip = 0;
 
     if (widget_minimap_handle_mouse(m)) {
         return 1;
     }
 
-    handled |= image_buttons_handle_mouse(m, buttons_offset_x, buttons_offset_y, buttons_build, 12, &button_id);
+    handled = image_buttons_handle_mouse(m, buttons_offset_x, buttons_offset_y, buttons_build, 12, &button_id);
     if (button_id) {
         data.focus_button_for_tooltip = button_id + 19;
+        data.first_focus = data.focus_button_for_tooltip;
     }
 
-    return (m->left.is_down || m->right.is_down ||
-            m->left.went_down || m->right.went_down ||
-            m->left.went_up || m->right.went_up
-        ? handled : 0);
+    return ((m->left.is_down || m->left.went_down || m->left.went_up) ? handled : 0);
 }
 
 int widget_octavius_ui_city_handle_mouse_build_menu(const mouse *m)
 {
-    return image_buttons_handle_mouse(m, buttons_offset_x, buttons_offset_y, buttons_build, 12, 0);
+    int handled = 0;
+    int button_id = 0;
+    int up = m->left.went_up;
+    handled = image_buttons_handle_mouse(m, buttons_offset_x, buttons_offset_y, buttons_build, 12, &button_id);
+
+    if (handled && m->left.is_down) {
+        if (button_id) {
+            data.focus_button_for_tooltip = button_id + 19;
+        }
+    } else if (handled && up) {
+        if (button_id) {
+            data.focus_button_for_tooltip = button_id + 19;
+            data.first_focus = data.focus_button_for_tooltip;
+        } else {
+            data.focus_button_for_tooltip = data.first_focus;
+        }
+    } else if (!handled && up) {
+        data.focus_button_for_tooltip = data.first_focus;
+    }
+    return handled;
 }
 
 int widget_octavius_ui_city_get_tooltip_text(void)
