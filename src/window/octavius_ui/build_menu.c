@@ -5,7 +5,10 @@
 #include "building/model.h"
 #include "city/view.h"
 #include "core/config.h"
+#include "core/string.h"
+#include "game/resource.h"
 #include "graphics/generic_button.h"
+#include "graphics/graphics.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "graphics/octavius_ui/build_button.h"
@@ -26,32 +29,35 @@ typedef struct {
     int offset_x;
     int offset_y;
     int group_index;
-} build_image_layout;
+    building_type building_type;
+} submenu_button_details;
 
 typedef struct {
     int button_count;
-    generic_button *buttons;
+    build_button *buttons;
+    int offset_x;
+    int offset_y;
     int width;
     int height;
-    build_image_layout *image_layouts;
+    submenu_button_details *button_details;
 } menu_definition;
 
-static generic_button build_menu_water_buttons[] = {
-    { 0,   0,   100, 100, button_menu_index, button_none, 1, GROUP_BUILDING_RESERVOIR  },
-    { 100, 100, 100, 100, button_menu_index, button_none, 2, GROUP_BUILDING_AQUEDUCT   },
-    { 0,   100, 100, 100, button_menu_index, button_none, 3, GROUP_BUILDING_FOUNTAIN_1 },
-    { 100, 0,   100, 100, button_menu_index, button_none, 4, GROUP_BUILDING_WELL       }
+static build_button build_menu_water_buttons[] = {
+    { 0,   0, 60, 100, IB_NORMAL, 0, 0, button_menu_index, button_none, 1, GROUP_BUILDING_RESERVOIR,  1 },
+    { 60,  0, 60, 100, IB_NORMAL, 0, 0, button_menu_index, button_none, 2, GROUP_BUILDING_AQUEDUCT,   1 },
+    { 120, 0, 60, 100, IB_NORMAL, 0, 0, button_menu_index, button_none, 3, GROUP_BUILDING_FOUNTAIN_1, 1 },
+    { 180, 0, 60, 100, IB_NORMAL, 0, 0, button_menu_index, button_none, 4, GROUP_BUILDING_WELL,       1 },
 };
 
-static build_image_layout build_menu_water_layouts[] = {
-    { 0, 0, GROUP_BUILDING_RESERVOIR  },
-    { 0, 0, GROUP_BUILDING_AQUEDUCT   },
-    { 0, 0, GROUP_BUILDING_FOUNTAIN_1 },
-    { 0, 0, GROUP_BUILDING_WELL       }
+static submenu_button_details build_menu_water_definitions[] = {
+    { -40, 30, GROUP_BUILDING_RESERVOIR,  BUILDING_RESERVOIR },
+    {   0, 50, GROUP_BUILDING_AQUEDUCT,   BUILDING_AQUEDUCT },
+    {   0, 50, GROUP_BUILDING_FOUNTAIN_1, BUILDING_FOUNTAIN },
+    {   0, 50, GROUP_BUILDING_WELL,       BUILDING_WELL },
 };
 
 static menu_definition menu_definitions[] = {
-    { 4, build_menu_water_buttons, 200, 200, build_menu_water_layouts }
+    { 4, build_menu_water_buttons, -3, -3, 246, 106, build_menu_water_definitions }
 };
 
 static generic_button build_menu_buttons[] = {
@@ -90,7 +96,7 @@ static generic_button build_menu_buttons[] = {
 static struct {
     build_menu_group selected_submenu;
     int num_items;
-    int y_offset;
+    int offset_y;
 
     int focus_button_id;
 } data;
@@ -99,7 +105,7 @@ static int init(build_menu_group submenu)
 {
     data.selected_submenu = submenu;
     data.num_items = building_menu_count_items(submenu);
-    data.y_offset = screen_height() - 250;
+    data.offset_y = screen_height() - 250;
     if (submenu == BUILD_MENU_VACANT_HOUSE ||
         submenu == BUILD_MENU_CLEAR_LAND ||
         submenu == BUILD_MENU_ROAD) {
@@ -148,17 +154,18 @@ static int get_build_buttons_index(void)
     }
 }
 
+static void draw_building(int image_id, int x, int y, int enabled)
+{
+    int mask = enabled ? 0 : COLOR_RED;
+    image_draw_isometric_footprint(image_id, x, y, mask);
+    image_draw_isometric_top(image_id, x, y, mask);
+}
+
 static void get_menu_offsets(int *x, int *y, int build_buttons_index)
 {
     menu_definition *menu = &menu_definitions[build_buttons_index];
-    *x = (screen_width() / 2) - ((12 * 52) / 2) + (get_parent_submenu() * 52);
-    *y = screen_height() - 100 - menu->height;
-}
-
-static void draw_building(int image_id, int x, int y)
-{
-    image_draw_isometric_footprint(image_id, x, y, 0);
-    image_draw_isometric_top(image_id, x, y, 0);
+    *x = (screen_width() / 2) - ((12 * 52) / 2) + (get_parent_submenu() * 52) - (menu->width / 2) + 26;
+    *y = screen_height() - 114 - menu->height;
 }
 
 static void draw_build_buttons(void)
@@ -166,17 +173,53 @@ static void draw_build_buttons(void)
     int build_buttons_index = get_build_buttons_index();
     menu_definition* menu = &menu_definitions[build_buttons_index];
 
-    int x_offset = 0;
-    int y_offset = 0;
-    get_menu_offsets(&x_offset, &y_offset, build_buttons_index);
-    build_image_layout *layout = menu->image_layouts;
+    int offset_x = 0;
+    int offset_y = 0;
 
-    for (int i = 0; i < menu->button_count; ++i) {
+    get_menu_offsets(&offset_x, &offset_y, build_buttons_index);
+    graphics_fill_rect(offset_x + menu->offset_x, offset_y + menu->offset_y, menu->width, menu->height, COLOR_BLACK);
+
+    for (int i = 0, drawn = 0; i < menu->button_count; ++i, ++drawn) {
+        build_button *btn = &menu->buttons[i];
+        submenu_button_details *details = &menu->button_details[i];
+
+        int enabled = building_menu_check_index_enabled(data.selected_submenu, btn->parameter1 - 1);
+
+        int start_x = offset_x + btn->x_offset;
+        int start_y = offset_y + btn->y_offset;
+        graphics_set_clip_rectangle(start_x, start_y, btn->width, btn->height);
+        graphics_fill_rect(start_x, start_y, btn->width, btn->height, COLOR_SIDEBAR);
+
         draw_building(
-            image_group(menu->image_layouts[i].group_index),
-            x_offset + menu->buttons[i].x + layout[i].offset_x,
-            y_offset + menu->buttons[i].y + layout[i].offset_y);
+            image_group(details->group_index),
+            start_x + details->offset_x,
+            start_y + details->offset_y,
+            enabled);
+        graphics_draw_inset_rect(start_x, start_y, btn->width, btn->height);
+
+        int type = building_menu_type(data.selected_submenu, i);
+        if (type == BUILDING_DRAGGABLE_RESERVOIR) {
+            type = BUILDING_RESERVOIR;
+        }
+        int cost = model_get_building(type)->cost;
+        if (type == BUILDING_FORT) {
+            cost = 0;
+        }
+        if (type == BUILDING_MENU_SMALL_TEMPLES && data.selected_submenu == BUILD_MENU_SMALL_TEMPLES) {
+            cost = model_get_building(BUILDING_SMALL_TEMPLE_CERES)->cost;
+        }
+        if (type == BUILDING_MENU_LARGE_TEMPLES && data.selected_submenu == BUILD_MENU_LARGE_TEMPLES) {
+            cost = model_get_building(BUILDING_LARGE_TEMPLE_CERES)->cost;
+        }
+
+        // draw tooltip?
+        if (cost) {
+            //text_draw_money(cost, x_start, y_start + btn->height - 15, FONT_NORMAL_GREEN);
+        }
+
+
     }
+    graphics_reset_clip_rectangle();
 }
 
 static void draw_menu_buttons(void)
@@ -186,7 +229,7 @@ static void draw_menu_buttons(void)
         return;
     }
 
-    int x_offset = (screen_width() / 2) - ((12 * 52) / 2) + 164 + (get_parent_submenu() * 52);
+    int offset_x = (screen_width() / 2) - ((12 * 52) / 2) + 164 + (get_parent_submenu() * 52);
     int item_index = -1;
     int y_step = -24;
 
@@ -195,12 +238,12 @@ static void draw_menu_buttons(void)
 
         int real_index = data.num_items - i - 1;
 
-        label_draw(x_offset - 266, data.y_offset + 110 + y_step * real_index, 16, data.focus_button_id == i + 1 ? 1 : 2);
+        label_draw(offset_x - 266, data.offset_y + 110 + y_step * real_index, 16, data.focus_button_id == i + 1 ? 1 : 2);
         int type = building_menu_type(data.selected_submenu, item_index);
         if (is_all_button(type)) {
-            lang_text_draw_centered(52, 19, x_offset - 266, data.y_offset + 113 + y_step * real_index, 176, FONT_NORMAL_GREEN);
+            lang_text_draw_centered(52, 19, offset_x - 266, data.offset_y + 113 + y_step * real_index, 176, FONT_NORMAL_GREEN);
         } else {
-            lang_text_draw_centered(28, type, x_offset - 266, data.y_offset + 113 + y_step * real_index, 176, FONT_NORMAL_GREEN);
+            lang_text_draw_centered(28, type, offset_x - 266, data.offset_y + 113 + y_step * real_index, 176, FONT_NORMAL_GREEN);
         }
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             type = BUILDING_RESERVOIR;
@@ -216,7 +259,7 @@ static void draw_menu_buttons(void)
             cost = model_get_building(BUILDING_LARGE_TEMPLE_CERES)->cost;
         }
         if (cost) {
-            text_draw_money(cost, x_offset - 82, data.y_offset + 114 + y_step * real_index, FONT_NORMAL_GREEN);
+            text_draw_money(cost, offset_x - 82, data.offset_y + 114 + y_step * real_index, FONT_NORMAL_GREEN);
         }
     }
 }
@@ -229,21 +272,21 @@ static void draw_foreground(void)
 
 static int handle_build_submenu(const mouse *m)
 {
-    int x_offset = (screen_width() / 2) - ((12 * 52) / 2) + (get_parent_submenu() * 52) - 102;
-    int y_offset = data.y_offset + 110 + (data.num_items - 1) * -24;
+    int offset_x = (screen_width() / 2) - ((12 * 52) / 2) + (get_parent_submenu() * 52) - 102;
+    int offset_y = data.offset_y + 110 + (data.num_items - 1) * -24;
 
     int build_buttons_index = get_build_buttons_index();
     if (build_buttons_index != -1) {
-        x_offset = 0;
-        y_offset = 0;
-        get_menu_offsets(&x_offset, &y_offset, build_buttons_index);
+        offset_x = 0;
+        offset_y = 0;
+        get_menu_offsets(&offset_x, &offset_y, build_buttons_index);
 
-        return generic_buttons_handle_mouse(
-            m, x_offset, y_offset, menu_definitions[build_buttons_index].buttons, data.num_items, &data.focus_button_id);
+        return build_buttons_handle_mouse(
+            m, offset_x, offset_y, menu_definitions[build_buttons_index].buttons, data.num_items, &data.focus_button_id);
     }
 
     return generic_buttons_handle_mouse(
-        m, x_offset, y_offset, build_menu_buttons, data.num_items, &data.focus_button_id);
+        m, offset_x, offset_y, build_menu_buttons, data.num_items, &data.focus_button_id);
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
@@ -308,7 +351,7 @@ static void button_menu_item(int item)
 
     if (set_submenu_for_type(type)) {
         data.num_items = building_menu_count_items(data.selected_submenu);
-        data.y_offset = screen_height() - 250;
+        data.offset_y = screen_height() - 250;
         building_construction_clear_type();
     } else {
         window_city_show();

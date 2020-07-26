@@ -46,6 +46,8 @@ void building_menu_update(void);
 
 int building_menu_count_items(int submenu);
 
+int building_menu_check_index_enabled(int submenu, int index);
+
 int building_menu_next_index(int submenu, int current_index);
 
 building_type building_menu_type(int submenu, int item);
