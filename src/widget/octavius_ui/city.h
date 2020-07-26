@@ -13,4 +13,6 @@ int widget_octavius_ui_city_handle_mouse_build_menu(const mouse *m);
 
 int widget_octavius_ui_city_get_tooltip_text(void);
 
+void widget_octavius_ui_city_init(void);
+
 #endif // WIDGET_OCTAVIUS_UI_CITY_H

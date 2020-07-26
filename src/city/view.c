@@ -194,6 +194,9 @@ void reset_viewport()
 
 void city_view_init(void)
 {
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        widget_octavius_ui_city_init();
+    }
     calculate_lookup();
     reset_viewport();
     check_camera_boundaries();

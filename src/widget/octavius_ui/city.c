@@ -201,6 +201,11 @@ int widget_octavius_ui_city_get_tooltip_text(void)
     return data.focus_button_for_tooltip;
 }
 
+void widget_octavius_ui_city_init(void)
+{
+    enable_building_buttons();
+}
+
 // --------
 
 static void button_build(int submenu, int param2)
