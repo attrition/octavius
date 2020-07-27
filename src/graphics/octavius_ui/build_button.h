@@ -9,7 +9,8 @@
 enum {
     IB_NORMAL = 4,
     IB_SCROLL = 6,
-    IB_BUILD = 2
+    IB_BUILD = 2,
+    IB_SUBMENU = 1
 };
 
 typedef struct {

@@ -99,7 +99,7 @@ int build_buttons_handle_mouse(const mouse *m, int x, int y, build_button *butto
         }
     } else if (hit_button->button_type == IB_BUILD || hit_button->button_type == IB_NORMAL) {
         if (!m->left.went_up && !m->right.went_up) {
-            return 1;
+            return 0;
         }
     }
     if (m->left.went_up) {

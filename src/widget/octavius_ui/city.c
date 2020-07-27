@@ -154,7 +154,6 @@ int widget_octavius_ui_city_handle_mouse(const mouse *m)
     int handled = 0;
     int button_id = 0;
     data.focus_button_for_tooltip = 0;
-    data.focus_button_for_tooltip = 0;
 
     if (widget_minimap_handle_mouse(m)) {
         return 1;
@@ -166,10 +165,7 @@ int widget_octavius_ui_city_handle_mouse(const mouse *m)
         data.first_focus = data.focus_button_for_tooltip;
     }
 
-    return (m->left.is_down  || m->left.went_down  || m->left.went_up  ||
-            m->right.is_down || m->right.went_down || m->right.went_up
-        ? handled
-        : 0);
+    return button_id;
 }
 
 int widget_octavius_ui_city_handle_mouse_build_menu(const mouse *m)
@@ -196,7 +192,7 @@ int widget_octavius_ui_city_handle_mouse_build_menu(const mouse *m)
     return handled;
 }
 
-int widget_octavius_ui_city_get_tooltip_text(void)
+int widget_octavius_ui_city_get_tooltip_text(tooltip_context *c)
 {
     return data.focus_button_for_tooltip;
 }
@@ -205,8 +201,6 @@ void widget_octavius_ui_city_init(void)
 {
     enable_building_buttons();
 }
-
-// --------
 
 static void button_build(int submenu, int param2, int param3)
 {

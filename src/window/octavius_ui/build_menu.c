@@ -22,6 +22,8 @@
 #include "widget/octavius_ui/city.h"
 #include "window/city.h"
 
+const int HEADER_HEIGHT = 20;
+
 static void build_button_menu_index(int param1, int param2, int param3);
 static void generic_button_menu_index(int param1, int param2);
 static void button_menu_item(int submenu, int item);
@@ -47,21 +49,21 @@ typedef struct {
 // param2: item index in submenu
 // param3: calculated actual item index
 static build_button build_menu_water_buttons[] = {
-    { 0,   0, 60, 100, IB_NORMAL, 0, 0, build_button_menu_index, build_button_none, 3, 1, 1, 1 },
-    { 60,  0, 60, 100, IB_NORMAL, 0, 0, build_button_menu_index, build_button_none, 3, 2, 1, 1 },
-    { 120, 0, 60, 100, IB_NORMAL, 0, 0, build_button_menu_index, build_button_none, 3, 3, 1, 1 },
-    { 180, 0, 60, 100, IB_NORMAL, 0, 0, build_button_menu_index, build_button_none, 3, 4, 1, 1 },
+    { 0,   0, 80, 100, IB_SUBMENU, 0, 0, build_button_menu_index, build_button_none, 3, 1, 1, 1 },
+    { 80,  0, 64, 100, IB_SUBMENU, 0, 0, build_button_menu_index, build_button_none, 3, 2, 1, 1 },
+    { 144, 0, 64, 100, IB_SUBMENU, 0, 0, build_button_menu_index, build_button_none, 3, 3, 1, 1 },
+    { 208, 0, 64, 100, IB_SUBMENU, 0, 0, build_button_menu_index, build_button_none, 3, 4, 1, 1 },
 };
 
 static submenu_button_details build_menu_water_definitions[] = {
-    { -40, 30, GROUP_BUILDING_RESERVOIR,  BUILDING_RESERVOIR },
-    {   0, 50, GROUP_BUILDING_AQUEDUCT,   BUILDING_AQUEDUCT  },
-    {   0, 50, GROUP_BUILDING_FOUNTAIN_1, BUILDING_FOUNTAIN  },
-    {   0, 50, GROUP_BUILDING_WELL,       BUILDING_WELL      },
+    { -20, 20, GROUP_BUILDING_RESERVOIR,  BUILDING_RESERVOIR },
+    {   3, 40, GROUP_BUILDING_AQUEDUCT,   BUILDING_AQUEDUCT  },
+    {   3, 40, GROUP_BUILDING_FOUNTAIN_1, BUILDING_FOUNTAIN  },
+    {   3, 40, GROUP_BUILDING_WELL,       BUILDING_WELL      },
 };
 
 static menu_definition menu_definitions[] = {
-    { 4, build_menu_water_buttons, -3, -3, 246, 106, build_menu_water_definitions }
+    { 4, build_menu_water_buttons, 0, 0, 272, 100, build_menu_water_definitions }
 };
 
 static generic_button build_menu_buttons[] = {
@@ -103,6 +105,7 @@ static struct {
     int offset_y;
 
     int focus_button_id;
+    int tooltip_text_id;
 } data;
 
 static int init(build_menu_group submenu)
@@ -189,8 +192,8 @@ static void draw_building(int image_id, int x, int y, int enabled)
 static void get_menu_offsets(int *x, int *y, int build_buttons_index)
 {
     menu_definition *menu = &menu_definitions[build_buttons_index];
-    *x = (screen_width() / 2) - ((12 * 52) / 2) + (get_parent_submenu() * 52) - (menu->width / 2) + 26;
-    *y = screen_height() - 114 - menu->height;
+    *x = (screen_width() / 2) - ((12 * 52) / 2) + (get_parent_submenu() * 52) - (menu->width / 2) + 26 + menu->offset_x;
+    *y = screen_height() - 114 - menu->height + menu->offset_y;
 }
 
 static void draw_build_buttons(void)
@@ -198,11 +201,16 @@ static void draw_build_buttons(void)
     int build_buttons_index = get_build_buttons_index();
     menu_definition* menu = &menu_definitions[build_buttons_index];
 
+    data.tooltip_text_id = 0;
     int offset_x = 0;
     int offset_y = 0;
 
     get_menu_offsets(&offset_x, &offset_y, build_buttons_index);
-    graphics_fill_rect(offset_x + menu->offset_x, offset_y + menu->offset_y, menu->width, menu->height, COLOR_BLACK);
+    graphics_fill_rect(offset_x, offset_y, menu->width, menu->height, COLOR_BLACK);
+
+    // header
+    label_draw(offset_x, offset_y - HEADER_HEIGHT, menu->width / 16, 2);
+    lang_text_draw_centered(68, data.selected_submenu + 20, offset_x, offset_y - HEADER_HEIGHT + 4, menu->width, FONT_NORMAL_GREEN);
 
     for (int i = 0, drawn = 0; i < menu->button_count; ++i, ++drawn) {
         build_button *btn = &menu->buttons[i];
@@ -213,6 +221,9 @@ static void draw_build_buttons(void)
 
         int start_x = offset_x + btn->x_offset;
         int start_y = offset_y + btn->y_offset;
+        int type = building_menu_type(btn->parameter1, i);
+
+        // body
         graphics_set_clip_rectangle(start_x, start_y, btn->width, btn->height);
         graphics_fill_rect(start_x, start_y, btn->width, btn->height, COLOR_SIDEBAR);
 
@@ -223,7 +234,6 @@ static void draw_build_buttons(void)
             enabled);
         graphics_draw_inset_rect(start_x, start_y, btn->width, btn->height);
 
-        int type = building_menu_type(btn->parameter1, i);
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             type = BUILDING_RESERVOIR;
         }
@@ -238,12 +248,14 @@ static void draw_build_buttons(void)
             cost = model_get_building(BUILDING_LARGE_TEMPLE_CERES)->cost;
         }
 
-        // draw tooltip?
         if (cost) {
-            //text_draw_money(cost, x_start, y_start + btn->height - 15, FONT_NORMAL_GREEN);
+            label_draw(start_x, start_y + btn->height - 20, btn->width / 16, data.focus_button_id == i + 1 ? 1 : 2);
+            text_draw_money(cost, start_x, start_y + btn->height - 15, FONT_NORMAL_GREEN);
         }
 
-
+        if (data.focus_button_id == i + 1) {
+            data.tooltip_text_id = type;
+        }
     }
     graphics_reset_clip_rectangle();
 }
@@ -304,8 +316,10 @@ static int handle_build_submenu(const mouse *m)
     if (build_buttons_index != -1) {
         offset_x = 0;
         offset_y = 0;
+
         get_menu_offsets(&offset_x, &offset_y, build_buttons_index);
         menu_definition *menu = &menu_definitions[build_buttons_index];
+
         return build_buttons_handle_mouse(
             m, offset_x, offset_y, menu->buttons, menu->button_count, &data.focus_button_id);
     }
@@ -369,6 +383,15 @@ static void button_menu_item(int submenu, int item)
     }
 }
 
+static void get_tooltip(tooltip_context *c)
+{
+    if (data.tooltip_text_id) {
+        c->type = TOOLTIP_BUTTON;
+        c->text_group = 28;
+        c->text_id = data.tooltip_text_id;
+    }
+}
+
 void window_octavius_build_menu_show(int submenu)
 {
     if (init(submenu)) {
@@ -377,7 +400,7 @@ void window_octavius_build_menu_show(int submenu)
             draw_background,
             draw_foreground,
             handle_input,
-            0
+            get_tooltip,
         };
         window_show(&window);
     }
