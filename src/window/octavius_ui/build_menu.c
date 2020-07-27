@@ -19,52 +19,14 @@
 #include "input/input.h"
 #include "scenario/property.h"
 #include "widget/city.h"
+#include "window/octavius_ui/build_menus/menu_definitions.h"
 #include "widget/octavius_ui/city.h"
 #include "window/city.h"
 
 const int HEADER_HEIGHT = 20;
 
-static void build_button_menu_index(int param1, int param2, int param3);
-static void generic_button_menu_index(int param1, int param2);
 static void button_menu_item(int submenu, int item);
-
-typedef struct {
-    int offset_x;
-    int offset_y;
-    int group_index;
-    building_type building_type;
-} submenu_button_details;
-
-typedef struct {
-    int button_count;
-    build_button *buttons;
-    int offset_x;
-    int offset_y;
-    int width;
-    int height;
-    submenu_button_details *button_details;
-} menu_definition;
-
-// param1: submenu
-// param2: item index in submenu
-// param3: calculated actual item index
-static build_button build_menu_water_buttons[] = {
-    { 0,   0, 80, 100, IB_SUBMENU, 0, 0, build_button_menu_index, build_button_none, 3, 1, 1, 1 },
-    { 80,  0, 64, 100, IB_SUBMENU, 0, 0, build_button_menu_index, build_button_none, 3, 2, 1, 1 },
-    { 144, 0, 64, 100, IB_SUBMENU, 0, 0, build_button_menu_index, build_button_none, 3, 3, 1, 1 },
-    { 208, 0, 64, 100, IB_SUBMENU, 0, 0, build_button_menu_index, build_button_none, 3, 4, 1, 1 },
-};
-
-static submenu_button_details build_menu_water_definitions[] = {
-    { -20, 20, GROUP_BUILDING_RESERVOIR,  BUILDING_RESERVOIR },
-    {   3, 40, GROUP_BUILDING_AQUEDUCT,   BUILDING_AQUEDUCT  },
-    {   3, 40, GROUP_BUILDING_FOUNTAIN_1, BUILDING_FOUNTAIN  },
-    {   3, 40, GROUP_BUILDING_WELL,       BUILDING_WELL      },
-};
-
-static menu_definition menu_definitions[] = {
-    { 4, build_menu_water_buttons, 0, 0, 272, 100, build_menu_water_definitions }
-};
+static void generic_button_menu_index(int param1, int param2);
 
 static generic_button build_menu_buttons[] = {
     {0, 0, 256, 20, generic_button_menu_index, button_none, 1, 0},
@@ -164,24 +126,6 @@ static void generic_button_menu_index(int param1, int param2)
     button_menu_item(data.selected_submenu, button_index_to_submenu_item(param1 - 1));
 }
 
-static void build_button_menu_index(int param1, int param2, int param3)
-{
-    if (param3) {
-        button_menu_item(param1, param3 - 1);
-    }
-}
-
-static int get_build_buttons_index(void)
-{
-    switch (data.selected_submenu) {
-        case 0:
-        case 1:
-        case 2:  return -1;
-        case 3:  return  0;
-        default: return -1;
-    }
-}
-
 static void draw_building(int image_id, int x, int y, int enabled)
 {
     int mask = enabled ? 0 : COLOR_RED;
@@ -189,23 +133,21 @@ static void draw_building(int image_id, int x, int y, int enabled)
     image_draw_isometric_top(image_id, x, y, mask);
 }
 
-static void get_menu_offsets(int *x, int *y, int build_buttons_index)
+static void get_menu_offsets(int *x, int *y, menu_definition* menu)
 {
-    menu_definition *menu = &menu_definitions[build_buttons_index];
     *x = (screen_width() / 2) - ((12 * 52) / 2) + (get_parent_submenu() * 52) - (menu->width / 2) + 26 + menu->offset_x;
-    *y = screen_height() - 114 - menu->height + menu->offset_y;
+    *y = screen_height() - 114 - menu->height;
 }
 
 static void draw_build_buttons(void)
 {
-    int build_buttons_index = get_build_buttons_index();
-    menu_definition* menu = &menu_definitions[build_buttons_index];
+    menu_definition *menu = window_octavius_ui_build_menu_definition(data.selected_submenu);
 
     data.tooltip_text_id = 0;
     int offset_x = 0;
     int offset_y = 0;
 
-    get_menu_offsets(&offset_x, &offset_y, build_buttons_index);
+    get_menu_offsets(&offset_x, &offset_y, menu);
     graphics_fill_rect(offset_x, offset_y - HEADER_HEIGHT, menu->width, menu->height + HEADER_HEIGHT, COLOR_BLACK);
 
     // header
@@ -221,7 +163,7 @@ static void draw_build_buttons(void)
 
         int start_x = offset_x + btn->x_offset;
         int start_y = offset_y + btn->y_offset;
-        int type = building_menu_type(btn->parameter1, i);
+        int type = building_menu_type(btn->parameter1, btn->parameter2 - 1);
 
         // body
         graphics_set_clip_rectangle(start_x, start_y, btn->width, btn->height);
@@ -262,7 +204,7 @@ static void draw_build_buttons(void)
 
 static void draw_menu_buttons(void)
 {
-    if (get_build_buttons_index() != -1) {
+    if (window_octavius_ui_build_menu_definition(data.selected_submenu)) {
         draw_build_buttons();
         return;
     }
@@ -312,13 +254,12 @@ static int handle_build_submenu(const mouse *m)
     int offset_x = (screen_width() / 2) - ((12 * 52) / 2) + (get_parent_submenu() * 52) - 102;
     int offset_y = data.offset_y + 110 + (data.num_items - 1) * -24;
 
-    int build_buttons_index = get_build_buttons_index();
-    if (build_buttons_index != -1) {
+    menu_definition *menu = window_octavius_ui_build_menu_definition(data.selected_submenu);
+    if (menu) {
         offset_x = 0;
         offset_y = 0;
 
-        get_menu_offsets(&offset_x, &offset_y, build_buttons_index);
-        menu_definition *menu = &menu_definitions[build_buttons_index];
+        get_menu_offsets(&offset_x, &offset_y, menu);
 
         return build_buttons_handle_mouse(
             m, offset_x, offset_y, menu->buttons, menu->button_count, &data.focus_button_id);
@@ -389,6 +330,13 @@ static void get_tooltip(tooltip_context *c)
         c->type = TOOLTIP_BUTTON;
         c->text_group = 28;
         c->text_id = data.tooltip_text_id;
+    }
+}
+
+void window_octavius_build_button_menu_index(int param1, int param2, int param3)
+{
+    if (param3) {
+        button_menu_item(param1, param3 - 1);
     }
 }
 

@@ -1,8 +1,8 @@
 #ifndef WINDOW_OCTAVIUS_BUILD_MENU_H
 #define WINDOW_OCTAVIUS_BUILD_MENU_H
 
-void window_octavius_build_menu_show(int submenu);
+void window_octavius_build_button_menu_index(int param1, int param2, int param3);
 
-int window_octavius_build_menu_get_tooltip_text(void);
+void window_octavius_build_menu_show(int submenu);
 
 #endif // WINDOW_OCTAVIUS_BUILD_MENU_H
