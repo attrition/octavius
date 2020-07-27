@@ -8,6 +8,10 @@
 #define PRESSED_REPEAT_INITIAL_MILLIS 300
 #define PRESSED_REPEAT_MILLIS 50
 
+void build_button_none(int param1, int param2, int param3)
+{
+}
+
 static void fade_pressed_effect(build_button *buttons, int num_buttons)
 {
     time_millis current_time = time_get_millis();
@@ -102,15 +106,15 @@ int build_buttons_handle_mouse(const mouse *m, int x, int y, build_button *butto
         sound_effect_play(SOUND_EFFECT_ICON);
         hit_button->pressed = 1;
         hit_button->pressed_since = time_get_millis();
-        hit_button->left_click_handler(hit_button->parameter1, hit_button->parameter2);
+        hit_button->left_click_handler(hit_button->parameter1, hit_button->parameter2, hit_button->parameter3);
     } else if (m->right.went_up) {
-        hit_button->right_click_handler(hit_button->parameter1, hit_button->parameter2);
+        hit_button->right_click_handler(hit_button->parameter1, hit_button->parameter2, hit_button->parameter3);
     } else if (hit_button->button_type == IB_SCROLL && m->left.is_down) {
         time_millis delay = hit_button->pressed == 2 ? PRESSED_REPEAT_MILLIS : PRESSED_REPEAT_INITIAL_MILLIS;
         if (time_get_millis() - hit_button->pressed_since >= delay) {
             hit_button->pressed = 2;
             hit_button->pressed_since = time_get_millis();
-            hit_button->left_click_handler(hit_button->parameter1, hit_button->parameter2);
+            hit_button->left_click_handler(hit_button->parameter1, hit_button->parameter2, hit_button->parameter3);
         }
     }
     return 1;

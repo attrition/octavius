@@ -22,7 +22,8 @@
 #include "widget/octavius_ui/city.h"
 #include "window/city.h"
 
-static void button_menu_index(int param1, int param2);
+static void build_button_menu_index(int param1, int param2, int param3);
+static void generic_button_menu_index(int param1, int param2);
 static void button_menu_item(int item);
 
 typedef struct {
@@ -42,18 +43,21 @@ typedef struct {
     submenu_button_details *button_details;
 } menu_definition;
 
+// param1: submenu
+// param2: item index in submenu
+// param3: calculated actual item index
 static build_button build_menu_water_buttons[] = {
-    { 0,   0, 60, 100, IB_NORMAL, 0, 0, button_menu_index, button_none, 1, GROUP_BUILDING_RESERVOIR,  1 },
-    { 60,  0, 60, 100, IB_NORMAL, 0, 0, button_menu_index, button_none, 2, GROUP_BUILDING_AQUEDUCT,   1 },
-    { 120, 0, 60, 100, IB_NORMAL, 0, 0, button_menu_index, button_none, 3, GROUP_BUILDING_FOUNTAIN_1, 1 },
-    { 180, 0, 60, 100, IB_NORMAL, 0, 0, button_menu_index, button_none, 4, GROUP_BUILDING_WELL,       1 },
+    { 0,   0, 60, 100, IB_NORMAL, 0, 0, build_button_menu_index, build_button_none, 3, 1, 1, 1 },
+    { 60,  0, 60, 100, IB_NORMAL, 0, 0, build_button_menu_index, build_button_none, 3, 2, 1, 1 },
+    { 120, 0, 60, 100, IB_NORMAL, 0, 0, build_button_menu_index, build_button_none, 3, 3, 1, 1 },
+    { 180, 0, 60, 100, IB_NORMAL, 0, 0, build_button_menu_index, build_button_none, 3, 4, 1, 1 },
 };
 
 static submenu_button_details build_menu_water_definitions[] = {
     { -40, 30, GROUP_BUILDING_RESERVOIR,  BUILDING_RESERVOIR },
-    {   0, 50, GROUP_BUILDING_AQUEDUCT,   BUILDING_AQUEDUCT },
-    {   0, 50, GROUP_BUILDING_FOUNTAIN_1, BUILDING_FOUNTAIN },
-    {   0, 50, GROUP_BUILDING_WELL,       BUILDING_WELL },
+    {   0, 50, GROUP_BUILDING_AQUEDUCT,   BUILDING_AQUEDUCT  },
+    {   0, 50, GROUP_BUILDING_FOUNTAIN_1, BUILDING_FOUNTAIN  },
+    {   0, 50, GROUP_BUILDING_WELL,       BUILDING_WELL      },
 };
 
 static menu_definition menu_definitions[] = {
@@ -61,36 +65,36 @@ static menu_definition menu_definitions[] = {
 };
 
 static generic_button build_menu_buttons[] = {
-    {0, 0, 256, 20, button_menu_index, button_none, 1, 0},
-    {0, 24, 256, 20, button_menu_index, button_none, 2, 0},
-    {0, 48, 256, 20, button_menu_index, button_none, 3, 0},
-    {0, 72, 256, 20, button_menu_index, button_none, 4, 0},
-    {0, 96, 256, 20, button_menu_index, button_none, 5, 0},
-    {0, 120, 256, 20, button_menu_index, button_none, 6, 0},
-    {0, 144, 256, 20, button_menu_index, button_none, 7, 0},
-    {0, 168, 256, 20, button_menu_index, button_none, 8, 0},
-    {0, 192, 256, 20, button_menu_index, button_none, 9, 0},
-    {0, 216, 256, 20, button_menu_index, button_none, 10, 0},
-    {0, 240, 256, 20, button_menu_index, button_none, 11, 0},
-    {0, 264, 256, 20, button_menu_index, button_none, 12, 0},
-    {0, 288, 256, 20, button_menu_index, button_none, 13, 0},
-    {0, 312, 256, 20, button_menu_index, button_none, 14, 0},
-    {0, 336, 256, 20, button_menu_index, button_none, 15, 0},
-    {0, 360, 256, 20, button_menu_index, button_none, 16, 0},
-    {0, 384, 256, 20, button_menu_index, button_none, 17, 0},
-    {0, 408, 256, 20, button_menu_index, button_none, 18, 0},
-    {0, 432, 256, 20, button_menu_index, button_none, 19, 0},
-    {0, 456, 256, 20, button_menu_index, button_none, 20, 0},
-    {0, 480, 256, 20, button_menu_index, button_none, 21, 0},
-    {0, 504, 256, 20, button_menu_index, button_none, 22, 0},
-    {0, 528, 256, 20, button_menu_index, button_none, 23, 0},
-    {0, 552, 256, 20, button_menu_index, button_none, 24, 0},
-    {0, 576, 256, 20, button_menu_index, button_none, 25, 0},
-    {0, 600, 256, 20, button_menu_index, button_none, 26, 0},
-    {0, 624, 256, 20, button_menu_index, button_none, 27, 0},
-    {0, 648, 256, 20, button_menu_index, button_none, 28, 0},
-    {0, 672, 256, 20, button_menu_index, button_none, 29, 0},
-    {0, 696, 256, 20, button_menu_index, button_none, 30, 0},
+    {0, 0, 256, 20, generic_button_menu_index, button_none, 1, 0},
+    {0, 24, 256, 20, generic_button_menu_index, button_none, 2, 0},
+    {0, 48, 256, 20, generic_button_menu_index, button_none, 3, 0},
+    {0, 72, 256, 20, generic_button_menu_index, button_none, 4, 0},
+    {0, 96, 256, 20, generic_button_menu_index, button_none, 5, 0},
+    {0, 120, 256, 20, generic_button_menu_index, button_none, 6, 0},
+    {0, 144, 256, 20, generic_button_menu_index, button_none, 7, 0},
+    {0, 168, 256, 20, generic_button_menu_index, button_none, 8, 0},
+    {0, 192, 256, 20, generic_button_menu_index, button_none, 9, 0},
+    {0, 216, 256, 20, generic_button_menu_index, button_none, 10, 0},
+    {0, 240, 256, 20, generic_button_menu_index, button_none, 11, 0},
+    {0, 264, 256, 20, generic_button_menu_index, button_none, 12, 0},
+    {0, 288, 256, 20, generic_button_menu_index, button_none, 13, 0},
+    {0, 312, 256, 20, generic_button_menu_index, button_none, 14, 0},
+    {0, 336, 256, 20, generic_button_menu_index, button_none, 15, 0},
+    {0, 360, 256, 20, generic_button_menu_index, button_none, 16, 0},
+    {0, 384, 256, 20, generic_button_menu_index, button_none, 17, 0},
+    {0, 408, 256, 20, generic_button_menu_index, button_none, 18, 0},
+    {0, 432, 256, 20, generic_button_menu_index, button_none, 19, 0},
+    {0, 456, 256, 20, generic_button_menu_index, button_none, 20, 0},
+    {0, 480, 256, 20, generic_button_menu_index, button_none, 21, 0},
+    {0, 504, 256, 20, generic_button_menu_index, button_none, 22, 0},
+    {0, 528, 256, 20, generic_button_menu_index, button_none, 23, 0},
+    {0, 552, 256, 20, generic_button_menu_index, button_none, 24, 0},
+    {0, 576, 256, 20, generic_button_menu_index, button_none, 25, 0},
+    {0, 600, 256, 20, generic_button_menu_index, button_none, 26, 0},
+    {0, 624, 256, 20, generic_button_menu_index, button_none, 27, 0},
+    {0, 648, 256, 20, generic_button_menu_index, button_none, 28, 0},
+    {0, 672, 256, 20, generic_button_menu_index, button_none, 29, 0},
+    {0, 696, 256, 20, generic_button_menu_index, button_none, 30, 0},
 };
 
 static struct {
@@ -143,6 +147,27 @@ static int get_parent_submenu(void)
     return data.selected_submenu;
 }
 
+static int button_index_to_submenu_item(int index)
+{
+    int item = -1;
+    for (int i = 0; i <= index; i++) {
+        item = building_menu_next_index(data.selected_submenu, item);
+    }
+    return item;
+}
+
+static void generic_button_menu_index(int param1, int param2)
+{
+    button_menu_item(data.selected_submenu, button_index_to_submenu_item(param1 - 1));
+}
+
+static void build_button_menu_index(int param1, int param2, int param3)
+{
+    if (param3) {
+        button_menu_item(param1, param3 - 1);
+    }
+}
+
 static int get_build_buttons_index(void)
 {
     switch (data.selected_submenu) {
@@ -183,7 +208,8 @@ static void draw_build_buttons(void)
         build_button *btn = &menu->buttons[i];
         submenu_button_details *details = &menu->button_details[i];
 
-        int enabled = building_menu_check_index_enabled(data.selected_submenu, btn->parameter1 - 1);
+        int enabled = building_menu_check_index_enabled(btn->parameter1, btn->parameter2 - 1);
+        btn->parameter3 = enabled ? btn->parameter2 : 0;
 
         int start_x = offset_x + btn->x_offset;
         int start_y = offset_y + btn->y_offset;
@@ -197,7 +223,7 @@ static void draw_build_buttons(void)
             enabled);
         graphics_draw_inset_rect(start_x, start_y, btn->width, btn->height);
 
-        int type = building_menu_type(data.selected_submenu, i);
+        int type = building_menu_type(btn->parameter1, i);
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
             type = BUILDING_RESERVOIR;
         }
@@ -205,10 +231,10 @@ static void draw_build_buttons(void)
         if (type == BUILDING_FORT) {
             cost = 0;
         }
-        if (type == BUILDING_MENU_SMALL_TEMPLES && data.selected_submenu == BUILD_MENU_SMALL_TEMPLES) {
+        if (type == BUILDING_MENU_SMALL_TEMPLES && btn->parameter1 == BUILD_MENU_SMALL_TEMPLES) {
             cost = model_get_building(BUILDING_SMALL_TEMPLE_CERES)->cost;
         }
-        if (type == BUILDING_MENU_LARGE_TEMPLES && data.selected_submenu == BUILD_MENU_LARGE_TEMPLES) {
+        if (type == BUILDING_MENU_LARGE_TEMPLES && btn->parameter1 == BUILD_MENU_LARGE_TEMPLES) {
             cost = model_get_building(BUILDING_LARGE_TEMPLE_CERES)->cost;
         }
 
@@ -280,9 +306,9 @@ static int handle_build_submenu(const mouse *m)
         offset_x = 0;
         offset_y = 0;
         get_menu_offsets(&offset_x, &offset_y, build_buttons_index);
-
+        menu_definition *menu = &menu_definitions[build_buttons_index];
         return build_buttons_handle_mouse(
-            m, offset_x, offset_y, menu_definitions[build_buttons_index].buttons, data.num_items, &data.focus_button_id);
+            m, offset_x, offset_y, menu->buttons, menu->button_count, &data.focus_button_id);
     }
 
     return generic_buttons_handle_mouse(
@@ -298,20 +324,6 @@ static void handle_input(const mouse *m, const hotkeys *h)
         window_city_show();
         return;
     }
-}
-
-static int button_index_to_submenu_item(int index)
-{
-    int item = -1;
-    for (int i = 0; i <= index; i++) {
-        item = building_menu_next_index(data.selected_submenu, item);
-    }
-    return item;
-}
-
-static void button_menu_index(int param1, int param2)
-{
-    button_menu_item(button_index_to_submenu_item(param1 - 1));
 }
 
 static int set_submenu_for_type(building_type type)
@@ -342,15 +354,15 @@ static int set_submenu_for_type(building_type type)
     return current_menu != data.selected_submenu;
 }
 
-static void button_menu_item(int item)
+static void button_menu_item(int submenu, int item)
 {
     widget_city_clear_current_tile();
 
-    building_type type = building_menu_type(data.selected_submenu, item);
+    building_type type = building_menu_type(submenu, item);
     building_construction_set_type(type);
 
     if (set_submenu_for_type(type)) {
-        data.num_items = building_menu_count_items(data.selected_submenu);
+        data.num_items = building_menu_count_items(submenu);
         data.offset_y = screen_height() - 250;
         building_construction_clear_type();
     } else {

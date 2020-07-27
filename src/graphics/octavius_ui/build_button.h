@@ -20,16 +20,19 @@ typedef struct {
     short button_type;
     short image_collection;
     short image_offset;
-    void (*left_click_handler)(int param1, int param2);
-    void (*right_click_handler)(int param1, int param2);
+    void (*left_click_handler)(int param1, int param2, int param3);
+    void (*right_click_handler)(int param1, int param2, int param3);
     int parameter1;
     int parameter2;
+    int parameter3;
     char enabled;
     // state
     char pressed;
     char focused;
     time_millis pressed_since;
 } build_button;
+
+void build_button_none(int param1, int param2, int param3);
 
 void build_buttons_draw(int x, int y, build_button *buttons, int num_buttons);
 
