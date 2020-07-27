@@ -206,7 +206,7 @@ static void draw_build_buttons(void)
     int offset_y = 0;
 
     get_menu_offsets(&offset_x, &offset_y, build_buttons_index);
-    graphics_fill_rect(offset_x, offset_y, menu->width, menu->height, COLOR_BLACK);
+    graphics_fill_rect(offset_x, offset_y - HEADER_HEIGHT, menu->width, menu->height + HEADER_HEIGHT, COLOR_BLACK);
 
     // header
     label_draw(offset_x, offset_y - HEADER_HEIGHT, menu->width / 16, 2);
