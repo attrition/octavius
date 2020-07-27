@@ -24,7 +24,7 @@
 
 static void build_button_menu_index(int param1, int param2, int param3);
 static void generic_button_menu_index(int param1, int param2);
-static void button_menu_item(int item);
+static void button_menu_item(int submenu, int item);
 
 typedef struct {
     int offset_x;
@@ -113,7 +113,7 @@ static int init(build_menu_group submenu)
     if (submenu == BUILD_MENU_VACANT_HOUSE ||
         submenu == BUILD_MENU_CLEAR_LAND ||
         submenu == BUILD_MENU_ROAD) {
-        button_menu_item(0);
+        button_menu_item(submenu, 0);
         return 0;
     } else {
         return 1;
@@ -261,7 +261,6 @@ static void draw_menu_buttons(void)
 
     for (int i = 0; i < data.num_items; i++) {
         item_index = building_menu_next_index(data.selected_submenu, item_index);
-
         int real_index = data.num_items - i - 1;
 
         label_draw(offset_x - 266, data.offset_y + 110 + y_step * real_index, 16, data.focus_button_id == i + 1 ? 1 : 2);
@@ -362,7 +361,7 @@ static void button_menu_item(int submenu, int item)
     building_construction_set_type(type);
 
     if (set_submenu_for_type(type)) {
-        data.num_items = building_menu_count_items(submenu);
+        data.num_items = building_menu_count_items(data.selected_submenu);
         data.offset_y = screen_height() - 250;
         building_construction_clear_type();
     } else {
