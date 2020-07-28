@@ -18,7 +18,7 @@ static build_button build_menu_water_buttons[] = {
     { 224, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 3, 4, 1, 1 },
 };
 
-static submenu_button_details build_menu_water_definitions[] = {
+static submenu_button_details build_menu_water_details[] = {
     { -12, 35, GROUP_BUILDING_RESERVOIR,  BUILDING_RESERVOIR },
     {   3, 55, GROUP_BUILDING_AQUEDUCT,   BUILDING_AQUEDUCT  },
     {   3, 55, GROUP_BUILDING_FOUNTAIN_1, BUILDING_FOUNTAIN  },
@@ -34,7 +34,7 @@ static build_button build_menu_health_buttons[] = {
     { 208, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 4, 4, 1, 1 },
 };
 
-static submenu_button_details build_menu_health_definitions[] = {
+static submenu_button_details build_menu_health_details[] = {
     {   3, 55, GROUP_BUILDING_BARBER,          BUILDING_BARBER    },
     {   8, 33, GROUP_BUILDING_BATHHOUSE_WATER, BUILDING_BATHHOUSE },
     {   3, 55, GROUP_BUILDING_DOCTOR,          BUILDING_DOCTOR    },
@@ -49,7 +49,7 @@ static build_button build_menu_education_buttons[] = {
     { 160, 0, 96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 6, 2, 1, 1 },
 };
 
-static submenu_button_details build_menu_education_definitions[] = {
+static submenu_button_details build_menu_education_details[] = {
     {  15, 45, GROUP_BUILDING_SCHOOL,  BUILDING_SCHOOL  },
     {  15, 60, GROUP_BUILDING_LIBRARY, BUILDING_LIBRARY },
     {  30, 30, GROUP_BUILDING_ACADEMY, BUILDING_ACADEMY },
@@ -58,30 +58,35 @@ static submenu_button_details build_menu_education_definitions[] = {
 // entertainment buildings
 
 static build_button build_menu_entertainment_buttons[] = {
-    { 0,   160, 80,  160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 1, 1, 1 },
-    { 80,  160, 96,  160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 2, 1, 1 },
-    { 176, 160, 160, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 3, 1, 1 },
+    { 0,     0, 80,  160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 8, 1, 1 },
     { 80,    0, 256, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 4, 1, 1 },
+    { 0,   160, 112, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 7, 1, 1 },
+    { 112, 160, 112, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 5, 1, 1 },
+    { 224, 160, 112, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 6, 1, 1 },
+    { 0,   320, 80,  160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 1, 1, 1 },
+    { 80,  320, 96,  160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 2, 1, 1 },
+    { 176, 320, 160, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 3, 1, 1 },
 };
 
-static submenu_button_details build_menu_entertainment_definitions[] = {
+static submenu_button_details build_menu_entertainment_details[] = {
+    {  15, 45, GROUP_BUILDING_CHARIOT_MAKER,    BUILDING_CHARIOT_MAKER    },
+    {  70, 80, GROUP_BUILDING_HIPPODROME_1,     BUILDING_HIPPODROME       },
+    {  30, 45, GROUP_BUILDING_ACTOR_COLONY,     BUILDING_ACTOR_COLONY     },
+    {  30, 45, GROUP_BUILDING_GLADIATOR_SCHOOL, BUILDING_GLADIATOR_SCHOOL },
+    {  30, 45, GROUP_BUILDING_LION_HOUSE,       BUILDING_LION_HOUSE       },
     {  15, 60, GROUP_BUILDING_THEATER,          BUILDING_THEATER          },
     {  30, 45, GROUP_BUILDING_AMPHITHEATER,     BUILDING_AMPHITHEATER     },
     {  80, 45, GROUP_BUILDING_COLOSSEUM,        BUILDING_COLOSSEUM        },
-    {  70, 80, GROUP_BUILDING_HIPPODROME_1,     BUILDING_HIPPODROME       },
-    //{  15, 60, GROUP_BUILDING_ACTOR_COLONY,     BUILDING_ACTOR_COLONY     },
-    //{  30, 45, GROUP_BUILDING_GLADIATOR_SCHOOL, BUILDING_GLADIATOR_SCHOOL },
-    //{  80, 30, GROUP_BUILDING_LION_HOUSE,       BUILDING_LION_HOUSE       },
 };
 
 // definitions
 
 static menu_definition menu_definitions[] = {
-    { 4, build_menu_water_buttons,         build_menu_water_definitions,         0, 288, 130 },
-    { 4, build_menu_health_buttons,        build_menu_health_definitions,        0, 288, 130 },
-    { 0, 0,                                0,                                    0, 0,   0   },
-    { 3, build_menu_education_buttons,     build_menu_education_definitions,     0, 256, 130 },
-    { 4, build_menu_entertainment_buttons, build_menu_entertainment_definitions, 40, 336, 320 },
+    { 4, build_menu_water_buttons,         build_menu_water_details,         0, 288, 130 },
+    { 4, build_menu_health_buttons,        build_menu_health_details,        0, 288, 130 },
+    { 0, 0,                                0,                                0, 0,   0   },
+    { 3, build_menu_education_buttons,     build_menu_education_details,     0, 256, 130 },
+    { 8, build_menu_entertainment_buttons, build_menu_entertainment_details, 40, 336, 480 },
 };
 
 int get_build_buttons_index(int submenu)
