@@ -50,15 +50,38 @@ static build_button build_menu_education_buttons[] = {
 };
 
 static submenu_button_details build_menu_education_definitions[] = {
-    {   0, 45, GROUP_BUILDING_SCHOOL,  BUILDING_SCHOOL  },
+    {  15, 45, GROUP_BUILDING_SCHOOL,  BUILDING_SCHOOL  },
     {  15, 60, GROUP_BUILDING_LIBRARY, BUILDING_LIBRARY },
     {  30, 30, GROUP_BUILDING_ACADEMY, BUILDING_ACADEMY },
 };
 
+// entertainment buildings
+
+static build_button build_menu_entertainment_buttons[] = {
+    { 0,   160, 80,  160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 1, 1, 1 },
+    { 80,  160, 96,  160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 2, 1, 1 },
+    { 176, 160, 160, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 3, 1, 1 },
+    { 80,    0, 256, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 4, 1, 1 },
+};
+
+static submenu_button_details build_menu_entertainment_definitions[] = {
+    {  15, 60, GROUP_BUILDING_THEATER,          BUILDING_THEATER          },
+    {  30, 45, GROUP_BUILDING_AMPHITHEATER,     BUILDING_AMPHITHEATER     },
+    {  80, 45, GROUP_BUILDING_COLOSSEUM,        BUILDING_COLOSSEUM        },
+    {  70, 80, GROUP_BUILDING_HIPPODROME_1,     BUILDING_HIPPODROME       },
+    //{  15, 60, GROUP_BUILDING_ACTOR_COLONY,     BUILDING_ACTOR_COLONY     },
+    //{  30, 45, GROUP_BUILDING_GLADIATOR_SCHOOL, BUILDING_GLADIATOR_SCHOOL },
+    //{  80, 30, GROUP_BUILDING_LION_HOUSE,       BUILDING_LION_HOUSE       },
+};
+
+// definitions
+
 static menu_definition menu_definitions[] = {
-    { 4, build_menu_water_buttons,     build_menu_water_definitions,     0, 288, 130 },
-    { 4, build_menu_health_buttons,    build_menu_health_definitions,    0, 288, 130 },
-    { 3, build_menu_education_buttons, build_menu_education_definitions, 0, 256, 130 },
+    { 4, build_menu_water_buttons,         build_menu_water_definitions,         0, 288, 130 },
+    { 4, build_menu_health_buttons,        build_menu_health_definitions,        0, 288, 130 },
+    { 0, 0,                                0,                                    0, 0,   0   },
+    { 3, build_menu_education_buttons,     build_menu_education_definitions,     0, 256, 130 },
+    { 4, build_menu_entertainment_buttons, build_menu_entertainment_definitions, 40, 336, 320 },
 };
 
 int get_build_buttons_index(int submenu)
@@ -66,7 +89,8 @@ int get_build_buttons_index(int submenu)
     switch (submenu) {
         case 3:  return  0; // water
         case 4:  return  1; // health
-        case 6:  return  2; // education
+        case 6:  return  3; // education
+        case 7:  return  4; // entertainment
         default: return -1;
     }
 }
