@@ -72,6 +72,7 @@ static struct {
 
 static int init(build_menu_group submenu)
 {
+    window_octavius_ui_build_menu_definition_resize();
     data.selected_submenu = submenu;
     data.num_items = building_menu_count_items(submenu);
     data.offset_y = screen_height() - 250;
@@ -198,8 +199,8 @@ static void draw_build_buttons(void)
             cost = model_get_building(BUILDING_LARGE_TEMPLE_CERES)->cost;
         }
 
+        label_draw(start_x, start_y + btn->height - 20, btn->width / 16, data.focus_button_id == i + 1 ? 1 : 2);
         if (cost) {
-            label_draw(start_x, start_y + btn->height - 20, btn->width / 16, data.focus_button_id == i + 1 ? 1 : 2);
             text_draw_money(cost, start_x, start_y + btn->height - 15, FONT_NORMAL_GREEN);
         }
 

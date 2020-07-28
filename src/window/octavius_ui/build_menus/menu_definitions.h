@@ -24,4 +24,6 @@ typedef struct {
 
 menu_definition *window_octavius_ui_build_menu_definition(int index);
 
+void window_octavius_ui_build_menu_definition_resize(void);
+
 #endif // WINDOW_OCTAVIUS_BUILD_MENU_MENU_DEFINITIONS_H

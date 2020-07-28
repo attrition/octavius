@@ -12,10 +12,10 @@
 // water related buildings
 
 static build_button build_menu_water_buttons[] = {
-    {   0, 0, 96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 3, 1, 1, 1 },
-    {  96, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 3, 2, 1, 1 },
-    { 160, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 3, 3, 1, 1 },
-    { 224, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 3, 4, 1, 1 },
+    {   0, 0, 96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_WATER, 1, 1, 1 },
+    {  96, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_WATER, 2, 1, 1 },
+    { 160, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_WATER, 3, 1, 1 },
+    { 224, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_WATER, 4, 1, 1 },
 };
 
 static submenu_button_details build_menu_water_details[] = {
@@ -28,10 +28,10 @@ static submenu_button_details build_menu_water_details[] = {
 // health related buildings
 
 static build_button build_menu_health_buttons[] = {
-    {   0, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 4, 1, 1, 1 },
-    {  64, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 4, 2, 1, 1 },
-    { 144, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 4, 3, 1, 1 },
-    { 208, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 4, 4, 1, 1 },
+    {   0, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_HEALTH, 1, 1, 1 },
+    {  64, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_HEALTH, 2, 1, 1 },
+    { 144, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_HEALTH, 3, 1, 1 },
+    { 208, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_HEALTH, 4, 1, 1 },
 };
 
 static submenu_button_details build_menu_health_details[] = {
@@ -44,9 +44,9 @@ static submenu_button_details build_menu_health_details[] = {
 // education buildings
 
 static build_button build_menu_education_buttons[] = {
-    {   0, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 6, 1, 1, 1 },
-    {  80, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 6, 3, 1, 1 },
-    { 160, 0, 96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 6, 2, 1, 1 },
+    {   0, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_EDUCATION, 1, 1, 1 },
+    {  80, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_EDUCATION, 3, 1, 1 },
+    { 160, 0, 96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_EDUCATION, 2, 1, 1 },
 };
 
 static submenu_button_details build_menu_education_details[] = {
@@ -58,14 +58,14 @@ static submenu_button_details build_menu_education_details[] = {
 // entertainment buildings
 
 static build_button build_menu_entertainment_buttons[] = {
-    {   0,   0,  80, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 8, 1, 1 },
-    {  80,   0, 256, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 4, 1, 1 },
-    {   0, 160, 112, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 7, 1, 1 },
-    { 112, 160, 112, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 5, 1, 1 },
-    { 224, 160, 112, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 6, 1, 1 },
-    {   0, 320,  80, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 1, 1, 1 },
-    {  80, 320,  96, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 2, 1, 1 },
-    { 176, 320, 160, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 7, 3, 1, 1 },
+    {   0,   0,  80, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 8, 1, 1 },
+    {  80,   0, 256, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 4, 1, 1 },
+    {   0, 160, 112, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 7, 1, 1 },
+    { 112, 160, 112, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 5, 1, 1 },
+    { 224, 160, 112, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 6, 1, 1 },
+    {   0, 320,  80, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 1, 1, 1 },
+    {  80, 320,  96, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 2, 1, 1 },
+    { 176, 320, 160, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 3, 1, 1 },
 };
 
 static submenu_button_details build_menu_entertainment_details[] = {
@@ -82,49 +82,51 @@ static submenu_button_details build_menu_entertainment_details[] = {
 // government buildings
 
 static build_button build_menu_government_buttons[] = {
-    {   0,   0, 128, 260, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 8, 2, 1, 1 },
-    { 128, 130,  96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 8, 1, 1, 1 },
-    { 224, 130,  80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 8, 6, 1, 1 },
-    { 304, 130,  80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 8, 7, 1, 1 },
-    { 384, 130,  96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 8, 8, 1, 1 },
-    { 128,   0, 176, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 8, 3, 1, 1 },
-    { 304,   0, 176, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 8, 4, 1, 1 },
-    { 480,   0, 128, 260, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 8, 5, 1, 1 },
+    {   0,   0, 128, 260, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 2, 1, 1 },
+    { 128, 130,  96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 1, 1, 1 },
+    { 224, 130,  96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 6, 1, 1 },
+    { 320, 130,  96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 7, 1, 1 },
+    { 416, 130,  96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 8, 1, 1 },
+    { 128,   0, 128, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 3, 1, 1 },
+    { 256,   0, 128, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 4, 1, 1 },
+    { 384,   0, 128, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 5, 1, 1 },
+    { 512,   0, 128, 260, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 9, 1, 1 },
 };
 
 static submenu_button_details build_menu_government_details[] = {
-    {  15, 55, GROUP_BUILDING_SENATE_FANCY,     0, BUILDING_SENATE           },
-    {  15, 55, GROUP_BUILDING_FORUM,            0, BUILDING_FORUM            },
-    {  10, 55, GROUP_BUILDING_STATUE,           0, BUILDING_SMALL_STATUE     },
-    {  15, 30, GROUP_BUILDING_STATUE,           1, BUILDING_MEDIUM_STATUE    },
-    {  15, 15, GROUP_BUILDING_STATUE,           2, BUILDING_LARGE_STATUE     },
-    {  60, 30, GROUP_BUILDING_GOVERNORS_HOUSE,  0, BUILDING_GOVERNORS_HOUSE  },
-    {  30, 15, GROUP_BUILDING_GOVERNORS_VILLA,  0, BUILDING_GOVERNORS_VILLA  },
-    {  45, 55, GROUP_BUILDING_GOVERNORS_PALACE, 0, BUILDING_GOVERNORS_PALACE },
+    {  15,  55, GROUP_BUILDING_SENATE,           0, BUILDING_SENATE           },
+    {  20,  55, GROUP_BUILDING_FORUM,            0, BUILDING_FORUM            },
+    {  20,  55, GROUP_BUILDING_STATUE,           0, BUILDING_SMALL_STATUE     },
+    {  20,  30, GROUP_BUILDING_STATUE,           1, BUILDING_MEDIUM_STATUE    },
+    {  20,  15, GROUP_BUILDING_STATUE,           2, BUILDING_LARGE_STATUE     },
+    {  30,  30, GROUP_BUILDING_GOVERNORS_HOUSE,  0, BUILDING_GOVERNORS_HOUSE  },
+    {   0,  15, GROUP_BUILDING_GOVERNORS_VILLA,  0, BUILDING_GOVERNORS_VILLA  },
+    {  45,  15, GROUP_BUILDING_GOVERNORS_PALACE, 0, BUILDING_GOVERNORS_PALACE },
+    {  45, 110, GROUP_BUILDING_TRIUMPHAL_ARCH,   0, BUILDING_TRIUMPHAL_ARCH   },
 };
 
 // engineering buildings
 
 static build_button build_menu_engineering_buttons[] = {
-    {   0,   0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 4, 1, 1 },
-    {  64,   0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 5, 1, 1 },
-    { 128,   0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 6, 1, 1 },
-    { 208,   0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 7, 1, 1 },
-    {   0, 130, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 1, 1, 1 },
-    {  64, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 3, 1, 1 },
-    { 144, 130, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 2, 1, 1 },
-    { 208, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 8, 1, 1 },
+    {   0,   0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 4, 1, 1 },
+    {  80,   0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 5, 1, 1 },
+    { 160,   0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 6, 1, 1 },
+    { 240,   0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 8, 1, 1 },
+    {   0, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 1, 1, 1 },
+    {  80, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 3, 1, 1 },
+    { 160, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 2, 1, 1 },
+    { 240, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 7, 1, 1 },
 };
 
 static submenu_button_details build_menu_engineering_details[] = {
-    {   3, 40, GROUP_BUILDING_BRIDGE,         1, BUILDING_LOW_BRIDGE,    1 },
-    {   3, 40, GROUP_BUILDING_BRIDGE,         7, BUILDING_SHIP_BRIDGE,   1 },
+    {  11, 40, GROUP_BUILDING_BRIDGE,         1, BUILDING_LOW_BRIDGE,    1 },
+    {  11, 40, GROUP_BUILDING_BRIDGE,         7, BUILDING_SHIP_BRIDGE,   1 },
     {  11, 35, GROUP_BUILDING_SHIPYARD,       1, BUILDING_SHIPYARD         },
-    {  11, 35, GROUP_BUILDING_DOCK_2,         0, BUILDING_DOCK             },
-    {   3, 55, GROUP_TERRAIN_GARDEN,          0, BUILDING_GARDENS          },
-    {  11, 55, GROUP_BUILDING_ENGINEERS_POST, 0, BUILDING_ENGINEERS_POST   },
-    {   3, 55, GROUP_TERRAIN_PLAZA,           0, BUILDING_PLAZA            },
     {  11, 35, GROUP_BUILDING_WHARF,          1, BUILDING_WHARF            },
+    {  11, 55, GROUP_TERRAIN_GARDEN,          0, BUILDING_GARDENS          },
+    {  11, 55, GROUP_BUILDING_ENGINEERS_POST, 0, BUILDING_ENGINEERS_POST   },
+    {  11, 55, GROUP_TERRAIN_PLAZA,           0, BUILDING_PLAZA            },
+    {  11, 35, GROUP_BUILDING_DOCK_2,         0, BUILDING_DOCK             },
 };
 
 // definitions
@@ -135,8 +137,8 @@ static menu_definition menu_definitions[] = {
     { 0, 0, /* religion */                 0,                                 0, 0,   0   },
     { 3, build_menu_education_buttons,     build_menu_education_details,      0, 256, 130 },
     { 8, build_menu_entertainment_buttons, build_menu_entertainment_details, 39, 336, 480 },
-    { 8, build_menu_government_buttons,    build_menu_government_details,    39, 608, 260 },
-    { 8, build_menu_engineering_buttons,   build_menu_engineering_details,   39, 288, 260 },
+    { 9, build_menu_government_buttons,    build_menu_government_details,    39, 640, 260 },
+    { 8, build_menu_engineering_buttons,   build_menu_engineering_details,   39, 320, 260 },
 };
 
 int get_build_buttons_index(int submenu)
@@ -159,5 +161,10 @@ menu_definition *window_octavius_ui_build_menu_definition(int submenu)
         return &menu_definitions[index];
     }
     return 0;
+}
+
+void window_octavius_ui_build_menu_definition_resize(void)
+{
+    // calculate bounds of each menu and set width/height
 }
 
