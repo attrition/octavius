@@ -103,15 +103,40 @@ static submenu_button_details build_menu_government_details[] = {
     {  45, 55, GROUP_BUILDING_GOVERNORS_PALACE, 0, BUILDING_GOVERNORS_PALACE },
 };
 
+// engineering buildings
+
+static build_button build_menu_engineering_buttons[] = {
+    {   0,   0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 4, 1, 1 },
+    {  64,   0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 5, 1, 1 },
+    { 128,   0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 6, 1, 1 },
+    { 208,   0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 7, 1, 1 },
+    {   0, 130, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 1, 1, 1 },
+    {  64, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 3, 1, 1 },
+    { 144, 130, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 2, 1, 1 },
+    { 208, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, 9, 8, 1, 1 },
+};
+
+static submenu_button_details build_menu_engineering_details[] = {
+    {   3, 40, GROUP_BUILDING_BRIDGE,         1, BUILDING_LOW_BRIDGE,    1 },
+    {   3, 40, GROUP_BUILDING_BRIDGE,         7, BUILDING_SHIP_BRIDGE,   1 },
+    {  11, 35, GROUP_BUILDING_SHIPYARD,       1, BUILDING_SHIPYARD         },
+    {  11, 35, GROUP_BUILDING_DOCK_2,         0, BUILDING_DOCK             },
+    {   3, 55, GROUP_TERRAIN_GARDEN,          0, BUILDING_GARDENS          },
+    {  11, 55, GROUP_BUILDING_ENGINEERS_POST, 0, BUILDING_ENGINEERS_POST   },
+    {   3, 55, GROUP_TERRAIN_PLAZA,           0, BUILDING_PLAZA            },
+    {  11, 35, GROUP_BUILDING_WHARF,          1, BUILDING_WHARF            },
+};
+
 // definitions
 
 static menu_definition menu_definitions[] = {
     { 4, build_menu_water_buttons,         build_menu_water_details,          0, 288, 130 },
     { 4, build_menu_health_buttons,        build_menu_health_details,         0, 288, 130 },
-    { 0, 0,                                0,                                 0, 0,   0   },
+    { 0, 0, /* religion */                 0,                                 0, 0,   0   },
     { 3, build_menu_education_buttons,     build_menu_education_details,      0, 256, 130 },
     { 8, build_menu_entertainment_buttons, build_menu_entertainment_details, 39, 336, 480 },
     { 8, build_menu_government_buttons,    build_menu_government_details,    39, 608, 260 },
+    { 8, build_menu_engineering_buttons,   build_menu_engineering_details,   39, 288, 260 },
 };
 
 int get_build_buttons_index(int submenu)
@@ -122,6 +147,7 @@ int get_build_buttons_index(int submenu)
         case 6:  return  3; // education
         case 7:  return  4; // entertainment
         case 8:  return  5; // government
+        case 9:  return  6; // engineering
         default: return -1;
     }
 }

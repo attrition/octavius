@@ -10,6 +10,7 @@ typedef struct {
     int group_index;
     int image_offset;
     building_type building_type;
+    int use_image_draw;
 } submenu_button_details;
 
 typedef struct {

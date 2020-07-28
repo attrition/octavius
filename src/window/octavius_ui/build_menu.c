@@ -169,11 +169,19 @@ static void draw_build_buttons(void)
         graphics_set_clip_rectangle(start_x, start_y, btn->width, btn->height);
         graphics_fill_rect(start_x, start_y, btn->width, btn->height, COLOR_SIDEBAR);
 
-        draw_building(
-            image_group(details->group_index) + details->image_offset,
-            start_x + details->offset_x,
-            start_y + details->offset_y,
-            enabled);
+        if (details->use_image_draw) {
+            image_draw_masked(
+                image_group(details->group_index) + details->image_offset,
+                start_x + details->offset_x,
+                start_y + details->offset_y,
+                enabled ? COLOR_MASK_NONE : COLOR_MASK_RED);
+        } else {
+            draw_building(
+                image_group(details->group_index) + details->image_offset,
+                start_x + details->offset_x,
+                start_y + details->offset_y,
+                enabled);
+        }
         graphics_draw_inset_rect(start_x, start_y, btn->width, btn->height);
 
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
