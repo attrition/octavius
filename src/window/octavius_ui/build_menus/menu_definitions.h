@@ -8,6 +8,7 @@ typedef struct {
     int offset_x;
     int offset_y;
     int group_index;
+    int image_offset;
     building_type building_type;
 } submenu_button_details;
 
