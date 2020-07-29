@@ -23,10 +23,11 @@ static build_button build_menu_water_buttons[] = {
 };
 
 static submenu_button_details build_menu_water_details[] = {
-    { -12, 35, GROUP_BUILDING_RESERVOIR,  0, BUILDING_RESERVOIR },
-    {   3, 55, GROUP_BUILDING_AQUEDUCT,   0, BUILDING_AQUEDUCT  },
-    {   3, 55, GROUP_BUILDING_FOUNTAIN_1, 0, BUILDING_FOUNTAIN  },
-    {   3, 55, GROUP_BUILDING_WELL,       0, BUILDING_WELL      },
+    { -12, 35, GROUP_BUILDING_RESERVOIR,  0, BUILDING_DRAGGABLE_RESERVOIR    },
+    { -25, 17, GROUP_BUILDING_RESERVOIR,  1, BUILDING_DRAGGABLE_RESERVOIR, 1 },
+    {   3, 55, GROUP_BUILDING_AQUEDUCT,   0, BUILDING_AQUEDUCT               },
+    {   3, 55, GROUP_BUILDING_FOUNTAIN_1, 0, BUILDING_FOUNTAIN               },
+    {   3, 55, GROUP_BUILDING_WELL,       0, BUILDING_WELL                   },
     0
 };
 
@@ -106,15 +107,16 @@ static build_button build_menu_government_buttons[] = {
 };
 
 static submenu_button_details build_menu_government_details[] = {
-    {  15,  55, GROUP_BUILDING_SENATE,           0, BUILDING_SENATE           },
-    {  20,  55, GROUP_BUILDING_FORUM,            0, BUILDING_FORUM            },
-    {  20,  55, GROUP_BUILDING_STATUE,           0, BUILDING_SMALL_STATUE     },
-    {  20,  30, GROUP_BUILDING_STATUE,           1, BUILDING_MEDIUM_STATUE    },
-    {  20,  15, GROUP_BUILDING_STATUE,           2, BUILDING_LARGE_STATUE     },
-    {  30,  30, GROUP_BUILDING_GOVERNORS_HOUSE,  0, BUILDING_GOVERNORS_HOUSE  },
-    {   0,  15, GROUP_BUILDING_GOVERNORS_VILLA,  0, BUILDING_GOVERNORS_VILLA  },
-    {  45,  15, GROUP_BUILDING_GOVERNORS_PALACE, 0, BUILDING_GOVERNORS_PALACE },
-    {  45, 110, GROUP_BUILDING_TRIUMPHAL_ARCH,   0, BUILDING_TRIUMPHAL_ARCH   },
+    {  15,  55, GROUP_BUILDING_SENATE,           0, BUILDING_SENATE_UPGRADED    },
+    {  20,  55, GROUP_BUILDING_FORUM,            0, BUILDING_FORUM              },
+    {  20,  55, GROUP_BUILDING_STATUE,           0, BUILDING_SMALL_STATUE       },
+    {  20,  30, GROUP_BUILDING_STATUE,           1, BUILDING_MEDIUM_STATUE      },
+    {  20,  15, GROUP_BUILDING_STATUE,           2, BUILDING_LARGE_STATUE       },
+    {  30,  30, GROUP_BUILDING_GOVERNORS_HOUSE,  0, BUILDING_GOVERNORS_HOUSE    },
+    {   0,  15, GROUP_BUILDING_GOVERNORS_VILLA,  0, BUILDING_GOVERNORS_VILLA    },
+    {  45,  15, GROUP_BUILDING_GOVERNORS_PALACE, 0, BUILDING_GOVERNORS_PALACE   },
+    {  45, 110, GROUP_BUILDING_TRIUMPHAL_ARCH,   0, BUILDING_TRIUMPHAL_ARCH     },
+    {  47, 58, GROUP_BUILDING_TRIUMPHAL_ARCH,   1, BUILDING_TRIUMPHAL_ARCH,  1 },
     0
 };
 
@@ -199,10 +201,29 @@ void window_octavius_ui_build_menu_definition_init(void)
             height = MAX(btn->y_offset + btn->height, height);
             ++count;
         }
+
         menu->button_count = count;
         menu->width = width;
         menu->height = height;
+
+        count = 0;
+        while (menu->button_details[count].building_type > 0) {
+            ++count;
+        }
+        menu->detail_count = count;
+
         ++menu_idx;
     }
+}
+
+build_button *window_octavius_ui_build_menu_get_button_for(menu_definition *menu, building_type type)
+{
+    for (int i = 0; i < menu->button_count; ++i) {
+        build_button *btn = &menu->buttons[i];
+        if (type == building_menu_type(btn->parameter1, btn->parameter2 - 1)) {
+            return btn;
+        }
+    }
+    return 0;
 }
 

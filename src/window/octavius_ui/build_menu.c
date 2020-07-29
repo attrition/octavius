@@ -157,7 +157,6 @@ static void draw_build_buttons(void)
 
     for (int i = 0; i < menu->button_count; ++i) {
         build_button *btn = &menu->buttons[i];
-        submenu_button_details *details = &menu->button_details[i];
 
         int enabled = building_menu_check_index_enabled(btn->parameter1, btn->parameter2 - 1);
         btn->parameter3 = enabled ? btn->parameter2 : 0;
@@ -170,19 +169,25 @@ static void draw_build_buttons(void)
         graphics_set_clip_rectangle(start_x, start_y, btn->width, btn->height);
         graphics_fill_rect(start_x, start_y, btn->width, btn->height, COLOR_SIDEBAR);
 
-        if (details->use_image_draw) {
-            image_draw_masked(
-                image_group(details->group_index) + details->image_offset,
-                start_x + details->offset_x,
-                start_y + details->offset_y,
-                enabled ? COLOR_MASK_NONE : COLOR_MASK_RED);
-        } else {
-            draw_building(
-                image_group(details->group_index) + details->image_offset,
-                start_x + details->offset_x,
-                start_y + details->offset_y,
-                enabled);
+        for (int detail = 0; detail < menu->detail_count; ++detail) {
+            submenu_button_details *details = &menu->button_details[detail];
+            if (details->building_type != type) { continue; }
+
+            if (details->use_image_draw) {
+                image_draw_masked(
+                    image_group(details->group_index) + details->image_offset,
+                    start_x + details->offset_x,
+                    start_y + details->offset_y,
+                    enabled ? COLOR_MASK_NONE : COLOR_MASK_RED);
+            } else {
+                draw_building(
+                    image_group(details->group_index) + details->image_offset,
+                    start_x + details->offset_x,
+                    start_y + details->offset_y,
+                    enabled);
+            }
         }
+
         graphics_draw_inset_rect(start_x, start_y, btn->width, btn->height);
 
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
