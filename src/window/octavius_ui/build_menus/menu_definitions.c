@@ -135,8 +135,12 @@ static build_button build_menu_engineering_buttons[] = {
 };
 
 static submenu_button_details build_menu_engineering_details[] = {
-    {  11, 40, GROUP_BUILDING_BRIDGE,         1, BUILDING_LOW_BRIDGE,    1 },
-    {  11, 40, GROUP_BUILDING_BRIDGE,         7, BUILDING_SHIP_BRIDGE,   1 },
+    {  45, 30, GROUP_BUILDING_BRIDGE,         3, BUILDING_LOW_BRIDGE,    1 },
+    {  15, 30, GROUP_BUILDING_BRIDGE,         4, BUILDING_LOW_BRIDGE,    1 },
+    { -15, 45, GROUP_BUILDING_BRIDGE,         5, BUILDING_LOW_BRIDGE,    1 },
+    {  45, 15, GROUP_BUILDING_BRIDGE,         9, BUILDING_SHIP_BRIDGE,   1 },
+    {  15, 20, GROUP_BUILDING_BRIDGE,        10, BUILDING_SHIP_BRIDGE,   1 },
+    { -45, 35, GROUP_BUILDING_BRIDGE,        11, BUILDING_SHIP_BRIDGE,   1 },
     {  11, 35, GROUP_BUILDING_SHIPYARD,       1, BUILDING_SHIPYARD         },
     {  11, 35, GROUP_BUILDING_WHARF,          1, BUILDING_WHARF            },
     {  11, 55, GROUP_TERRAIN_GARDEN,          0, BUILDING_GARDENS          },
