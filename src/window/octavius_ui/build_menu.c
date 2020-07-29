@@ -155,7 +155,7 @@ static void draw_build_buttons(void)
     label_draw(offset_x, offset_y - HEADER_HEIGHT, menu->width / 16, 2);
     lang_text_draw_centered(68, data.selected_submenu + 20, offset_x, offset_y - HEADER_HEIGHT + 4, menu->width, FONT_NORMAL_GREEN);
 
-    for (int i = 0, drawn = 0; i < menu->button_count; ++i, ++drawn) {
+    for (int i = 0; i < menu->button_count; ++i) {
         build_button *btn = &menu->buttons[i];
         submenu_button_details *details = &menu->button_details[i];
 
