@@ -103,6 +103,17 @@ static int items_in_first_list(void)
 static void draw_item(int item_id, int x, int y, int selected)
 {
     color_t color = selected ? COLOR_FONT_BLUE : COLOR_BLACK;
+
+    // in group 33 (new map sizes), 6 is "Cancel" and 7 is out of range.
+    // we manually draw "320x320" in the Cancel position and then offset the 
+    // next id by -1 to get the Cancel text back
+    if (data.group == 33 && item_id == 6) {
+        text_draw_centered("320x320", data.x + x, data.y + y, 190, FONT_NORMAL_PLAIN, color);
+        return;
+    } else if (data.group == 33 && item_id == 7) {
+        item_id = 6;
+    }
+
     if (data.mode == MODE_GROUP) {
         lang_text_draw_centered_colored(data.group, item_id, data.x + x, data.y + y, 190, FONT_NORMAL_PLAIN, color);
     } else {

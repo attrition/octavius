@@ -11,7 +11,7 @@
 #define MAX_QUEUE GRID_SIZE * GRID_SIZE
 #define GUARD 50000
 
-static const int ROUTE_OFFSETS[] = {-162, 1, 162, -1, -161, 163, 161, -163};
+static const int ROUTE_OFFSETS[] = {-322, 1, 322, -1, -321, 323, 321, -323};
 
 static grid_i16 routing_distance;
 

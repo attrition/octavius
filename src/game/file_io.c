@@ -203,13 +203,14 @@ static void init_scenario_data(void)
         }
         return;
     }
+
     scenario_state *state = &scenario_data.state;
-    state->graphic_ids = create_scenario_piece(52488);
-    state->edge = create_scenario_piece(26244);
-    state->terrain = create_scenario_piece(52488);
-    state->bitfields = create_scenario_piece(26244);
-    state->random = create_scenario_piece(26244);
-    state->elevation = create_scenario_piece(26244);
+    state->graphic_ids = create_scenario_piece(207368);
+    state->edge = create_scenario_piece(103684);
+    state->terrain = create_scenario_piece(207368);
+    state->bitfields = create_scenario_piece(103684);
+    state->random = create_scenario_piece(103684);
+    state->elevation = create_scenario_piece(103684);
     state->random_iv = create_scenario_piece(8);
     state->camera = create_scenario_piece(8);
     state->scenario = create_scenario_piece(1720);
@@ -228,25 +229,28 @@ static void init_savegame_data(void)
         //return;
         savegame_data.num_pieces = 0;
     }
+    const int GRID_ONEX = 322 * 322;
+    const int GRID_TWOX = GRID_ONEX * 2;
+
     savegame_state *state = &savegame_data.state;
     state->scenario_campaign_mission = create_savegame_piece(4, 0);
     state->file_version = create_savegame_piece(4, 0);
-    state->image_grid = create_savegame_piece(52488, 1);
-    state->edge_grid = create_savegame_piece(26244, 1);
-    state->building_grid = create_savegame_piece(52488, 1);
-    state->terrain_grid = create_savegame_piece(52488, 1);
-    state->aqueduct_grid = create_savegame_piece(26244, 1);
-    state->figure_grid = create_savegame_piece(52488, 1);
-    state->bitfields_grid = create_savegame_piece(26244, 1);
-    state->sprite_grid = create_savegame_piece(26244, 1);
-    state->random_grid = create_savegame_piece(26244, 0);
-    state->desirability_grid = create_savegame_piece(26244, 1);
-    state->elevation_grid = create_savegame_piece(26244, 1);
-    state->building_damage_grid = create_savegame_piece(26244, 1);
-    state->aqueduct_backup_grid = create_savegame_piece(26244, 1);
-    state->sprite_backup_grid = create_savegame_piece(26244, 1);
-    state->figures = create_savegame_piece(128000, 1);
-    state->route_figures = create_savegame_piece(1200, 1);
+    state->image_grid = create_savegame_piece(GRID_TWOX, 1);
+    state->edge_grid = create_savegame_piece(GRID_ONEX, 1);
+    state->building_grid = create_savegame_piece(GRID_TWOX, 1);
+    state->terrain_grid = create_savegame_piece(GRID_TWOX, 1);
+    state->aqueduct_grid = create_savegame_piece(GRID_TWOX, 1);
+    state->figure_grid = create_savegame_piece(GRID_TWOX, 1);
+    state->bitfields_grid = create_savegame_piece(GRID_ONEX, 1);
+    state->sprite_grid = create_savegame_piece(GRID_ONEX, 1);
+    state->random_grid = create_savegame_piece(GRID_ONEX, 0);
+    state->desirability_grid = create_savegame_piece(GRID_ONEX, 1);
+    state->elevation_grid = create_savegame_piece(GRID_ONEX, 1);
+    state->building_damage_grid = create_savegame_piece(GRID_ONEX, 1);
+    state->aqueduct_backup_grid = create_savegame_piece(GRID_ONEX, 1);
+    state->sprite_backup_grid = create_savegame_piece(GRID_ONEX, 1);
+    state->figures = create_savegame_piece(512000, 1);
+    state->route_figures = create_savegame_piece(4800, 1);
     state->route_paths = create_savegame_piece(300000, 1);
     state->formations = create_savegame_piece(6400, 1);
     state->formation_totals = create_savegame_piece(12, 0);
