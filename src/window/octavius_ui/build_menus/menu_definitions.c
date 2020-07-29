@@ -116,7 +116,7 @@ static submenu_button_details build_menu_government_details[] = {
     {   0,  15, GROUP_BUILDING_GOVERNORS_VILLA,  0, BUILDING_GOVERNORS_VILLA    },
     {  45,  15, GROUP_BUILDING_GOVERNORS_PALACE, 0, BUILDING_GOVERNORS_PALACE   },
     {  45, 110, GROUP_BUILDING_TRIUMPHAL_ARCH,   0, BUILDING_TRIUMPHAL_ARCH     },
-    {  47, 58, GROUP_BUILDING_TRIUMPHAL_ARCH,   1, BUILDING_TRIUMPHAL_ARCH,  1 },
+    {  48,  58, GROUP_BUILDING_TRIUMPHAL_ARCH,   1, BUILDING_TRIUMPHAL_ARCH,  1 },
     0
 };
 
@@ -215,15 +215,3 @@ void window_octavius_ui_build_menu_definition_init(void)
         ++menu_idx;
     }
 }
-
-build_button *window_octavius_ui_build_menu_get_button_for(menu_definition *menu, building_type type)
-{
-    for (int i = 0; i < menu->button_count; ++i) {
-        build_button *btn = &menu->buttons[i];
-        if (type == building_menu_type(btn->parameter1, btn->parameter2 - 1)) {
-            return btn;
-        }
-    }
-    return 0;
-}
-
