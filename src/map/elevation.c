@@ -47,12 +47,12 @@ void map_elevation_remove_cliffs(void)
     }
 }
 
-void map_elevation_save_state(buffer *buf)
+void map_elevation_save_state(buffer *buf, int force16bit)
 {
     map_grid_save_state_u8(elevation.items, buf);
 }
 
-void map_elevation_load_state(buffer *buf)
+void map_elevation_load_state(buffer *buf, int force16bit)
 {
     map_grid_load_state_u8(elevation.items, buf);
 }

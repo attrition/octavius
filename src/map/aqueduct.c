@@ -53,13 +53,13 @@ void map_aqueduct_restore(void)
     map_grid_copy_u8(aqueduct_backup.items, aqueduct.items);
 }
 
-void map_aqueduct_save_state(buffer *buf, buffer *backup)
+void map_aqueduct_save_state(buffer *buf, buffer *backup, int force16bit)
 {
     map_grid_save_state_u8(aqueduct.items, buf);
     map_grid_save_state_u8(aqueduct_backup.items, backup);
 }
 
-void map_aqueduct_load_state(buffer *buf, buffer *backup)
+void map_aqueduct_load_state(buffer *buf, buffer *backup, int force16bit)
 {
     map_grid_load_state_u8(aqueduct.items, buf);
     map_grid_load_state_u8(aqueduct_backup.items, backup);

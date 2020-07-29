@@ -224,8 +224,13 @@ void map_property_save_state(buffer *bitfields, buffer *edge)
     map_grid_save_state_u8(edge_grid.items, edge);
 }
 
-void map_property_load_state(buffer *bitfields, buffer *edge)
+void map_property_load_state(buffer *bitfields, buffer *edge, int force16bit)
 {
-    map_grid_load_state_u8(bitfields_grid.items, bitfields);
-    map_grid_load_state_u8(edge_grid.items, edge);
+    if (force16bit) {
+        map_grid_load_state_u16(bitfields_grid.items, bitfields);
+        map_grid_load_state_u16(edge_grid.items, edge);
+    } else {
+        map_grid_load_state_u8(bitfields_grid.items, bitfields);
+        map_grid_load_state_u8(edge_grid.items, edge);
+    }
 }

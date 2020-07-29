@@ -2,10 +2,11 @@
 #define CITY_VIEW_H
 
 #include "core/buffer.h"
+#include "map/grid.h"
 
 // TODO get rid of these
-#define VIEW_X_MAX 325
-#define VIEW_Y_MAX 645
+#define VIEW_X_MAX (GRID_SIZE + 3)
+#define VIEW_Y_MAX (GRID_SIZE * 2) + 3
 
 typedef struct {
     int x;

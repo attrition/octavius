@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 enum {
-    GRID_SIZE = 322
+    GRID_SIZE = 172
 };
 
 typedef struct {

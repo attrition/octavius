@@ -18,7 +18,7 @@ static const struct {
     {100, 100},
     {120, 120},
     {160, 160},
-    {320, 320}
+    {170, 170}
 };
 
 static void init_point(map_point *point)

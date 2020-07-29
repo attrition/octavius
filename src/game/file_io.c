@@ -30,6 +30,7 @@
 #include "map/desirability.h"
 #include "map/elevation.h"
 #include "map/figure.h"
+#include "map/grid.h"
 #include "map/image.h"
 #include "map/property.h"
 #include "map/random.h"
@@ -50,6 +51,9 @@
 
 #define COMPRESS_BUFFER_SIZE 3000000
 #define UNCOMPRESSED 0x80000000
+
+const int GRID_ONEX = GRID_SIZE * GRID_SIZE;
+const int GRID_TWOX = GRID_SIZE * GRID_SIZE * 2;
 
 static const int SAVE_GAME_VERSION = 0x76;
 
@@ -79,6 +83,7 @@ static struct {
     int num_pieces;
     file_piece pieces[10];
     scenario_state state;
+    int extended;
 } scenario_data = {0};
 
 typedef struct {
@@ -171,6 +176,7 @@ static struct {
     int num_pieces;
     file_piece pieces[100];
     savegame_state state;
+    int extended;
 } savegame_data = {0};
 
 static void init_file_piece(file_piece *piece, int size, int compressed)
@@ -201,23 +207,43 @@ static void init_scenario_data(void)
         for (int i = 0; i < scenario_data.num_pieces; i++) {
             buffer_reset(&scenario_data.pieces[i].buf);
         }
-        return;
+        scenario_data.num_pieces = 0;
+        scenario_data.extended = 0;
     }
-
     scenario_state *state = &scenario_data.state;
-    state->graphic_ids = create_scenario_piece(207368);
-    state->edge = create_scenario_piece(103684);
-    state->terrain = create_scenario_piece(207368);
-    state->bitfields = create_scenario_piece(103684);
-    state->random = create_scenario_piece(103684);
-    state->elevation = create_scenario_piece(103684);
+    state->graphic_ids = create_scenario_piece(52488);
+    state->edge = create_scenario_piece(26244);
+    state->terrain = create_scenario_piece(52488);
+    state->bitfields = create_scenario_piece(26244);
+    state->random = create_scenario_piece(26244);
+    state->elevation = create_scenario_piece(26244);
     state->random_iv = create_scenario_piece(8);
     state->camera = create_scenario_piece(8);
     state->scenario = create_scenario_piece(1720);
     state->end_marker = create_scenario_piece(4);
 }
 
-
+static void init_scenario_data_extended(void)
+{
+    if (scenario_data.num_pieces > 0) {
+        for (int i = 0; i < scenario_data.num_pieces; i++) {
+            buffer_reset(&scenario_data.pieces[i].buf);
+        }
+        scenario_data.num_pieces = 0;
+        scenario_data.extended = 1;
+    }
+    scenario_state *state = &scenario_data.state;
+    state->graphic_ids = create_scenario_piece(GRID_TWOX);
+    state->edge = create_scenario_piece(GRID_ONEX);
+    state->terrain = create_scenario_piece(GRID_TWOX);
+    state->bitfields = create_scenario_piece(GRID_ONEX);
+    state->random = create_scenario_piece(GRID_ONEX);
+    state->elevation = create_scenario_piece(GRID_ONEX);
+    state->random_iv = create_scenario_piece(8);
+    state->camera = create_scenario_piece(8);
+    state->scenario = create_scenario_piece(1720);
+    state->end_marker = create_scenario_piece(4);
+}
 
 static void init_savegame_data(void)
 {
@@ -226,31 +252,29 @@ static void init_savegame_data(void)
             buffer_reset(&savegame_data.pieces[i].buf);
             free(savegame_data.pieces[i].buf.data);
         }
-        //return;
         savegame_data.num_pieces = 0;
+        savegame_data.extended = 0;
     }
-    const int GRID_ONEX = 322 * 322;
-    const int GRID_TWOX = GRID_ONEX * 2;
 
     savegame_state *state = &savegame_data.state;
     state->scenario_campaign_mission = create_savegame_piece(4, 0);
     state->file_version = create_savegame_piece(4, 0);
-    state->image_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->edge_grid = create_savegame_piece(GRID_ONEX, 1);
-    state->building_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->terrain_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->aqueduct_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->figure_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->bitfields_grid = create_savegame_piece(GRID_ONEX, 1);
-    state->sprite_grid = create_savegame_piece(GRID_ONEX, 1);
-    state->random_grid = create_savegame_piece(GRID_ONEX, 0);
-    state->desirability_grid = create_savegame_piece(GRID_ONEX, 1);
-    state->elevation_grid = create_savegame_piece(GRID_ONEX, 1);
-    state->building_damage_grid = create_savegame_piece(GRID_ONEX, 1);
-    state->aqueduct_backup_grid = create_savegame_piece(GRID_ONEX, 1);
-    state->sprite_backup_grid = create_savegame_piece(GRID_ONEX, 1);
-    state->figures = create_savegame_piece(512000, 1);
-    state->route_figures = create_savegame_piece(4800, 1);
+    state->image_grid = create_savegame_piece(52488, 1);
+    state->edge_grid = create_savegame_piece(26244, 1);
+    state->building_grid = create_savegame_piece(52488, 1);
+    state->terrain_grid = create_savegame_piece(52488, 1);
+    state->aqueduct_grid = create_savegame_piece(26244, 1);
+    state->figure_grid = create_savegame_piece(52488, 1);
+    state->bitfields_grid = create_savegame_piece(26244, 1);
+    state->sprite_grid = create_savegame_piece(26244, 1);
+    state->random_grid = create_savegame_piece(26244, 0);
+    state->desirability_grid = create_savegame_piece(26244, 1);
+    state->elevation_grid = create_savegame_piece(26244, 1);
+    state->building_damage_grid = create_savegame_piece(26244, 1);
+    state->aqueduct_backup_grid = create_savegame_piece(26244, 1);
+    state->sprite_backup_grid = create_savegame_piece(26244, 1);
+    state->figures = create_savegame_piece(128000, 1);
+    state->route_figures = create_savegame_piece(1200, 1);
     state->route_paths = create_savegame_piece(300000, 1);
     state->formations = create_savegame_piece(6400, 1);
     state->formation_totals = create_savegame_piece(12, 0);
@@ -327,6 +351,7 @@ static void init_savegame_data_expanded(void)
         }
         //return;
         savegame_data.num_pieces = 0;
+        savegame_data.extended = 1;
     }
     savegame_state *state = &savegame_data.state;
     state->scenario_campaign_mission = create_savegame_piece(4, 0);
@@ -418,9 +443,9 @@ static void scenario_load_from_state(scenario_state *file)
 {
     map_image_load_state(file->graphic_ids);
     map_terrain_load_state(file->terrain);
-    map_property_load_state(file->bitfields, file->edge);
-    map_random_load_state(file->random);
-    map_elevation_load_state(file->elevation);
+    map_property_load_state(file->bitfields, file->edge, scenario_data.extended);
+    map_random_load_state(file->random, scenario_data.extended);
+    map_elevation_load_state(file->elevation, scenario_data.extended);
     city_view_load_scenario_state(file->camera);
 
     random_load_state(file->random_iv);
@@ -434,9 +459,9 @@ static void scenario_save_to_state(scenario_state *file)
 {
     map_image_save_state(file->graphic_ids);
     map_terrain_save_state(file->terrain);
-    map_property_save_state(file->bitfields, file->edge);
-    map_random_save_state(file->random);
-    map_elevation_save_state(file->elevation);
+    map_property_save_state(file->bitfields, file->edge, scenario_data.extended);
+    map_random_save_state(file->random, scenario_data.extended);
+    map_elevation_save_state(file->elevation, scenario_data.extended);
     city_view_save_scenario_state(file->camera);
 
     random_save_state(file->random_iv);
@@ -459,13 +484,13 @@ static void savegame_load_from_state(savegame_state *state)
     map_image_load_state(state->image_grid);
     map_building_load_state(state->building_grid, state->building_damage_grid);
     map_terrain_load_state(state->terrain_grid);
-    map_aqueduct_load_state(state->aqueduct_grid, state->aqueduct_backup_grid);
+    map_aqueduct_load_state(state->aqueduct_grid, state->aqueduct_backup_grid, savegame_data.extended);
     map_figure_load_state(state->figure_grid);
     map_sprite_load_state(state->sprite_grid, state->sprite_backup_grid);
-    map_property_load_state(state->bitfields_grid, state->edge_grid);
-    map_random_load_state(state->random_grid);
+    map_property_load_state(state->bitfields_grid, state->edge_grid, savegame_data.extended);
+    map_random_load_state(state->random_grid, savegame_data.extended);
     map_desirability_load_state(state->desirability_grid);
-    map_elevation_load_state(state->elevation_grid);
+    map_elevation_load_state(state->elevation_grid, savegame_data.extended);
 
     figure_load_state(state->figures, state->figure_sequence);
     figure_route_load_state(state->route_figures, state->route_paths);
@@ -540,13 +565,13 @@ static void savegame_save_to_state(savegame_state *state)
     map_image_save_state(state->image_grid);
     map_building_save_state(state->building_grid, state->building_damage_grid);
     map_terrain_save_state(state->terrain_grid);
-    map_aqueduct_save_state(state->aqueduct_grid, state->aqueduct_backup_grid);
+    map_aqueduct_save_state(state->aqueduct_grid, state->aqueduct_backup_grid, savegame_data.extended);
     map_figure_save_state(state->figure_grid);
     map_sprite_save_state(state->sprite_grid, state->sprite_backup_grid);
-    map_property_save_state(state->bitfields_grid, state->edge_grid);
-    map_random_save_state(state->random_grid);
+    map_property_save_state(state->bitfields_grid, state->edge_grid, savegame_data.extended);
+    map_random_save_state(state->random_grid, savegame_data.extended);
     map_desirability_save_state(state->desirability_grid);
-    map_elevation_save_state(state->elevation_grid);
+    map_elevation_save_state(state->elevation_grid, savegame_data.extended);
 
     figure_save_state(state->figures, state->figure_sequence);
     figure_route_save_state(state->route_figures, state->route_paths);
@@ -608,7 +633,7 @@ static void savegame_save_to_state(savegame_state *state)
     buffer_skip(state->end_marker, 284);
 }
 
-int game_file_io_read_scenario(const char *filename)
+int read_scenario_classic(const char *filename)
 {
     log_info("Loading scenario", filename, 0);
     init_scenario_data();
@@ -616,6 +641,7 @@ int game_file_io_read_scenario(const char *filename)
     if (!fp) {
         return 0;
     }
+
     for (int i = 0; i < scenario_data.num_pieces; i++) {
         if (fread(scenario_data.pieces[i].buf.data, 1, scenario_data.pieces[i].buf.size, fp) != scenario_data.pieces[i].buf.size) {
             log_error("Unable to load scenario", filename, 0);
@@ -629,10 +655,40 @@ int game_file_io_read_scenario(const char *filename)
     return 1;
 }
 
+int read_scenario_extended(const char *filename)
+{
+    log_info("Loading scenario", filename, 0);
+    init_scenario_data_extended();
+    FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
+    if (!fp) {
+        return 0;
+    }
+
+    for (int i = 0; i < scenario_data.num_pieces; i++) {
+        if (fread(scenario_data.pieces[i].buf.data, 1, scenario_data.pieces[i].buf.size, fp) != scenario_data.pieces[i].buf.size) {
+            log_error("Unable to load scenario", filename, 0);
+            file_close(fp);
+            return 0;
+        }
+    }
+    file_close(fp);
+
+    scenario_load_from_state(&scenario_data.state);
+    return 1;
+}
+
+int game_file_io_read_scenario(const char *filename)
+{
+    if (!read_scenario_extended(filename)) {
+        return read_scenario_classic(filename);
+    }
+    return 1;
+}
+
 int game_file_io_write_scenario(const char *filename)
 {
     log_info("Saving scenario", filename, 0);
-    init_scenario_data();
+    init_scenario_data_extended();
     scenario_save_to_state(&scenario_data.state);
 
     FILE *fp = file_open(filename, "wb");
