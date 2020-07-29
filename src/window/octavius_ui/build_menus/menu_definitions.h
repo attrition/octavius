@@ -14,16 +14,17 @@ typedef struct {
 } submenu_button_details;
 
 typedef struct {
-    int button_count;
     build_button *buttons;
     submenu_button_details *button_details;
     int offset_x;
+    // calculated
     int width;
     int height;
+    int button_count;
 } menu_definition;
 
 menu_definition *window_octavius_ui_build_menu_definition(int index);
 
-void window_octavius_ui_build_menu_definition_resize(void);
+void window_octavius_ui_build_menu_definition_init(void);
 
 #endif // WINDOW_OCTAVIUS_BUILD_MENU_MENU_DEFINITIONS_H

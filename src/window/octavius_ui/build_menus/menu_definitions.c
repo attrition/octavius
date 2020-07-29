@@ -5,6 +5,9 @@
 #include "graphics/octavius_ui/build_button.h"
 #include "window/octavius_ui/build_menu.h"
 
+
+#define MAX(a, b) ( ((a) > (b)) ? (a) : (b) )
+
 // param1: submenu
 // param2: item index in submenu
 // param3: calculated actual item index
@@ -16,6 +19,7 @@ static build_button build_menu_water_buttons[] = {
     {  96, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_WATER, 2, 1, 1 },
     { 160, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_WATER, 3, 1, 1 },
     { 224, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_WATER, 4, 1, 1 },
+    0
 };
 
 static submenu_button_details build_menu_water_details[] = {
@@ -23,6 +27,7 @@ static submenu_button_details build_menu_water_details[] = {
     {   3, 55, GROUP_BUILDING_AQUEDUCT,   0, BUILDING_AQUEDUCT  },
     {   3, 55, GROUP_BUILDING_FOUNTAIN_1, 0, BUILDING_FOUNTAIN  },
     {   3, 55, GROUP_BUILDING_WELL,       0, BUILDING_WELL      },
+    0
 };
 
 // health related buildings
@@ -32,6 +37,7 @@ static build_button build_menu_health_buttons[] = {
     {  64, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_HEALTH, 2, 1, 1 },
     { 144, 0, 64, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_HEALTH, 3, 1, 1 },
     { 208, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_HEALTH, 4, 1, 1 },
+    0
 };
 
 static submenu_button_details build_menu_health_details[] = {
@@ -39,6 +45,7 @@ static submenu_button_details build_menu_health_details[] = {
     {   8, 33, GROUP_BUILDING_BATHHOUSE_WATER, 0, BUILDING_BATHHOUSE },
     {   3, 55, GROUP_BUILDING_DOCTOR,          0, BUILDING_DOCTOR    },
     { -20, 28, GROUP_BUILDING_HOSPITAL,        0, BUILDING_HOSPITAL  },
+    0
 };
 
 // education buildings
@@ -47,12 +54,14 @@ static build_button build_menu_education_buttons[] = {
     {   0, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_EDUCATION, 1, 1, 1 },
     {  80, 0, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_EDUCATION, 3, 1, 1 },
     { 160, 0, 96, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_EDUCATION, 2, 1, 1 },
+    0
 };
 
 static submenu_button_details build_menu_education_details[] = {
     {  15, 45, GROUP_BUILDING_SCHOOL,  0, BUILDING_SCHOOL  },
     {  15, 60, GROUP_BUILDING_LIBRARY, 0, BUILDING_LIBRARY },
     {  30, 30, GROUP_BUILDING_ACADEMY, 0, BUILDING_ACADEMY },
+    0
 };
 
 // entertainment buildings
@@ -66,6 +75,7 @@ static build_button build_menu_entertainment_buttons[] = {
     {   0, 320,  80, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 1, 1, 1 },
     {  80, 320,  96, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 2, 1, 1 },
     { 176, 320, 160, 160, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENTERTAINMENT, 3, 1, 1 },
+    0
 };
 
 static submenu_button_details build_menu_entertainment_details[] = {
@@ -77,6 +87,7 @@ static submenu_button_details build_menu_entertainment_details[] = {
     {  15, 60, GROUP_BUILDING_THEATER,          0, BUILDING_THEATER          },
     {  30, 45, GROUP_BUILDING_AMPHITHEATER,     0, BUILDING_AMPHITHEATER     },
     {  80, 45, GROUP_BUILDING_COLOSSEUM,        0, BUILDING_COLOSSEUM        },
+    0
 };
 
 // government buildings
@@ -91,6 +102,7 @@ static build_button build_menu_government_buttons[] = {
     { 256,   0, 128, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 4, 1, 1 },
     { 384,   0, 128, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 5, 1, 1 },
     { 512,   0, 128, 260, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ADMINISTRATION, 9, 1, 1 },
+    0
 };
 
 static submenu_button_details build_menu_government_details[] = {
@@ -103,6 +115,7 @@ static submenu_button_details build_menu_government_details[] = {
     {   0,  15, GROUP_BUILDING_GOVERNORS_VILLA,  0, BUILDING_GOVERNORS_VILLA  },
     {  45,  15, GROUP_BUILDING_GOVERNORS_PALACE, 0, BUILDING_GOVERNORS_PALACE },
     {  45, 110, GROUP_BUILDING_TRIUMPHAL_ARCH,   0, BUILDING_TRIUMPHAL_ARCH   },
+    0
 };
 
 // engineering buildings
@@ -116,6 +129,7 @@ static build_button build_menu_engineering_buttons[] = {
     {  80, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 3, 1, 1 },
     { 160, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 2, 1, 1 },
     { 240, 130, 80, 130, IB_SUBMENU, 0, 0, window_octavius_build_button_menu_index, build_button_none, BUILD_MENU_ENGINEERING, 7, 1, 1 },
+    0
 };
 
 static submenu_button_details build_menu_engineering_details[] = {
@@ -127,18 +141,19 @@ static submenu_button_details build_menu_engineering_details[] = {
     {  11, 55, GROUP_BUILDING_ENGINEERS_POST, 0, BUILDING_ENGINEERS_POST   },
     {  11, 55, GROUP_TERRAIN_PLAZA,           0, BUILDING_PLAZA            },
     {  11, 35, GROUP_BUILDING_DOCK_2,         0, BUILDING_DOCK             },
+    0,
 };
 
 // definitions
 
 static menu_definition menu_definitions[] = {
-    { 4, build_menu_water_buttons,         build_menu_water_details,          0, 288, 130 },
-    { 4, build_menu_health_buttons,        build_menu_health_details,         0, 288, 130 },
-    { 0, 0, /* religion */                 0,                                 0, 0,   0   },
-    { 3, build_menu_education_buttons,     build_menu_education_details,      0, 256, 130 },
-    { 8, build_menu_entertainment_buttons, build_menu_entertainment_details, 39, 336, 480 },
-    { 9, build_menu_government_buttons,    build_menu_government_details,    39, 640, 260 },
-    { 8, build_menu_engineering_buttons,   build_menu_engineering_details,   39, 320, 260 },
+    { build_menu_water_buttons,         build_menu_water_details,          0 },
+    { build_menu_health_buttons,        build_menu_health_details,         0 },
+    { build_menu_education_buttons,     build_menu_education_details,      0 },
+    { build_menu_entertainment_buttons, build_menu_entertainment_details, 39 },
+    { build_menu_government_buttons,    build_menu_government_details,    39 },
+    { build_menu_engineering_buttons,   build_menu_engineering_details,   39 },
+    0
 };
 
 int get_build_buttons_index(int submenu)
@@ -146,10 +161,13 @@ int get_build_buttons_index(int submenu)
     switch (submenu) {
         case 3:  return  0; // water
         case 4:  return  1; // health
-        case 6:  return  3; // education
-        case 7:  return  4; // entertainment
-        case 8:  return  5; // government
-        case 9:  return  6; // engineering
+                            // religion
+        case 6:  return  2; // education
+        case 7:  return  3; // entertainment
+        case 8:  return  4; // government
+        case 9:  return  5; // engineering
+                            // security
+                            // industry
         default: return -1;
     }
 }
@@ -163,8 +181,28 @@ menu_definition *window_octavius_ui_build_menu_definition(int submenu)
     return 0;
 }
 
-void window_octavius_ui_build_menu_definition_resize(void)
+void window_octavius_ui_build_menu_definition_init(void)
 {
     // calculate bounds of each menu and set width/height
+    // set button_count for each menu
+    int menu_idx = 0;
+    while (menu_definitions[menu_idx].buttons > 0) {
+        menu_definition *menu = &menu_definitions[menu_idx];
+        int count = 0;
+
+        int width = 0;
+        int height = 0;
+
+        while (menu->buttons[count].left_click_handler > 0) {
+            build_button *btn = &menu->buttons[count];
+            width = MAX(btn->x_offset + btn->width, width);
+            height = MAX(btn->y_offset + btn->height, height);
+            ++count;
+        }
+        menu->button_count = count;
+        menu->width = width;
+        menu->height = height;
+        ++menu_idx;
+    }
 }
 

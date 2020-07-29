@@ -72,7 +72,7 @@ static struct {
 
 static int init(build_menu_group submenu)
 {
-    window_octavius_ui_build_menu_definition_resize();
+    window_octavius_ui_build_menu_definition_init();
     data.selected_submenu = submenu;
     data.num_items = building_menu_count_items(submenu);
     data.offset_y = screen_height() - 250;
