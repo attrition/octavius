@@ -27,6 +27,7 @@ static submenu_button_details build_menu_water_details[] = {
     { -25, 17, GROUP_BUILDING_RESERVOIR,  1, BUILDING_DRAGGABLE_RESERVOIR, 1 },
     {   3, 55, GROUP_BUILDING_AQUEDUCT,   0, BUILDING_AQUEDUCT               },
     {   3, 55, GROUP_BUILDING_FOUNTAIN_1, 0, BUILDING_FOUNTAIN               },
+    {  15, 45, GROUP_BUILDING_FOUNTAIN_1, 1, BUILDING_FOUNTAIN,            1 },
     {   3, 55, GROUP_BUILDING_WELL,       0, BUILDING_WELL                   },
     0
 };
@@ -115,8 +116,8 @@ static submenu_button_details build_menu_government_details[] = {
     {  30,  30, GROUP_BUILDING_GOVERNORS_HOUSE,  0, BUILDING_GOVERNORS_HOUSE    },
     {   0,  15, GROUP_BUILDING_GOVERNORS_VILLA,  0, BUILDING_GOVERNORS_VILLA    },
     {  45,  15, GROUP_BUILDING_GOVERNORS_PALACE, 0, BUILDING_GOVERNORS_PALACE   },
-    {  45, 110, GROUP_BUILDING_TRIUMPHAL_ARCH,   0, BUILDING_TRIUMPHAL_ARCH     },
-    {  48,  58, GROUP_BUILDING_TRIUMPHAL_ARCH,   1, BUILDING_TRIUMPHAL_ARCH,  1 },
+    {  39, 110, GROUP_BUILDING_TRIUMPHAL_ARCH,   0, BUILDING_TRIUMPHAL_ARCH     },
+    {  42,  58, GROUP_BUILDING_TRIUMPHAL_ARCH,   1, BUILDING_TRIUMPHAL_ARCH,  1 },
     0
 };
 
@@ -157,7 +158,7 @@ static menu_definition menu_definitions[] = {
     { build_menu_health_buttons,        build_menu_health_details,         0 },
     { build_menu_education_buttons,     build_menu_education_details,      0 },
     { build_menu_entertainment_buttons, build_menu_entertainment_details, 39 },
-    { build_menu_government_buttons,    build_menu_government_details,    39 },
+    { build_menu_government_buttons,    build_menu_government_details,    47 },
     { build_menu_engineering_buttons,   build_menu_engineering_details,   39 },
     0
 };
