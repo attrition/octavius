@@ -5,9 +5,9 @@
 #include "map/grid.h"
 
 static grid_u16 buildings_grid;
-static grid_u8 damage_grid;
-static grid_u8 rubble_type_grid;
-static grid_u8 highlight_grid;
+static grid_u16 damage_grid;
+static grid_u16 rubble_type_grid;
+static grid_u16 highlight_grid;
 
 int map_building_at(int grid_offset)
 {
@@ -62,25 +62,25 @@ void map_set_rubble_building_type(int grid_offset, building_type type)
 void map_building_clear(void)
 {
     map_grid_clear_u16(buildings_grid.items);
-    map_grid_clear_u8(damage_grid.items);
-    map_grid_clear_u8(rubble_type_grid.items);
+    map_grid_clear_u16(damage_grid.items);
+    map_grid_clear_u16(rubble_type_grid.items);
 }
 
 void map_clear_highlights(void)
 {
-    map_grid_clear_u8(highlight_grid.items);
+    map_grid_clear_u16(highlight_grid.items);
 }
 
 void map_building_save_state(buffer *buildings, buffer *damage)
 {
     map_grid_save_state_u16(buildings_grid.items, buildings);
-    map_grid_save_state_u8(damage_grid.items, damage);
+    map_grid_save_state_u16(damage_grid.items, damage);
 }
 
 void map_building_load_state(buffer *buildings, buffer *damage)
 {
     map_grid_load_state_u16(buildings_grid.items, buildings);
-    map_grid_load_state_u8(damage_grid.items, damage);
+    map_grid_load_state_u16(damage_grid.items, damage);
 }
 
 int map_building_is_reservoir(int x, int y)

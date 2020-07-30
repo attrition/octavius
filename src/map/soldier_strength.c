@@ -5,11 +5,11 @@
 #include "map/grid.h"
 #include "map/routing.h"
 
-static grid_u8 strength;
+static grid_u16 strength;
 
 void map_soldier_strength_clear(void)
 {
-    map_grid_clear_u8(strength.items);
+    map_grid_clear_u16(strength.items);
 }
 
 void map_soldier_strength_add(int x, int y, int radius, int amount)

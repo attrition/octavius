@@ -119,8 +119,8 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->size);
     buffer_write_u8(buf, b->house_is_merged);
     buffer_write_u8(buf, b->house_size);
-    buffer_write_u8(buf, b->x);
-    buffer_write_u8(buf, b->y);
+    buffer_write_u16(buf, b->x);
+    buffer_write_u16(buf, b->y);
     buffer_write_i16(buf, b->grid_offset);
     buffer_write_i16(buf, b->type);
     buffer_write_i16(buf, b->subtype.house_level); // which union field we use does not matter
@@ -134,8 +134,8 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_i16(buf, b->distance_from_entry);
     buffer_write_i16(buf, b->house_highest_population);
     buffer_write_i16(buf, b->house_unreachable_ticks);
-    buffer_write_u8(buf, b->road_access_x);
-    buffer_write_u8(buf, b->road_access_y);
+    buffer_write_u16(buf, b->road_access_x);
+    buffer_write_u16(buf, b->road_access_y);
     buffer_write_i16(buf, b->figure_id);
     buffer_write_i16(buf, b->figure_id2);
     buffer_write_i16(buf, b->immigrant_figure_id);
@@ -267,8 +267,8 @@ void building_state_load_from_buffer(buffer *buf, building *b)
     b->size = buffer_read_u8(buf);
     b->house_is_merged = buffer_read_u8(buf);
     b->house_size = buffer_read_u8(buf);
-    b->x = buffer_read_u8(buf);
-    b->y = buffer_read_u8(buf);
+    b->x = buffer_read_u16(buf);
+    b->y = buffer_read_u16(buf);
     b->grid_offset = buffer_read_i16(buf);
     b->type = buffer_read_i16(buf);
     b->subtype.house_level = buffer_read_i16(buf); // which union field we use does not matter
@@ -282,8 +282,8 @@ void building_state_load_from_buffer(buffer *buf, building *b)
     b->distance_from_entry = buffer_read_i16(buf);
     b->house_highest_population = buffer_read_i16(buf);
     b->house_unreachable_ticks = buffer_read_i16(buf);
-    b->road_access_x = buffer_read_u8(buf);
-    b->road_access_y = buffer_read_u8(buf);
+    b->road_access_x = buffer_read_u16(buf);
+    b->road_access_y = buffer_read_u16(buf);
     b->figure_id = buffer_read_i16(buf);
     b->figure_id2 = buffer_read_i16(buf);
     b->immigrant_figure_id = buffer_read_i16(buf);

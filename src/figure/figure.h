@@ -29,18 +29,18 @@ typedef struct {
     signed char direction;
     signed char previous_tile_direction;
     signed char attack_direction;
-    unsigned char x;
-    unsigned char y;
+    unsigned short x;
+    unsigned short y;
     unsigned char previous_tile_x;
     unsigned char previous_tile_y;
     unsigned char missile_damage;
     unsigned char damage;
-    short grid_offset;
-    unsigned char destination_x;
-    unsigned char destination_y;
-    short destination_grid_offset; // only used for soldiers
-    unsigned char source_x;
-    unsigned char source_y;
+    int grid_offset;
+    unsigned short destination_x;
+    unsigned short destination_y;
+    int destination_grid_offset; // only used for soldiers
+    unsigned short source_x;
+    unsigned short source_y;
     union {
         unsigned char soldier;
         signed char enemy;

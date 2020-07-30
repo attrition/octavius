@@ -3,7 +3,7 @@
 #include "map/data.h"
 #include "map/grid.h"
 
-static grid_u8 elevation;
+static grid_u16 elevation;
 
 int map_elevation_at(int grid_offset)
 {
@@ -17,7 +17,7 @@ void map_elevation_set(int grid_offset, int value)
 
 void map_elevation_clear(void)
 {
-    map_grid_clear_u8(elevation.items);
+    map_grid_clear_u16(elevation.items);
 }
 
 static void fix_cliff_tiles(int grid_offset)
@@ -47,12 +47,12 @@ void map_elevation_remove_cliffs(void)
     }
 }
 
-void map_elevation_save_state(buffer *buf, int force16bit)
+void map_elevation_save_state(buffer *buf)
 {
-    map_grid_save_state_u8(elevation.items, buf);
+    map_grid_save_state_u16(elevation.items, buf);
 }
 
-void map_elevation_load_state(buffer *buf, int force16bit)
+void map_elevation_load_state(buffer *buf)
 {
-    map_grid_load_state_u8(elevation.items, buf);
+    map_grid_load_state_u16(elevation.items, buf);
 }

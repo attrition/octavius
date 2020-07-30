@@ -12,7 +12,7 @@
 
 static const int ADJACENT_OFFSETS[] = {-GRID_SIZE, 1, GRID_SIZE, -1};
 
-static grid_u8 network;
+static grid_u16 network;
 
 static struct {
     int items[MAX_QUEUE];
@@ -22,7 +22,7 @@ static struct {
 
 void map_road_network_clear(void)
 {
-    map_grid_clear_u8(network.items);
+    map_grid_clear_u16(network.items);
 }
 
 int map_road_network_get(int grid_offset)
@@ -30,7 +30,7 @@ int map_road_network_get(int grid_offset)
     return network.items[grid_offset];
 }
 
-static int mark_road_network(int grid_offset, uint8_t network_id)
+static int mark_road_network(int grid_offset, uint16_t network_id)
 {
     memset(&queue, 0, sizeof(queue));
     int guard = 0;
@@ -76,7 +76,7 @@ static int mark_road_network(int grid_offset, uint8_t network_id)
 void map_road_network_update(void)
 {
     city_map_clear_largest_road_networks();
-    map_grid_clear_u8(network.items);
+    map_grid_clear_u16(network.items);
     int network_id = 1;
     int grid_offset = map_data.start_offset;
     for (int y = 0; y < map_data.height; y++, grid_offset += map_data.border_size) {

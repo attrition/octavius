@@ -56,7 +56,7 @@ void map_property_clear(void);
 void map_property_backup(void);
 void map_property_restore(void);
 
-void map_property_save_state(buffer *bitfields, buffer *edge, int force16bit);
-void map_property_load_state(buffer *bitfields, buffer *edge, int force16bit);
+void map_property_save_state(buffer *bitfields, buffer *edge);
+void map_property_load_state(buffer *bitfields, buffer *edge);
 
 #endif // MAP_PROPERTY_H

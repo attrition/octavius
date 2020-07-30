@@ -9,11 +9,11 @@
 #include "map/ring.h"
 #include "map/terrain.h"
 
-static grid_i8 desirability_grid;
+static grid_i16 desirability_grid;
 
 void map_desirability_clear(void)
 {
-    map_grid_clear_i8(desirability_grid.items);
+    map_grid_clear_i16(desirability_grid.items);
 }
 
 static void add_desirability_at_distance(int x, int y, int size, int distance, int desirability)
@@ -151,10 +151,10 @@ int map_desirability_get_max(int x, int y, int size)
 
 void map_desirability_save_state(buffer *buf)
 {
-    map_grid_save_state_i8(desirability_grid.items, buf);
+    map_grid_save_state_i16(desirability_grid.items, buf);
 }
 
 void map_desirability_load_state(buffer *buf)
 {
-    map_grid_load_state_i8(desirability_grid.items, buf);
+    map_grid_load_state_i16(desirability_grid.items, buf);
 }

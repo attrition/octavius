@@ -3,11 +3,11 @@
 #include "core/random.h"
 #include "map/grid.h"
 
-static grid_u8 random;
+static grid_u16 random;
 
 void map_random_clear(void)
 {
-    map_grid_clear_u8(random.items);
+    map_grid_clear_u16(random.items);
 }
 
 void map_random_init(void)
@@ -16,7 +16,7 @@ void map_random_init(void)
     for (int y = 0; y < GRID_SIZE; y++) {
         for (int x = 0; x < GRID_SIZE; x++, grid_offset++) {
             random_generate_next();
-            random.items[grid_offset] = (uint8_t) random_short();
+            random.items[grid_offset] = (uint16_t) random_short();
         }
     }
 }
@@ -26,12 +26,12 @@ int map_random_get(int grid_offset)
     return random.items[grid_offset];
 }
 
-void map_random_save_state(buffer *buf, int force16bit)
+void map_random_save_state(buffer *buf)
 {
-    map_grid_save_state_u8(random.items, buf);
+    map_grid_save_state_u16(random.items, buf);
 }
 
-void map_random_load_state(buffer *buf, int force16bit)
+void map_random_load_state(buffer *buf)
 {
-    map_grid_load_state_u8(random.items, buf);
+    map_grid_load_state_u16(random.items, buf);
 }

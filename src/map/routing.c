@@ -37,7 +37,7 @@ static struct {
     int items[MAX_QUEUE];
 } queue;
 
-static grid_u8 water_drag;
+static grid_u16 water_drag;
 
 static struct {
     int through_building_id;
@@ -130,7 +130,7 @@ static void route_queue_max(int source, int dest, int max_tiles, void (*callback
 static void route_queue_boat(int source, void (*callback)(int, int))
 {
     clear_distances();
-    map_grid_clear_u8(water_drag.items);
+    map_grid_clear_u16(water_drag.items);
     queue.head = queue.tail = 0;
     enqueue(source, 1);
     int tiles = 0;

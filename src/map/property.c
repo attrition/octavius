@@ -28,11 +28,11 @@ enum {
     EDGE_NO_NATIVE_LAND = 0x7f,
 };
 
-static grid_u8 edge_grid;
-static grid_u8 bitfields_grid;
+static grid_u16 edge_grid;
+static grid_u16 bitfields_grid;
 
-static grid_u8 edge_backup;
-static grid_u8 bitfields_backup;
+static grid_u16 edge_backup;
+static grid_u16 bitfields_backup;
 
 static int edge_for(int x, int y)
 {
@@ -66,7 +66,7 @@ void map_property_mark_native_land(int grid_offset)
 
 void map_property_clear_all_native_land(void)
 {
-    map_grid_and_u8(edge_grid.items, EDGE_NO_NATIVE_LAND);
+    map_grid_and_u16(edge_grid.items, EDGE_NO_NATIVE_LAND);
 }
 
 int map_property_multi_tile_xy(int grid_offset)
@@ -197,40 +197,35 @@ void map_property_clear_deleted(int grid_offset)
 
 void map_property_clear_constructing_and_deleted(void)
 {
-    map_grid_and_u8(bitfields_grid.items, BIT_NO_CONSTRUCTION_AND_DELETED);
+    map_grid_and_u16(bitfields_grid.items, BIT_NO_CONSTRUCTION_AND_DELETED);
 }
 
 void map_property_clear(void)
 {
-    map_grid_clear_u8(bitfields_grid.items);
-    map_grid_clear_u8(edge_grid.items);
+    map_grid_clear_u16(bitfields_grid.items);
+    map_grid_clear_u16(edge_grid.items);
 }
 
 void map_property_backup(void)
 {
-    map_grid_copy_u8(bitfields_grid.items, bitfields_backup.items);
-    map_grid_copy_u8(edge_grid.items, edge_backup.items);
+    map_grid_copy_u16(bitfields_grid.items, bitfields_backup.items);
+    map_grid_copy_u16(edge_grid.items, edge_backup.items);
 }
 
 void map_property_restore(void)
 {
-    map_grid_copy_u8(bitfields_backup.items, bitfields_grid.items);
-    map_grid_copy_u8(edge_backup.items, edge_grid.items);
+    map_grid_copy_u16(bitfields_backup.items, bitfields_grid.items);
+    map_grid_copy_u16(edge_backup.items, edge_grid.items);
 }
 
-void map_property_save_state(buffer *bitfields, buffer *edge, int force16bit)
+void map_property_save_state(buffer *bitfields, buffer *edge)
 {
-    map_grid_save_state_u8(bitfields_grid.items, bitfields);
-    map_grid_save_state_u8(edge_grid.items, edge);
+    map_grid_save_state_u16(bitfields_grid.items, bitfields);
+    map_grid_save_state_u16(edge_grid.items, edge);
 }
 
-void map_property_load_state(buffer *bitfields, buffer *edge, int force16bit)
+void map_property_load_state(buffer *bitfields, buffer *edge)
 {
-    if (force16bit) {
-        map_grid_load_state_u16(bitfields_grid.items, bitfields);
-        map_grid_load_state_u16(edge_grid.items, edge);
-    } else {
-        map_grid_load_state_u8(bitfields_grid.items, bitfields);
-        map_grid_load_state_u8(edge_grid.items, edge);
-    }
+    map_grid_load_state_u16(bitfields_grid.items, bitfields);
+    map_grid_load_state_u16(edge_grid.items, edge);
 }
