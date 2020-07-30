@@ -8,6 +8,8 @@
 
 #include <string.h>
 
+#define GRID_SIZE_NO_BUFFER ((GRID_SIZE) - 2)
+
 static const struct {
     int width;
     int height;
@@ -18,7 +20,7 @@ static const struct {
     {100, 100},
     {120, 120},
     {160, 160},
-    {320, 320}
+    {GRID_SIZE_NO_BUFFER, GRID_SIZE_NO_BUFFER}
 };
 
 static void init_point(map_point *point)

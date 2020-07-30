@@ -83,7 +83,6 @@ static struct {
     int num_pieces;
     file_piece pieces[10];
     scenario_state state;
-    int extended;
 } scenario_data = {0};
 
 typedef struct {
@@ -176,7 +175,6 @@ static struct {
     int num_pieces;
     file_piece pieces[100];
     savegame_state state;
-    int extended;
 } savegame_data = {0};
 
 static void init_file_piece(file_piece *piece, int size, int compressed)
