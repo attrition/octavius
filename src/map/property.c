@@ -218,7 +218,7 @@ void map_property_restore(void)
     map_grid_copy_u8(edge_backup.items, edge_grid.items);
 }
 
-void map_property_save_state(buffer *bitfields, buffer *edge)
+void map_property_save_state(buffer *bitfields, buffer *edge, int force16bit)
 {
     map_grid_save_state_u8(bitfields_grid.items, bitfields);
     map_grid_save_state_u8(edge_grid.items, edge);
