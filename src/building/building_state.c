@@ -121,7 +121,7 @@ void building_state_save_to_buffer(buffer *buf, const building *b)
     buffer_write_u8(buf, b->house_size);
     buffer_write_u16(buf, b->x);
     buffer_write_u16(buf, b->y);
-    buffer_write_i16(buf, b->grid_offset);
+    buffer_write_i32(buf, b->grid_offset);
     buffer_write_i16(buf, b->type);
     buffer_write_i16(buf, b->subtype.house_level); // which union field we use does not matter
     buffer_write_u8(buf, b->road_network_id);
@@ -269,7 +269,7 @@ void building_state_load_from_buffer(buffer *buf, building *b)
     b->house_size = buffer_read_u8(buf);
     b->x = buffer_read_u16(buf);
     b->y = buffer_read_u16(buf);
-    b->grid_offset = buffer_read_i16(buf);
+    b->grid_offset = buffer_read_i32(buf);
     b->type = buffer_read_i16(buf);
     b->subtype.house_level = buffer_read_i16(buf); // which union field we use does not matter
     b->road_network_id = buffer_read_u8(buf);
