@@ -6,7 +6,7 @@
 
 // TODO get rid of these
 #define VIEW_X_MAX (GRID_SIZE + 3)
-#define VIEW_Y_MAX (GRID_SIZE * 2) + 3
+#define VIEW_Y_MAX (GRID_SIZE * 2) + 1
 
 typedef struct {
     int x;

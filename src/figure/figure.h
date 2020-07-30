@@ -31,8 +31,8 @@ typedef struct {
     signed char attack_direction;
     unsigned short x;
     unsigned short y;
-    unsigned char previous_tile_x;
-    unsigned char previous_tile_y;
+    unsigned short previous_tile_x;
+    unsigned short previous_tile_y;
     unsigned char missile_damage;
     unsigned char damage;
     int grid_offset;
@@ -42,12 +42,12 @@ typedef struct {
     unsigned short source_x;
     unsigned short source_y;
     union {
-        unsigned char soldier;
-        signed char enemy;
+        unsigned short soldier;
+        signed short enemy;
     } formation_position_x;
     union {
-        unsigned char soldier;
-        signed char enemy;
+        unsigned short soldier;
+        signed short enemy;
     } formation_position_y;
     short __unused_24;
     short wait_ticks;
