@@ -48,6 +48,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define COMPRESS_BUFFER_SIZE 3000000
 #define UNCOMPRESSED 0x80000000
@@ -85,6 +86,7 @@ typedef struct {
     scenario_state state;
 } scenario_all;
 static scenario_all scenario_data = {0};
+static scenario_all migration_data = {0};
 
 typedef struct {
     buffer *scenario_campaign_mission;
@@ -226,7 +228,6 @@ static void init_scenario_data_current(scenario_all *data)
     if (data->num_pieces > 0) {
         for (int i = 0; i < data->num_pieces; i++) {
             buffer_reset(&data->pieces[i].buf);
-            free(data->pieces[i].buf.data);
         }
         data->num_pieces = 0;
     }
@@ -436,25 +437,81 @@ static void init_savegame_data_expanded(void)
     state->end_marker = create_savegame_piece(284, 0); // 71x 4-bytes emptiness
 }
 
+void migrate_data_u8_u16(file_piece *from, file_piece *to)
+{
+    buffer_reset(&from->buf);
+    buffer_reset(&to->buf);
+    int mapsize = (int)sqrt(from->buf.size);
+    for (int y = 0; y < mapsize; ++y) {
+        for (int x = 0; x < mapsize; ++x) {
+            int old_idx = y * mapsize + x;
+            int new_idx = (y * GRID_SIZE + x) * 2 + 1;
+            buffer_set(&to->buf, new_idx);
+            buffer_set(&from->buf, old_idx);
+            buffer_write_u16(&to->buf, buffer_read_u8(&from->buf));
+        }
+    }
+    buffer_reset(&from->buf);
+    buffer_reset(&to->buf);
+}
+
+void migrate_data_u16_u16(file_piece *from, file_piece *to)
+{
+    buffer_reset(&from->buf);
+    buffer_reset(&to->buf);
+    int mapsize = (int)sqrt(from->buf.size);
+    for (int y = 0; y < mapsize; ++y) {
+
+        char debug[162] = { '\0' };
+
+        for (int x = 0; x < mapsize; ++x) {
+
+            int old_idx = y * mapsize + x;
+            int new_idx = y * GRID_SIZE + x;
+            buffer_set(&to->buf, new_idx);
+            buffer_set(&from->buf, old_idx);
+            
+            uint16_t value = buffer_read_u16(&from->buf);
+            strcpy(debug + x, (char)value);
+            buffer_write_u16(&to->buf, value);
+        }
+        log_info(debug, 0, 0);
+    }
+    buffer_reset(&from->buf);
+    buffer_reset(&to->buf);
+}
+
 static void scenario_migrate_from_state(scenario_all *data)
 {
-    // first create a new state to fill
-    scenario_all new_scenario = {0};
-    scenario_state *current = &new_scenario.state;
-
-    init_scenario_data_current(&new_scenario);
+    init_scenario_data_current(&migration_data);
 
     scenario_state *file = &data->state;
     // populate current buffers from incoming buffers
-      
-    if (data->num_pieces > 0) {
-        for (int i = 0; i < data->num_pieces; i++) {
-            buffer_reset(&data->pieces[i].buf);
-            free(data->pieces[i].buf.data);
-        }
-    }
 
-    data->state = new_scenario.state;
+    migrate_data_u16_u16(&data->pieces[0], &migration_data.pieces[0]);
+    migrate_data_u8_u16( &data->pieces[1], &migration_data.pieces[1]);
+    migrate_data_u16_u16(&data->pieces[2], &migration_data.pieces[2]);
+    migrate_data_u8_u16( &data->pieces[3], &migration_data.pieces[3]);
+    migrate_data_u8_u16( &data->pieces[4], &migration_data.pieces[4]);
+    migrate_data_u8_u16( &data->pieces[5], &migration_data.pieces[5]);
+
+    //memcpy(&migration_data.pieces[0].buf.data, &data->pieces[0].buf.data, data->pieces[0].buf.size);
+    //memcpy(&migration_data.pieces[1].buf.data, &data->pieces[1].buf.data, data->pieces[1].buf.size);
+    //memcpy(&migration_data.pieces[2].buf.data, &data->pieces[2].buf.data, data->pieces[2].buf.size);
+    //memcpy(&migration_data.pieces[3].buf.data, &data->pieces[3].buf.data, data->pieces[3].buf.size);
+    //memcpy(&migration_data.pieces[4].buf.data, &data->pieces[4].buf.data, data->pieces[4].buf.size);
+    //memcpy(&migration_data.pieces[5].buf.data, &data->pieces[5].buf.data, data->pieces[5].buf.size);
+    memcpy(&migration_data.pieces[6].buf.data, &data->pieces[6].buf.data, data->pieces[6].buf.size);
+    memcpy(&migration_data.pieces[7].buf.data, &data->pieces[7].buf.data, data->pieces[7].buf.size);
+    memcpy(&migration_data.pieces[8].buf.data, &data->pieces[8].buf.data, data->pieces[8].buf.size);
+    memcpy(&migration_data.pieces[9].buf.data, &data->pieces[9].buf.data, data->pieces[9].buf.size);
+
+    // clear existing data
+    //for (int i = 6; i < data->num_pieces; i++) {
+    //    buffer_reset(&data->pieces[i].buf);
+    //}
+
+    data = &migration_data;
 }
 
 static void scenario_load_from_state(scenario_state *file)
