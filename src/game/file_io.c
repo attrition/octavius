@@ -52,10 +52,10 @@
 #define COMPRESS_BUFFER_SIZE 3000000
 #define UNCOMPRESSED 0x80000000
 
-const int GRID_ONEX = GRID_SIZE * GRID_SIZE;
-const int GRID_TWOX = GRID_SIZE * GRID_SIZE * 2;
+const int GRID_U16 = GRID_SIZE * GRID_SIZE * sizeof(uint16_t);
 
-static const int SAVE_GAME_VERSION = 0x76;
+static const int SAVE_GAME_VERSION_CLASSIC = 0x76;
+static const int SAVE_GAME_VERSION_AUG_2 = 0x77;
 
 static char compress_buffer[COMPRESS_BUFFER_SIZE];
 
@@ -79,11 +79,12 @@ typedef struct {
     buffer *end_marker;
 } scenario_state;
 
-static struct {
+typedef struct {
     int num_pieces;
     file_piece pieces[10];
     scenario_state state;
-} scenario_data = {0};
+} scenario_all;
+static scenario_all scenario_data = {0};
 
 typedef struct {
     buffer *scenario_campaign_mission;
@@ -185,9 +186,9 @@ static void init_file_piece(file_piece *piece, int size, int compressed)
     buffer_init(&piece->buf, data, size);
 }
 
-static buffer *create_scenario_piece(int size)
+static buffer *create_scenario_piece(scenario_all *data, int size)
 {
-    file_piece *piece = &scenario_data.pieces[scenario_data.num_pieces++];
+    file_piece *piece = &data->pieces[data->num_pieces++];
     init_file_piece(piece, size, 0);
     return &piece->buf;
 }
@@ -208,37 +209,38 @@ static void init_scenario_data(void)
         scenario_data.num_pieces = 0;
     }
     scenario_state *state = &scenario_data.state;
-    state->graphic_ids = create_scenario_piece(52488);
-    state->edge = create_scenario_piece(26244);
-    state->terrain = create_scenario_piece(52488);
-    state->bitfields = create_scenario_piece(26244);
-    state->random = create_scenario_piece(26244);
-    state->elevation = create_scenario_piece(26244);
-    state->random_iv = create_scenario_piece(8);
-    state->camera = create_scenario_piece(8);
-    state->scenario = create_scenario_piece(1720);
-    state->end_marker = create_scenario_piece(4);
+    state->graphic_ids = create_scenario_piece(&scenario_data, 52488);
+    state->edge = create_scenario_piece(&scenario_data, 26244);
+    state->terrain = create_scenario_piece(&scenario_data, 52488);
+    state->bitfields = create_scenario_piece(&scenario_data, 26244);
+    state->random = create_scenario_piece(&scenario_data, 26244);
+    state->elevation = create_scenario_piece(&scenario_data, 26244);
+    state->random_iv = create_scenario_piece(&scenario_data, 8);
+    state->camera = create_scenario_piece(&scenario_data, 8);
+    state->scenario = create_scenario_piece(&scenario_data, 1720);
+    state->end_marker = create_scenario_piece(&scenario_data, 4);
 }
 
-static void init_scenario_data_extended(void)
+static void init_scenario_data_current(scenario_all *data)
 {
-    if (scenario_data.num_pieces > 0) {
-        for (int i = 0; i < scenario_data.num_pieces; i++) {
-            buffer_reset(&scenario_data.pieces[i].buf);
+    if (data->num_pieces > 0) {
+        for (int i = 0; i < data->num_pieces; i++) {
+            buffer_reset(&data->pieces[i].buf);
+            free(data->pieces[i].buf.data);
         }
-        scenario_data.num_pieces = 0;
+        data->num_pieces = 0;
     }
-    scenario_state *state = &scenario_data.state;
-    state->graphic_ids = create_scenario_piece(GRID_TWOX);
-    state->edge = create_scenario_piece(GRID_TWOX);
-    state->terrain = create_scenario_piece(GRID_TWOX);
-    state->bitfields = create_scenario_piece(GRID_TWOX);
-    state->random = create_scenario_piece(GRID_TWOX);
-    state->elevation = create_scenario_piece(GRID_TWOX);
-    state->random_iv = create_scenario_piece(8);
-    state->camera = create_scenario_piece(8);
-    state->scenario = create_scenario_piece(1720);
-    state->end_marker = create_scenario_piece(4);
+    scenario_state *state = &data->state;
+    state->graphic_ids = create_scenario_piece(data, GRID_U16);
+    state->edge = create_scenario_piece(data, GRID_U16);
+    state->terrain = create_scenario_piece(data, GRID_U16);
+    state->bitfields = create_scenario_piece(data, GRID_U16);
+    state->random = create_scenario_piece(data, GRID_U16);
+    state->elevation = create_scenario_piece(data, GRID_U16);
+    state->random_iv = create_scenario_piece(data, 8);
+    state->camera = create_scenario_piece(data, 8);
+    state->scenario = create_scenario_piece(data, 1720);
+    state->end_marker = create_scenario_piece(data, 4);
 }
 
 static void init_savegame_data(void)
@@ -351,20 +353,20 @@ static void init_savegame_data_expanded(void)
     savegame_state *state = &savegame_data.state;
     state->scenario_campaign_mission = create_savegame_piece(4, 0);
     state->file_version = create_savegame_piece(4, 0);
-    state->image_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->edge_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->building_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->terrain_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->aqueduct_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->figure_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->bitfields_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->sprite_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->random_grid = create_savegame_piece(GRID_TWOX, 0);
-    state->desirability_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->elevation_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->building_damage_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->aqueduct_backup_grid = create_savegame_piece(GRID_TWOX, 1);
-    state->sprite_backup_grid = create_savegame_piece(GRID_TWOX, 1);
+    state->image_grid = create_savegame_piece(GRID_U16, 1);
+    state->edge_grid = create_savegame_piece(GRID_U16, 1);
+    state->building_grid = create_savegame_piece(GRID_U16, 1);
+    state->terrain_grid = create_savegame_piece(GRID_U16, 1);
+    state->aqueduct_grid = create_savegame_piece(GRID_U16, 1);
+    state->figure_grid = create_savegame_piece(GRID_U16, 1);
+    state->bitfields_grid = create_savegame_piece(GRID_U16, 1);
+    state->sprite_grid = create_savegame_piece(GRID_U16, 1);
+    state->random_grid = create_savegame_piece(GRID_U16, 0);
+    state->desirability_grid = create_savegame_piece(GRID_U16, 1);
+    state->elevation_grid = create_savegame_piece(GRID_U16, 1);
+    state->building_damage_grid = create_savegame_piece(GRID_U16, 1);
+    state->aqueduct_backup_grid = create_savegame_piece(GRID_U16, 1);
+    state->sprite_backup_grid = create_savegame_piece(GRID_U16, 1);
     state->figures = create_savegame_piece(640000, 1);
     state->route_figures = create_savegame_piece(6000, 1);
     state->route_paths = create_savegame_piece(1500000, 1);
@@ -432,6 +434,27 @@ static void init_savegame_data_expanded(void)
     state->tutorial_part3 = create_savegame_piece(4, 0);
     state->city_entry_exit_grid_offset = create_savegame_piece(8, 0);
     state->end_marker = create_savegame_piece(284, 0); // 71x 4-bytes emptiness
+}
+
+static void scenario_migrate_from_state(scenario_all *data)
+{
+    // first create a new state to fill
+    scenario_all new_scenario = {0};
+    scenario_state *current = &new_scenario.state;
+
+    init_scenario_data_current(&new_scenario);
+
+    scenario_state *file = &data->state;
+    // populate current buffers from incoming buffers
+      
+    if (data->num_pieces > 0) {
+        for (int i = 0; i < data->num_pieces; i++) {
+            buffer_reset(&data->pieces[i].buf);
+            free(data->pieces[i].buf.data);
+        }
+    }
+
+    data->state = new_scenario.state;
 }
 
 static void scenario_load_from_state(scenario_state *file)
@@ -650,13 +673,27 @@ int read_scenario_classic(const char *filename)
     return 1;
 }
 
-int read_scenario_extended(const char *filename)
+int read_scenario(const char *filename)
 {
     log_info("Loading scenario", filename, 0);
-    init_scenario_data_extended();
+
     FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
     if (!fp) {
         return 0;
+    }
+
+    // check if scenario is versioned (sentinel value at position 0)
+    int sentinel = 0;
+    fseek(fp, 0, SEEK_SET);
+    fread(&sentinel, 1, 4, fp);
+
+    if (sentinel == 0xDEADBEEF) {
+        // create extended scenario buffers and continue from his position
+        init_scenario_data_current(&scenario_data);
+    } else {
+        // return to regular scenario processing, reset position
+        fseek(fp, 0, SEEK_SET);
+        init_scenario_data(); 
     }
 
     for (int i = 0; i < scenario_data.num_pieces; i++) {
@@ -668,22 +705,24 @@ int read_scenario_extended(const char *filename)
     }
     file_close(fp);
 
+    if (sentinel != 0xDEADBEEF) {
+        // migrate buffers before loading state
+        scenario_migrate_from_state(&scenario_data);
+    }
+
     scenario_load_from_state(&scenario_data.state);
     return 1;
 }
 
 int game_file_io_read_scenario(const char *filename)
 {
-    if (!read_scenario_extended(filename)) {
-        return read_scenario_classic(filename);
-    }
-    return 1;
+    return read_scenario(filename);
 }
 
 int game_file_io_write_scenario(const char *filename)
 {
     log_info("Saving scenario", filename, 0);
-    init_scenario_data_extended();
+    init_scenario_data_current(&scenario_data);
     scenario_save_to_state(&scenario_data.state);
 
     FILE *fp = file_open(filename, "wb");
@@ -786,14 +825,6 @@ static void savegame_write_to_file(FILE *fp)
 }
 int game_file_io_read_saved_game(const char *filename, int offset)
 {
-    if (file_has_extension(filename,"svx")) {
-        init_savegame_data_expanded();
-        log_info("Loading saved game new format.", filename, 0);
-
-    } else {
-        log_info("Loading saved game old format.", filename, 0);
-        init_savegame_data();
-    }
 
     log_info("Loading saved game", filename, 0);
     FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
@@ -801,15 +832,30 @@ int game_file_io_read_saved_game(const char *filename, int offset)
         log_error("Unable to load game, unable to open file.", 0, 0);
         return 0;
     }
-    if (offset) {
-        fseek(fp, offset, SEEK_SET);
+
+    // check savegame version
+    fseek(fp, offset + 4, SEEK_SET);
+    fread(&savegame_version, 1, 4, fp);
+
+    // return to regular savegame processing
+    fseek(fp, offset, SEEK_SET);
+
+    if (savegame_version == SAVE_GAME_VERSION_AUG_2 ||
+        file_has_extension(filename,"svx")) {
+        init_savegame_data_expanded();
+        log_info("Loading saved game new format.", filename, 0);
+    } else {
+        log_info("Loading saved game old format.", filename, 0);
+        init_savegame_data();
     }
+
     int result = savegame_read_from_file(fp);
     file_close(fp);
     if (!result) {
         log_error("Unable to load game, unable to read savefile.", 0, 0);
         return 0;
     }
+
     savegame_load_from_state(&savegame_data.state);
     return 1;
 }
@@ -819,7 +865,7 @@ int game_file_io_write_saved_game(const char *filename)
     init_savegame_data_expanded();
 
     log_info("Saving game", filename, 0);
-    savegame_version = SAVE_GAME_VERSION;
+    savegame_version = SAVE_GAME_VERSION_AUG_2;
     savegame_save_to_state(&savegame_data.state);
 
     FILE *fp = file_open(filename, "wb");
