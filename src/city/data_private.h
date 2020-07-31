@@ -25,19 +25,19 @@ typedef struct {
 extern struct city_data_t {
     struct {
         int16_t senate_placed;
-        uint8_t senate_x;
-        uint8_t senate_y;
-        int16_t senate_grid_offset;
+        int16_t senate_x;
+        int16_t senate_y;
+        int32_t senate_grid_offset;
         int32_t senate_building_id;
         int32_t hippodrome_placed;
-        int8_t barracks_x;
-        int8_t barracks_y;
-        int16_t barracks_grid_offset;
+        int16_t barracks_x;
+        int16_t barracks_y;
+        int32_t barracks_grid_offset;
         int32_t barracks_building_id;
         int32_t barracks_placed;
-        int8_t distribution_center_x;
-        int8_t distribution_center_y;
-        int16_t distribution_center_grid_offset;
+        int16_t distribution_center_x;
+        int16_t distribution_center_y;
+        int32_t distribution_center_grid_offset;
         int32_t distribution_center_building_id;
         int32_t distribution_center_placed;
         int32_t trade_center_building_id;

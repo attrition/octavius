@@ -603,7 +603,7 @@ static void button_go_to_problem(int param1, int param2)
             grid_offset = invasion_grid_offset;
         }
     }
-    if (grid_offset > 0 && grid_offset < 26244) {
+    if (grid_offset > 0 && grid_offset < (GRID_SIZE * GRID_SIZE)) {
         city_view_go_to_grid_offset(grid_offset);
     }
     window_city_show();

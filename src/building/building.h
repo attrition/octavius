@@ -15,9 +15,9 @@ typedef struct {
     unsigned char size;
     unsigned char house_is_merged;
     unsigned char house_size;
-    unsigned char x;
-    unsigned char y;
-    short grid_offset;
+    unsigned short x;
+    unsigned short y;
+    int grid_offset;
     short type;
     union {
         short house_level;
@@ -39,8 +39,8 @@ typedef struct {
     short distance_from_entry;
     short house_highest_population;
     short house_unreachable_ticks;
-    unsigned char road_access_x;
-    unsigned char road_access_y;
+    unsigned short road_access_x;
+    unsigned short road_access_y;
     short figure_id;
     short figure_id2; // labor seeker or market buyer
     short immigrant_figure_id;

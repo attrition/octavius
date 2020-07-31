@@ -174,7 +174,7 @@ int widget_top_menu_editor_handle_input(const mouse *m, const hotkeys *h)
 static void map_size_selected(int size)
 {
     clear_state();
-    if (size >= 0 && size <= 5) {
+    if (size >= 0 && size <= 6) {
         game_file_editor_create_scenario(size);
         window_editor_map_show();
     } else {
@@ -184,7 +184,7 @@ static void map_size_selected(int size)
 
 static void menu_file_new_map(int param)
 {
-    window_select_list_show(50, 50, 33, 7, map_size_selected);
+    window_select_list_show(50, 50, 33, 8, map_size_selected);
 }
 
 static void menu_file_load_map(int param)
