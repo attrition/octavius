@@ -78,11 +78,11 @@ typedef struct {
     buffer *end_marker;
 } scenario_state;
 
-static struct {
+typedef struct {
     int num_pieces;
     file_piece pieces[10];
     scenario_state state;
-} scenario_data = {0};
+} scenario_data;
 
 typedef struct {
     buffer *scenario_campaign_mission;
@@ -184,9 +184,9 @@ static void init_file_piece(file_piece *piece, int size, int compressed)
     buffer_init(&piece->buf, data, size);
 }
 
-static buffer *create_scenario_piece(int size)
+static buffer *create_scenario_piece(scenario_data *data, int size)
 {
-    file_piece *piece = &scenario_data.pieces[scenario_data.num_pieces++];
+    file_piece *piece = &data->pieces[data->num_pieces++];
     init_file_piece(piece, size, 0);
     return &piece->buf;
 }
@@ -198,28 +198,49 @@ static buffer *create_savegame_piece(int size, int compressed)
     return &piece->buf;
 }
 
-static void init_scenario_data(void)
+static void init_scenario_data_classic(scenario_data *data)
 {
-    if (scenario_data.num_pieces > 0) {
-        for (int i = 0; i < scenario_data.num_pieces; i++) {
-            buffer_reset(&scenario_data.pieces[i].buf);
+    if (data->num_pieces > 0) {
+        for (int i = 0; i < data->num_pieces; i++) {
+            buffer_reset(&data->pieces[i].buf);
+            free(data->pieces[i].buf.data);
         }
-        return;
+        data->num_pieces = 0;
     }
-    scenario_state *state = &scenario_data.state;
-    state->graphic_ids = create_scenario_piece(GRID_U16);
-    state->edge = create_scenario_piece(GRID_U8);
-    state->terrain = create_scenario_piece(GRID_U16);
-    state->bitfields = create_scenario_piece(GRID_U8);
-    state->random = create_scenario_piece(GRID_U8);
-    state->elevation = create_scenario_piece(GRID_U8);
-    state->random_iv = create_scenario_piece(8);
-    state->camera = create_scenario_piece(8);
-    state->scenario = create_scenario_piece(1720);
-    state->end_marker = create_scenario_piece(4);
+    scenario_state *state = &data->state;
+    state->graphic_ids = create_scenario_piece(data, 52488);
+    state->edge = create_scenario_piece(data, 26244);
+    state->terrain = create_scenario_piece(data, 52488);
+    state->bitfields = create_scenario_piece(data, 26244);
+    state->random = create_scenario_piece(data, 26244);
+    state->elevation = create_scenario_piece(data, 26244);
+    state->random_iv = create_scenario_piece(data, 8);
+    state->camera = create_scenario_piece(data, 8);
+    state->scenario = create_scenario_piece(data, 1720);
+    state->end_marker = create_scenario_piece(data, 4);
 }
 
-
+static void init_scenario_data_extended(scenario_data *data)
+{
+    if (data->num_pieces > 0) {
+        for (int i = 0; i < data->num_pieces; i++) {
+            buffer_reset(&data->pieces[i].buf);
+            free(data->pieces[i].buf.data);
+        }
+        data->num_pieces = 0;
+    }
+    scenario_state *state = &data->state;
+    state->graphic_ids = create_scenario_piece(data, GRID_U16);
+    state->edge = create_scenario_piece(data, GRID_U8);
+    state->terrain = create_scenario_piece(data, GRID_U16);
+    state->bitfields = create_scenario_piece(data, GRID_U8);
+    state->random = create_scenario_piece(data, GRID_U8);
+    state->elevation = create_scenario_piece(data, GRID_U8);
+    state->random_iv = create_scenario_piece(data, 8);
+    state->camera = create_scenario_piece(data, 8);
+    state->scenario = create_scenario_piece(data, 1720);
+    state->end_marker = create_scenario_piece(data, 4);
+}
 
 static void init_savegame_data(void)
 {
@@ -607,40 +628,111 @@ static void savegame_save_to_state(savegame_state *state)
     buffer_skip(state->end_marker, 284);
 }
 
-int game_file_io_read_scenario(const char *filename)
+int read_scenario_classic(const char *filename, scenario_data *data)
 {
-    log_info("Loading scenario", filename, 0);
-    init_scenario_data();
+    log_info("Loading classic scenario", filename, 0);
+    init_scenario_data_classic(data);
     FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
     if (!fp) {
         return 0;
     }
-    for (int i = 0; i < scenario_data.num_pieces; i++) {
-        if (fread(scenario_data.pieces[i].buf.data, 1, scenario_data.pieces[i].buf.size, fp) != scenario_data.pieces[i].buf.size) {
-            log_error("Unable to load scenario", filename, 0);
+    for (int i = 0; i < data->num_pieces; i++) {
+        if (fread(data->pieces[i].buf.data, 1, data->pieces[i].buf.size, fp) != data->pieces[i].buf.size) {
+            log_error("Unable to load classic scenario", filename, 0);
             file_close(fp);
             return 0;
         }
     }
     file_close(fp);
 
-    scenario_load_from_state(&scenario_data.state);
+    scenario_load_from_state(&data->state);
+    return 1;
+}
+
+int read_scenario_extended(const char *filename, scenario_data *data)
+{
+    log_info("Loading augustus scenario", filename, 0);
+    init_scenario_data_extended(data);
+    FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
+    if (!fp) {
+        return 0;
+    }
+    for (int i = 0; i < data->num_pieces; i++) {
+        if (fread(data->pieces[i].buf.data, 1, data->pieces[i].buf.size, fp) != data->pieces[i].buf.size) {
+            log_error("Unable to load augustus scenario", filename, 0);
+            file_close(fp);
+            return 0;
+        }
+    }
+    file_close(fp);
+
+    scenario_load_from_state(&data->state);
+    return 1;
+
+}
+
+void scenario_diff(void)
+{
+    const char *newmap = "small-largemap.map";
+    const char *oldmap = "small-aug.map";
+    scenario_data olddata = { 0 };
+    scenario_data newdata = { 0 };
+    read_scenario_classic(oldmap, &olddata);
+    read_scenario_extended(newmap, &newdata);
+    int oldsize = 162;
+    int newsize = 502;
+
+    FILE *fp = file_open("debug.txt", "w");
+
+    // 2 -> terrain grid
+    int piece = 2;
+    buffer *buf = &olddata.pieces[piece].buf;
+    for (int y = 0; y < oldsize; ++y) {
+        for (int x = 0; x < oldsize; ++x) {
+            int val = buf->data[y * (oldsize*2) + (x * 2)];
+            fprintf(fp, "%d", val);
+        }
+        fprintf(fp, "\n");
+    }
+    buf = &newdata.pieces[piece].buf;
+    for (int y = 0; y < newsize; ++y) {
+        for (int x = 0; x < newsize; ++x) {
+            int val = buf->data[y * (newsize * 2) + (x * 2)];
+            fprintf(fp, "%d", val);
+        }
+        fprintf(fp, "\n");
+    }
+
+    fclose(fp);
+}
+
+int game_file_io_read_scenario(const char *filename)
+{
+    scenario_data data = {0};
+    scenario_diff();
+
+    if (!read_scenario_extended(filename, &data)) {
+        return read_scenario_classic(filename, &data);
+    }
     return 1;
 }
 
 int game_file_io_write_scenario(const char *filename)
 {
+    scenario_data data = {0};
+
     log_info("Saving scenario", filename, 0);
-    init_scenario_data();
-    scenario_save_to_state(&scenario_data.state);
+
+    init_scenario_data_extended(&data);
+    scenario_save_to_state(&data.state);
 
     FILE *fp = file_open(filename, "wb");
     if (!fp) {
         log_error("Unable to save scenario", 0, 0);
         return 0;
     }
-    for (int i = 0; i < scenario_data.num_pieces; i++) {
-        fwrite(scenario_data.pieces[i].buf.data, 1, scenario_data.pieces[i].buf.size, fp);
+    for (int i = 0; i < data.num_pieces; i++) {
+        fwrite(data.pieces[i].buf.data, 1, data.pieces[i].buf.size, fp);
     }
     file_close(fp);
     return 1;
