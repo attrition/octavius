@@ -36,8 +36,8 @@ typedef struct {
     unsigned char missile_damage;
     unsigned char damage;
     int grid_offset;
-    unsigned short destination_x;
-    unsigned short destination_y;
+    short destination_x;
+    short destination_y;
     int destination_grid_offset; // only used for soldiers
     unsigned short source_x;
     unsigned short source_y;

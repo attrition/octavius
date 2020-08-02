@@ -66,6 +66,7 @@ static void init(void)
 {
     scenario_set_custom(2);
     data.scenarios = dir_find_files_with_extension(".", "map");
+    data.scenarios = dir_append_files_with_extension("mapx");
     data.focus_button_id = 0;
     button_select_item(0, 0);
     scrollbar_init(&scrollbar, 0, data.scenarios->num_files - MAX_SCENARIOS);

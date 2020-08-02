@@ -37,13 +37,16 @@
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "scenario/criteria.h"
+#include "scenario/data.h"
 #include "scenario/earthquake.h"
 #include "scenario/emperor_change.h"
 #include "scenario/gladiator_revolt.h"
 #include "scenario/invasion.h"
+#include "scenario/map.h"
 #include "scenario/scenario.h"
 #include "sound/city.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,6 +58,8 @@ static const int GRID_U8  = GRID_SIZE * GRID_SIZE * sizeof(uint8_t);
 static const int GRID_U16 = GRID_SIZE * GRID_SIZE * sizeof(uint16_t);
 
 static const int SAVE_GAME_VERSION = 0x76;
+static const uint16_t SCENARIO_VERSION = 0x01;
+static const uint16_t SENTINEL = 0xCAFE;
 
 static char compress_buffer[COMPRESS_BUFFER_SIZE];
 
@@ -66,6 +71,7 @@ typedef struct {
 } file_piece;
 
 typedef struct {
+    buffer *file_version;
     buffer *graphic_ids;
     buffer *edge;
     buffer *terrain;
@@ -80,7 +86,7 @@ typedef struct {
 
 typedef struct {
     int num_pieces;
-    file_piece pieces[10];
+    file_piece pieces[11];
     scenario_state state;
 } scenario_data;
 
@@ -198,7 +204,7 @@ static buffer *create_savegame_piece(int size, int compressed)
     return &piece->buf;
 }
 
-static void init_scenario_data_classic(scenario_data *data)
+static void init_scenario_data_legacy(scenario_data *data)
 {
     if (data->num_pieces > 0) {
         for (int i = 0; i < data->num_pieces; i++) {
@@ -207,9 +213,10 @@ static void init_scenario_data_classic(scenario_data *data)
         }
         data->num_pieces = 0;
     }
-    scenario_state *state = &data->state;
-    state->graphic_ids = create_scenario_piece(data, 52488);
-    state->edge = create_scenario_piece(data, 26244);
+
+    scenario_state *state = &data->state;                    // classic map sizes:
+    state->graphic_ids = create_scenario_piece(data, 52488); // 162x162 x 2 bytes
+    state->edge = create_scenario_piece(data, 26244);        // 162x162 x 1 byte
     state->terrain = create_scenario_piece(data, 52488);
     state->bitfields = create_scenario_piece(data, 26244);
     state->random = create_scenario_piece(data, 26244);
@@ -220,7 +227,7 @@ static void init_scenario_data_classic(scenario_data *data)
     state->end_marker = create_scenario_piece(data, 4);
 }
 
-static void init_scenario_data_extended(scenario_data *data)
+static void init_scenario_data_current(scenario_data *data)
 {
     if (data->num_pieces > 0) {
         for (int i = 0; i < data->num_pieces; i++) {
@@ -230,6 +237,7 @@ static void init_scenario_data_extended(scenario_data *data)
         data->num_pieces = 0;
     }
     scenario_state *state = &data->state;
+    state->file_version = create_scenario_piece(data, 4);
     state->graphic_ids = create_scenario_piece(data, GRID_U16);
     state->edge = create_scenario_piece(data, GRID_U8);
     state->terrain = create_scenario_piece(data, GRID_U16);
@@ -434,8 +442,22 @@ static void init_savegame_data_expanded(void)
     state->end_marker = create_savegame_piece(284, 0); // 71x 4-bytes emptiness
 }
 
-static void scenario_load_from_state(scenario_state *file)
+static void scenario_version_save_state(buffer *buf)
 {
+    buffer_write_u16(buf, SENTINEL);
+    buffer_write_u16(buf, SCENARIO_VERSION);
+}
+
+static void scenario_version_load_state(buffer *buf)
+{
+    buffer_skip(buf, 4);
+}
+
+static void scenario_load_from_state(scenario_state *file, int version)
+{
+    if (version != 0) {
+        scenario_version_load_state(file->file_version);
+    }
     map_image_load_state(file->graphic_ids);
     map_terrain_load_state(file->terrain);
     map_property_load_state(file->bitfields, file->edge);
@@ -452,6 +474,8 @@ static void scenario_load_from_state(scenario_state *file)
 
 static void scenario_save_to_state(scenario_state *file)
 {
+    scenario_version_save_state(file->file_version);
+
     map_image_save_state(file->graphic_ids);
     map_terrain_save_state(file->terrain);
     map_property_save_state(file->bitfields, file->edge);
@@ -628,92 +652,145 @@ static void savegame_save_to_state(savegame_state *state)
     buffer_skip(state->end_marker, 284);
 }
 
-int read_scenario_classic(const char *filename, scenario_data *data)
+static int fetch_scenario_version(FILE *fp)
 {
-    log_info("Loading classic scenario", filename, 0);
-    init_scenario_data_classic(data);
-    FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
-    if (!fp) {
-        return 0;
+    uint16_t sentinel_check = 0;
+    fread(&sentinel_check, 2, 1, fp);
+    if (sentinel_check != SENTINEL) {
+        fseek(fp, 0, SEEK_SET);
+        return 0; // shouldn't be here for mapx files
     }
-    for (int i = 0; i < data->num_pieces; i++) {
-        if (fread(data->pieces[i].buf.data, 1, data->pieces[i].buf.size, fp) != data->pieces[i].buf.size) {
-            log_error("Unable to load classic scenario", filename, 0);
-            file_close(fp);
-            return 0;
-        }
-    }
-    file_close(fp);
 
-    scenario_load_from_state(&data->state);
-    return 1;
+    uint16_t version = 0;
+    fread(&version, 2, 1, fp);
+    fseek(fp, 0, SEEK_SET);
+
+    return version;
 }
 
-int read_scenario_extended(const char *filename, scenario_data *data)
+static void scenario_migrate_mapsize(scenario_data *new_data, scenario_data *old_data, int old_size, int new_size, short has_ver)
 {
-    log_info("Loading augustus scenario", filename, 0);
-    init_scenario_data_extended(data);
-    FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
-    if (!fp) {
-        return 0;
-    }
-    for (int i = 0; i < data->num_pieces; i++) {
-        if (fread(data->pieces[i].buf.data, 1, data->pieces[i].buf.size, fp) != data->pieces[i].buf.size) {
-            log_error("Unable to load augustus scenario", filename, 0);
-            file_close(fp);
-            return 0;
+    // migrating map sizes requires replacing scenario pieces:
+    // 1 graphic_ids (16bit)
+    // 2 edge (8bit)
+    // 3 terrain (16bit)
+    // 4 bitfields (8bit)
+    // 5 random (8bit)
+    // 6 elevation (8bit)
+    // if has_ver is 0 then data won't have the version buffer, read from piece[0-5] instead of [1-6]
+    // scenario map information will also have to be adjusted (start_offset, border_size)
+
+    int piece_bytesize[] = {
+        2,1,2,1,1,1
+    };
+
+    // there will be some throw-away work here to load needed buffers/map information
+    init_scenario_data_current(new_data);
+    
+    // find new top left starting index of larger, centered map
+    int new_start_idx = (new_size - old_size) / 2 * new_size + (new_size - old_size) / 2;
+
+    for (int i = 0; i < old_data->num_pieces; ++i) {
+        buffer_reset(&new_data->pieces[i + 1].buf);
+        if (i < 6) {
+            int bytesize = piece_bytesize[i];
+            buffer *old_buf = &old_data->pieces[i + has_ver].buf;
+            buffer *new_buf = &new_data->pieces[i + 1].buf;
+
+            for (int y = 0; y < old_size; ++y) {
+                int old_idx = y * old_size * bytesize;
+                int new_idx = (new_start_idx * bytesize) + (y * new_size * bytesize);
+
+                buffer_set(new_buf, new_idx);
+                buffer_write_raw(new_buf, &old_buf->data[old_idx], old_size * bytesize);
+            }
+        } else {
+            buffer_write_raw(&new_data->pieces[i + 1].buf, old_data->pieces[i + has_ver].buf.data, old_data->pieces[i + has_ver].buf.size);
         }
+        buffer_reset(&new_data->pieces[i + 1].buf);
     }
-    file_close(fp);
 
-    scenario_load_from_state(&data->state);
-    return 1;
+    // store resized information in original state
+    // fetch incoming map data from old_data
+    int width, height;
+    scenario_load_state(old_data->state.scenario);
+    scenario_map_init();
+    map_grid_size(&width, &height);
 
+    // store modified map data back into new_data
+    scenario.map.grid_border_size = new_size - scenario.map.width;
+    scenario.map.grid_start = (new_size - scenario.map.height) / 2 * new_size + (new_size - scenario.map.width) / 2;
+    scenario_save_state(new_data->state.scenario);
+
+    for (int i = 0; i < new_data->num_pieces; ++i) {
+        buffer_reset(&new_data->pieces[i].buf);
+    }
 }
 
-void scenario_diff(void)
+static int scenario_migrate_and_load_from_state(scenario_data *data, int version)
 {
-    const char *newmap = "small-largemap.map";
-    const char *oldmap = "small-aug.map";
-    scenario_data olddata = { 0 };
-    scenario_data newdata = { 0 };
-    read_scenario_classic(oldmap, &olddata);
-    read_scenario_extended(newmap, &newdata);
-    int oldsize = 162;
-    int newsize = 502;
-
-    FILE *fp = file_open("debug.txt", "w");
-
-    // 2 -> terrain grid
-    int piece = 2;
-    buffer *buf = &olddata.pieces[piece].buf;
-    for (int y = 0; y < oldsize; ++y) {
-        for (int x = 0; x < oldsize; ++x) {
-            int val = buf->data[y * (oldsize*2) + (x * 2)];
-            fprintf(fp, "%d", val);
-        }
-        fprintf(fp, "\n");
-    }
-    buf = &newdata.pieces[piece].buf;
-    for (int y = 0; y < newsize; ++y) {
-        for (int x = 0; x < newsize; ++x) {
-            int val = buf->data[y * (newsize * 2) + (x * 2)];
-            fprintf(fp, "%d", val);
-        }
-        fprintf(fp, "\n");
+    scenario_data migrated_data = {0};
+    switch (version) {
+        case 0: // classic maps are 162x162, have no version buffer
+            log_info("Migrating legacy map", 0, 0);
+            scenario_migrate_mapsize(&migrated_data, data, 162, GRID_SIZE, 0);
+            break;
     }
 
-    fclose(fp);
+    scenario_load_from_state(&migrated_data.state, version);
+    return 0;
 }
 
 int game_file_io_read_scenario(const char *filename)
 {
     scenario_data data = {0};
-    scenario_diff();
 
-    if (!read_scenario_extended(filename, &data)) {
-        return read_scenario_classic(filename, &data);
+    log_info("Loading scenario file", filename, 0);
+    FILE *fp = file_open(dir_get_file(filename, NOT_LOCALIZED), "rb");
+    if (!fp) {
+        return 0;
     }
+
+    log_info("Checking scenario compatibility", 0, 0);
+    int scenario_ver = 0;
+    
+    if (file_has_extension(filename, "mapx")) {
+        scenario_ver = fetch_scenario_version(fp);
+    }
+        
+    switch (scenario_ver) {
+        case 0:
+            log_info("Loading legacy scenario", 0, 0);
+            init_scenario_data_legacy(&data);
+            break;
+        case 1:
+            log_info("Loading Augustus scenario, version", 0, scenario_ver);
+            init_scenario_data_current(&data);
+            break;
+        default:
+            return 0; // unhandled version, don't attempt to load
+    }
+
+    for (int i = 0; i < data.num_pieces; i++) {
+        if (fread(data.pieces[i].buf.data, 1, data.pieces[i].buf.size, fp) != data.pieces[i].buf.size) {
+            log_error("Unable to load scenario", filename, 0);
+            file_close(fp);
+            return 0;
+        }
+    }
+    file_close(fp);
+
+    if (scenario_ver != SCENARIO_VERSION) {
+        // migrate buffers before loading state
+        if (!scenario_migrate_and_load_from_state(&data, scenario_ver)) {
+            log_error("Failed to migrate and load scenario current version", 0, 0);
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
+    scenario_load_from_state(&data.state, scenario_ver);
     return 1;
 }
 
@@ -723,7 +800,7 @@ int game_file_io_write_scenario(const char *filename)
 
     log_info("Saving scenario", filename, 0);
 
-    init_scenario_data_extended(&data);
+    init_scenario_data_current(&data);
     scenario_save_to_state(&data.state);
 
     FILE *fp = file_open(filename, "wb");

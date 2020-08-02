@@ -78,6 +78,7 @@ static struct {
 static file_type_data saved_game_data = {"sav"};
 static file_type_data saved_game_data_expanded = {"svx"};
 static file_type_data scenario_data = {"map"};
+static file_type_data scenario_data_expanded = {"mapx"};
 
 static int double_click = 0;
 
@@ -89,6 +90,8 @@ static void init(file_type type, file_dialog_type dialog_type)
         string_copy(lang_get_string(9, type == FILE_TYPE_SCENARIO ? 7 : 6), data.typed_name, FILE_NAME_MAX);
         if (type == FILE_TYPE_SAVED_GAME) {
             file_append_extension(data.typed_name, saved_game_data_expanded.extension);
+        } else {
+            file_append_extension(data.typed_name, scenario_data_expanded.extension);
         }
         encoding_to_utf8(data.typed_name, data.file_data->last_loaded_file, FILE_NAME_MAX, 0);
     } else {
@@ -100,6 +103,7 @@ static void init(file_type type, file_dialog_type dialog_type)
     if (data.dialog_type != FILE_DIALOG_SAVE) {
         if (type == FILE_TYPE_SCENARIO) {
             data.file_list = dir_find_files_with_extension(".", scenario_data.extension);
+            data.file_list = dir_append_files_with_extension(scenario_data_expanded.extension);
         }  else {
             data.file_list = dir_find_files_with_extension(".", data.file_data->extension);
             data.file_list = dir_append_files_with_extension(saved_game_data_expanded.extension);
