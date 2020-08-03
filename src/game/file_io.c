@@ -62,7 +62,6 @@ static const int GRID_U8  = GRID_SIZE * GRID_SIZE * sizeof(uint8_t);
 static const int GRID_U16 = GRID_SIZE * GRID_SIZE * sizeof(uint16_t);
 
 static const uint16_t SCENARIO_VERSION = 0x01;
-static const uint16_t SENTINEL = 0xCAFE;
 
 static char compress_buffer[COMPRESS_BUFFER_SIZE];
 
@@ -451,13 +450,12 @@ static void init_savegame_data_augustus(savegame_data *data, int version)
 
 static void scenario_version_save_state(buffer *buf)
 {
-    buffer_write_u16(buf, SENTINEL);
     buffer_write_u16(buf, SCENARIO_VERSION);
 }
 
 static void scenario_version_load_state(buffer *buf)
 {
-    buffer_skip(buf, 4);
+    buffer_skip(buf, 2);
 }
 
 static void scenario_load_from_state(scenario_state *file, int version)
@@ -661,13 +659,6 @@ static void savegame_save_to_state(savegame_state *state, int savegame_version)
 
 static int fetch_scenario_version(FILE *fp)
 {
-    uint16_t sentinel_check = 0;
-    fread(&sentinel_check, 1, 2, fp);
-    if (sentinel_check != SENTINEL) {
-        fseek(fp, 0, SEEK_SET);
-        return 0; // shouldn't be here for mapx files
-    }
-
     uint16_t version = 0;
     fread(&version, 1, 2, fp);
     fseek(fp, 0, SEEK_SET);
@@ -775,7 +766,7 @@ int game_file_io_read_scenario(const char *filename)
     log_info("Checking scenario compatibility", 0, 0);
     int scenario_ver = 0;
     
-    if (file_has_extension(filename, "mapx")) {
+    if (file_has_extension(filename, "mpx")) {
         scenario_ver = fetch_scenario_version(fp);
     }
         

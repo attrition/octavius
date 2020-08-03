@@ -78,7 +78,7 @@ static struct {
 static file_type_data saved_game_data = {"sav"};
 static file_type_data saved_game_data_expanded = {"svx"};
 static file_type_data scenario_data = {"map"};
-static file_type_data scenario_data_expanded = {"mapx"};
+static file_type_data scenario_data_expanded = {"mpx"};
 
 static int double_click = 0;
 
@@ -238,8 +238,8 @@ static void button_ok_cancel(int is_ok, int param2)
             game_file_write_saved_game(filename);
             window_city_show();
         } else if (data.type == FILE_TYPE_SCENARIO) {
-            if (!file_has_extension(filename, scenario_data.extension)) {
-                file_append_extension(filename, scenario_data.extension);
+            if (!file_has_extension(filename, scenario_data_expanded.extension)) {
+                file_append_extension(filename, scenario_data_expanded.extension);
             }
             game_file_editor_write_scenario(filename);
             window_editor_map_show();

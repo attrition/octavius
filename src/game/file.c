@@ -339,9 +339,17 @@ static const char *get_scenario_filename(const uint8_t *scenario_name, int decom
 {
     static char filename[FILE_NAME_MAX];
     encoding_to_utf8(scenario_name, filename, FILE_NAME_MAX, decomposed);
-    if (!file_has_extension(filename, "map")) {
-        file_append_extension(filename, "map");
+    
+    if (!file_has_extension(filename, "mpx")) {
+        file_append_extension(filename, "mpx");
     }
+
+    if (!file_exists(filename, 1)) {
+        if (!file_has_extension(filename, "map")) {
+            file_change_extension(filename, "map");
+        }
+    }
+
     return filename;
 }
 
