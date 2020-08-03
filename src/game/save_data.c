@@ -1,5 +1,8 @@
 #include "save_data.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 void init_file_piece(file_piece *piece, int size, int compressed)
 {
     piece->compressed = compressed;
