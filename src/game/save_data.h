@@ -3,7 +3,7 @@
 
 #include "core/buffer.h"
 
-#define SAVE_GAME_VERSION_CLASSIC 0x66
+#define SAVE_GAME_VERSION_LEGACY 0x66
 #define SAVE_GAME_VERSION_AUG_V1 0x76
 #define SAVE_GAME_VERSION 0x77
 #define SCENARIO_VERSION 0x01
@@ -125,8 +125,14 @@ typedef struct {
     savegame_state state;
 } savegame_data;
 
-buffer *save_data_create_savegame_piece(savegame_data *data, int size, int compressed);
+void save_data_init_scenario_data_legacy(scenario_data *data);
+void save_data_init_scenario_data_current(scenario_data *data);
+void save_data_scenario_load_from_state(scenario_state *file, int version);
+void save_data_scenario_save_to_state(scenario_state *file);
 
-buffer *save_data_create_scenario_piece(scenario_data *data, int size);
+void save_data_init_savegame_data_legacy(savegame_data *data);
+void save_data_init_savegame_data_augustus(savegame_data *data, int version);
+void save_data_savegame_load_from_state(savegame_state *state);
+void save_data_savegame_save_to_state(savegame_state *state, int savegame_version);
 
 #endif

@@ -119,7 +119,7 @@ void migrate_savegame_mapsize(savegame_data *new_data, savegame_data *old_data, 
 int migrate_savegame_and_load_from_state(savegame_data *migrated_data, savegame_data *data, int version)
 {
     switch (version) {
-        case SAVE_GAME_VERSION_CLASSIC: // classic maps are 162x162, have no version buffer
+        case SAVE_GAME_VERSION_LEGACY: // classic maps are 162x162, have no version buffer
         case SAVE_GAME_VERSION_AUG_V1:  // same for the initial augustus expanded save version
             log_info("Migrating legacy map size", 0, 0);
             migrate_savegame_mapsize(migrated_data, data, 162, GRID_SIZE);
