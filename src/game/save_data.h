@@ -125,4 +125,8 @@ typedef struct {
     savegame_state state;
 } savegame_data;
 
+buffer *save_data_create_savegame_piece(savegame_data *data, int size, int compressed);
+
+buffer *save_data_create_scenario_piece(scenario_data *data, int size);
+
 #endif
