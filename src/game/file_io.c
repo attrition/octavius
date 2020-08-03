@@ -22,6 +22,8 @@
 #include "figure/name.h"
 #include "figure/route.h"
 #include "figure/trader.h"
+#include "game/migrate_save_data.h"
+#include "game/save_data.h"
 #include "game/time.h"
 #include "game/tutorial.h"
 #include "map/aqueduct.h"
@@ -37,7 +39,6 @@
 #include "map/sprite.h"
 #include "map/terrain.h"
 #include "scenario/criteria.h"
-#include "scenario/data.h"
 #include "scenario/earthquake.h"
 #include "scenario/emperor_change.h"
 #include "scenario/gladiator_revolt.h"
@@ -54,133 +55,7 @@
 #define COMPRESS_BUFFER_SIZE 3000000
 #define UNCOMPRESSED 0x80000000
 
-#define SAVE_GAME_VERSION_CLASSIC 0x66
-#define SAVE_GAME_VERSION_AUG_V1 0x76
-#define SAVE_GAME_VERSION 0x77
-
-static const int GRID_U8  = GRID_SIZE * GRID_SIZE * sizeof(uint8_t);
-static const int GRID_U16 = GRID_SIZE * GRID_SIZE * sizeof(uint16_t);
-
-static const uint16_t SCENARIO_VERSION = 0x01;
-
 static char compress_buffer[COMPRESS_BUFFER_SIZE];
-
-typedef struct {
-    buffer buf;
-    int compressed;
-} file_piece;
-
-typedef struct {
-    buffer *file_version;
-    buffer *graphic_ids;
-    buffer *edge;
-    buffer *terrain;
-    buffer *bitfields;
-    buffer *random;
-    buffer *elevation;
-    buffer *random_iv;
-    buffer *camera;
-    buffer *scenario;
-    buffer *end_marker;
-} scenario_state;
-
-typedef struct {
-    int num_pieces;
-    file_piece pieces[11];
-    scenario_state state;
-} scenario_data;
-
-typedef struct {
-    buffer *scenario_campaign_mission;
-    buffer *file_version;
-    buffer *image_grid;
-    buffer *edge_grid;
-    buffer *building_grid;
-    buffer *terrain_grid;
-    buffer *aqueduct_grid;
-    buffer *figure_grid;
-    buffer *bitfields_grid;
-    buffer *sprite_grid;
-    buffer *random_grid;
-    buffer *desirability_grid;
-    buffer *elevation_grid;
-    buffer *building_damage_grid;
-    buffer *aqueduct_backup_grid;
-    buffer *sprite_backup_grid;
-    buffer *figures;
-    buffer *route_figures;
-    buffer *route_paths;
-    buffer *formations;
-    buffer *formation_totals;
-    buffer *city_data;
-    buffer *city_faction_unknown;
-    buffer *player_name;
-    buffer *city_faction;
-    buffer *buildings;
-    buffer *city_view_orientation;
-    buffer *game_time;
-    buffer *building_extra_highest_id_ever;
-    buffer *random_iv;
-    buffer *city_view_camera;
-    buffer *building_count_culture1;
-    buffer *city_graph_order;
-    buffer *emperor_change_time;
-    buffer *empire;
-    buffer *empire_cities;
-    buffer *building_count_industry;
-    buffer *trade_prices;
-    buffer *figure_names;
-    buffer *culture_coverage;
-    buffer *scenario;
-    buffer *max_game_year;
-    buffer *earthquake;
-    buffer *emperor_change_state;
-    buffer *messages;
-    buffer *message_extra;
-    buffer *population_messages;
-    buffer *message_counts;
-    buffer *message_delays;
-    buffer *building_list_burning_totals;
-    buffer *figure_sequence;
-    buffer *scenario_settings;
-    buffer *invasion_warnings;
-    buffer *scenario_is_custom;
-    buffer *city_sounds;
-    buffer *building_extra_highest_id;
-    buffer *figure_traders;
-    buffer *building_list_burning;
-    buffer *building_list_small;
-    buffer *building_list_large;
-    buffer *tutorial_part1;
-    buffer *building_count_military;
-    buffer *enemy_army_totals;
-    buffer *building_storages;
-    buffer *building_count_culture2;
-    buffer *building_count_support;
-    buffer *tutorial_part2;
-    buffer *gladiator_revolt;
-    buffer *trade_route_limit;
-    buffer *trade_route_traded;
-    buffer *building_barracks_tower_sentry;
-    buffer *building_extra_sequence;
-    buffer *routing_counters;
-    buffer *building_count_culture3;
-    buffer *enemy_armies;
-    buffer *city_entry_exit_xy;
-    buffer *last_invasion_id;
-    buffer *building_extra_corrupt_houses;
-    buffer *scenario_name;
-    buffer *bookmarks;
-    buffer *tutorial_part3;
-    buffer *city_entry_exit_grid_offset;
-    buffer *end_marker;
-} savegame_state;
-
-typedef struct {
-    int num_pieces;
-    file_piece pieces[100];
-    savegame_state state;
-} savegame_data;
 
 static void init_file_piece(file_piece *piece, int size, int compressed)
 {
@@ -236,14 +111,17 @@ static void init_scenario_data_current(scenario_data *data)
         }
         data->num_pieces = 0;
     }
+
+    int grid_u8 = GRID_SIZE * GRID_SIZE * sizeof(uint8_t);
+
     scenario_state *state = &data->state;
     state->file_version = create_scenario_piece(data, 4);
-    state->graphic_ids = create_scenario_piece(data, GRID_U16);
-    state->edge = create_scenario_piece(data, GRID_U8);
-    state->terrain = create_scenario_piece(data, GRID_U16);
-    state->bitfields = create_scenario_piece(data, GRID_U8);
-    state->random = create_scenario_piece(data, GRID_U8);
-    state->elevation = create_scenario_piece(data, GRID_U8);
+    state->graphic_ids = create_scenario_piece(data, grid_u8 * 2);
+    state->edge = create_scenario_piece(data, grid_u8);
+    state->terrain = create_scenario_piece(data, grid_u8 * 2);
+    state->bitfields = create_scenario_piece(data, grid_u8);
+    state->random = create_scenario_piece(data, grid_u8);
+    state->elevation = create_scenario_piece(data, grid_u8);
     state->random_iv = create_scenario_piece(data, 8);
     state->camera = create_scenario_piece(data, 8);
     state->scenario = create_scenario_piece(data, 1720);
@@ -355,7 +233,7 @@ static void init_savegame_data_augustus(savegame_data *data, int version)
         data->num_pieces = 0;
     }
 
-    int grid_u8 = GRID_U8;
+    int grid_u8 = GRID_SIZE * GRID_SIZE * sizeof(uint8_t);
     switch (version) {
         case SAVE_GAME_VERSION_AUG_V1:
             grid_u8 = 162 * 162 * sizeof(uint8_t);
@@ -666,93 +544,6 @@ static int fetch_scenario_version(FILE *fp)
     return version;
 }
 
-static void migrate_buffer_mapsize(buffer *new_buf, buffer* old_buf, int bytesize, int old_size, int new_size)
-{
-    // find new top left starting index of larger, centered map
-    int new_start_idx = (new_size - old_size) / 2 * new_size + (new_size - old_size) / 2;
-    for (int y = 0; y < old_size; ++y) {
-        int old_idx = y * old_size * bytesize;
-        int new_idx = (new_start_idx * bytesize) + (y * new_size * bytesize);
-
-        buffer_set(new_buf, new_idx);
-        buffer_write_raw(new_buf, &old_buf->data[old_idx], old_size * bytesize);
-    }
-}
-
-static void migrate_scenario_map_data(buffer *new_scenario, buffer *old_scenario, int old_size, int new_size)
-{
-    // store resized information in original state
-    // fetch incoming map data from old_data
-    int width, height;
-    scenario_load_state(old_scenario);
-    scenario_map_init();
-    map_grid_size(&width, &height);
-
-    // store modified map data back into new_data
-    scenario.map.grid_border_size = new_size - scenario.map.width;
-    scenario.map.grid_start = (new_size - scenario.map.height) / 2 * new_size + (new_size - scenario.map.width) / 2;
-    scenario_save_state(new_scenario);
-}
-
-static void scenario_migrate_mapsize(scenario_data *new_data, scenario_data *old_data, int old_size, int new_size, short has_ver)
-{
-    // migrating map sizes requires replacing scenario pieces:
-    // 1 graphic_ids (16bit)
-    // 2 edge (8bit)
-    // 3 terrain (16bit)
-    // 4 bitfields (8bit)
-    // 5 random (8bit)
-    // 6 elevation (8bit)
-    // if has_ver is 0 then data won't have the version buffer, read from piece[0-5] instead of [1-6]
-    // scenario map information will also have to be adjusted (start_offset, border_size)
-
-    int piece_bytesize[] = {
-        2,1,2,1,1,1
-    };
-
-    // there will be some throw-away work here to load needed buffers/map information
-    init_scenario_data_current(new_data);
-        
-    for (int i = 0; i < old_data->num_pieces; ++i) {
-        buffer *old_buf = &old_data->pieces[i + has_ver].buf;
-        buffer *new_buf = &new_data->pieces[i + 1].buf;
-
-        buffer_reset(old_buf);
-        buffer_reset(new_buf);
-
-        if (i < 6) {
-            int bytesize = piece_bytesize[i];
-            migrate_buffer_mapsize(new_buf, old_buf, bytesize, old_size, new_size);
-        } else {
-            buffer_write_raw(new_buf, old_buf->data, old_buf->size);
-        }
-
-        buffer_reset(old_buf);
-        buffer_reset(new_buf);
-    }
-}
-
-static int scenario_migrate_and_load_from_state(scenario_data *data, int version)
-{
-    scenario_data migrated_data = {0};
-    switch (version) {
-        case 0: // classic maps are 162x162, have no version buffer
-            log_info("Migrating legacy map", 0, 0);
-            scenario_migrate_mapsize(&migrated_data, data, 162, GRID_SIZE, 0);
-            migrate_scenario_map_data(migrated_data.state.scenario, data->state.scenario, 162, GRID_SIZE);
-            break;
-        default:
-            return 0; // unsupported scenario version
-    }
-
-    for (int i = 0; i < migrated_data.num_pieces; ++i) {
-        buffer_reset(&migrated_data.pieces[i].buf);
-    }
-
-    scenario_load_from_state(&migrated_data.state, version);
-    return 1;
-}
-
 int game_file_io_read_scenario(const char *filename)
 {
     scenario_data data = {0};
@@ -794,10 +585,13 @@ int game_file_io_read_scenario(const char *filename)
 
     if (scenario_ver != SCENARIO_VERSION) {
         // migrate buffers and load state
-        if (!scenario_migrate_and_load_from_state(&data, scenario_ver)) {
+        scenario_data migrated_data = {0};
+        init_scenario_data_current(&migrated_data);
+        if (!migrate_scenario_and_load_from_state(&migrated_data, &data, scenario_ver)) {
             log_error("Failed to migrate and load scenario current version", 0, 0);
             return 0;
         }
+        scenario_load_from_state(&migrated_data.state, scenario_ver);
         return 1;
     }
 
@@ -913,58 +707,6 @@ static void savegame_write_to_file(savegame_data *data, FILE *fp)
     }
 }
 
-static void savegame_migrate_mapsize(savegame_data *new_data, savegame_data *old_data, int old_size, int new_size)
-{
-    // only needed for the map-related buffers
-    int piece_bytesize[] = {
-        1, 1, // mission and file_version, skipped
-        2, 1, 2, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1
-    };
-
-    // there will be some throw-away work here to load needed buffers/map information
-    init_savegame_data_augustus(new_data, SAVE_GAME_VERSION);
-
-    for (int i = 0; i < old_data->num_pieces; ++i) {
-        buffer *old_buf = &old_data->pieces[i].buf;
-        buffer *new_buf = &new_data->pieces[i].buf;
-
-        buffer_reset(old_buf);
-        buffer_reset(new_buf);
-
-        if (i > 1 && i < 16) {
-            migrate_buffer_mapsize(new_buf, old_buf, piece_bytesize[i], old_size, new_size);            
-        } else { //if (i > 20 && i != 25 && (i < 57 || i > 59)) { // skip figures/routes/buildings
-            buffer_write_raw(new_buf, old_buf->data, old_buf->size);
-        }
-
-        buffer_reset(old_buf);
-        buffer_reset(new_buf);
-    }
-}
-
-static int savegame_migrate_and_load_from_state(savegame_data *data, int version)
-{
-    savegame_data migrated_data = {0};
-    switch (version) {
-        case SAVE_GAME_VERSION_CLASSIC: // classic maps are 162x162, have no version buffer
-        case SAVE_GAME_VERSION_AUG_V1:  // same for the initial augustus expanded save version
-            log_info("Migrating legacy map size", 0, 0);
-            savegame_migrate_mapsize(&migrated_data, data, 162, GRID_SIZE);
-            migrate_scenario_map_data(migrated_data.state.scenario, data->state.scenario, 162, GRID_SIZE);
-            //migrate_figure_data(&migrated_data, data);
-            break;
-        default:
-            return 0; // unsupported savegame version            
-    }
-
-    for (int i = 0; i < migrated_data.num_pieces; ++i) {
-        buffer_reset(&migrated_data.pieces[i].buf);
-    }
-
-    savegame_load_from_state(&migrated_data.state);
-    return 1;
-}
-
 int game_file_io_read_saved_game(const char *filename, int offset)
 {
     savegame_data data = {0};
@@ -1007,10 +749,13 @@ int game_file_io_read_saved_game(const char *filename, int offset)
 
     if (savegame_version != SAVE_GAME_VERSION) {
         // migrate buffers and load state
-        if (!savegame_migrate_and_load_from_state(&data, savegame_version)) {
+        savegame_data migrated_data = {0};
+        init_savegame_data_augustus(&migrated_data, SAVE_GAME_VERSION);
+        if (!migrate_savegame_and_load_from_state(&migrated_data, &data, savegame_version)) {
             log_error("Failed to migrate and load savegame current version", 0, 0);
             return 0;
         }
+        savegame_load_from_state(&migrated_data.state);
         return 1;
     }
 
