@@ -39,19 +39,9 @@ int game_file_io_read_scenario(const char *filename)
     if (file_has_extension(filename, "mpx")) {
         scenario_ver = fetch_scenario_version(fp);
     }
-        
-    switch (scenario_ver) {
-        case 0:
-            log_info("Loading legacy scenario", 0, 0);
-            save_data_init_scenario_data_legacy(&data);
-            break;
-        case 1:
-            log_info("Loading Augustus scenario, version", 0, scenario_ver);
-            save_data_init_scenario_data_current(&data);
-            break;
-        default:
-            return 0; // unhandled version, don't attempt to load
-    }
+
+    log_info("Loading scenario version", 0, scenario_ver);
+    save_data_scenario_init_data(&data, scenario_ver);
 
     for (int i = 0; i < data.num_pieces; i++) {
         if (fread(data.pieces[i].buf.data, 1, data.pieces[i].buf.size, fp) != data.pieces[i].buf.size) {
@@ -65,7 +55,7 @@ int game_file_io_read_scenario(const char *filename)
     if (scenario_ver != SCENARIO_VERSION) {
         // migrate buffers and load state
         scenario_data migrated_data = {0};
-        save_data_init_scenario_data_current(&migrated_data);
+        save_data_scenario_init_data(&migrated_data, SCENARIO_VERSION);
         if (!migrate_scenario_and_load_from_state(&migrated_data, &data, scenario_ver)) {
             log_error("Failed to migrate and load scenario current version", 0, 0);
             return 0;
@@ -84,7 +74,7 @@ int game_file_io_write_scenario(const char *filename)
 
     log_info("Saving scenario", filename, 0);
 
-    save_data_init_scenario_data_current(&data);
+    save_data_scenario_init_data(&data, SCENARIO_VERSION);
     save_data_scenario_save_to_state(&data.state);
 
     FILE *fp = file_open(filename, "wb");
@@ -210,12 +200,12 @@ int game_file_io_read_saved_game(const char *filename, int offset)
     switch (savegame_version) {
         case SAVE_GAME_VERSION_LEGACY:
             log_info("Loading saved game with legacy format.", 0, 0);
-            save_data_init_savegame_data_legacy(&data);
+            save_data_savegame_init_data_legacy(&data);
             break;
         case SAVE_GAME_VERSION_AUG_V1:
         case SAVE_GAME_VERSION:
             log_info("Loading saved game with augustus current format.", 0, 0);
-            save_data_init_savegame_data_augustus(&data, savegame_version);
+            save_data_savegame_init_data_augustus(&data, savegame_version);
             break;
     }
 
@@ -229,7 +219,7 @@ int game_file_io_read_saved_game(const char *filename, int offset)
     if (savegame_version != SAVE_GAME_VERSION) {
         // migrate buffers and load state
         savegame_data migrated_data = {0};
-        save_data_init_savegame_data_augustus(&migrated_data, SAVE_GAME_VERSION);
+        save_data_savegame_init_data_augustus(&migrated_data, SAVE_GAME_VERSION);
         if (!migrate_savegame_and_load_from_state(&migrated_data, &data, savegame_version)) {
             log_error("Failed to migrate and load savegame current version", 0, 0);
             return 0;
@@ -248,7 +238,7 @@ int game_file_io_write_saved_game(const char *filename)
     log_info("Saving game", filename, 0);
     int savegame_version = SAVE_GAME_VERSION;
 
-    save_data_init_savegame_data_augustus(&data, savegame_version);
+    save_data_savegame_init_data_augustus(&data, savegame_version);
     save_data_savegame_save_to_state(&data.state, savegame_version);
 
     FILE *fp = file_open(filename, "wb");

@@ -69,31 +69,7 @@ buffer *create_savegame_piece(savegame_data *data, int size, int compressed)
     return &piece->buf;
 }
 
-
-void save_data_init_scenario_data_legacy(scenario_data *data)
-{
-    if (data->num_pieces > 0) {
-        for (int i = 0; i < data->num_pieces; i++) {
-            buffer_reset(&data->pieces[i].buf);
-            free(data->pieces[i].buf.data);
-        }
-        data->num_pieces = 0;
-    }
-
-    scenario_state *state = &data->state;                              // classic map sizes:
-    state->graphic_ids = create_scenario_piece(data, 52488); // 162x162 x 2 bytes
-    state->edge = create_scenario_piece(data, 26244);        // 162x162 x 1 byte
-    state->terrain = create_scenario_piece(data, 52488);
-    state->bitfields = create_scenario_piece(data, 26244);
-    state->random = create_scenario_piece(data, 26244);
-    state->elevation = create_scenario_piece(data, 26244);
-    state->random_iv = create_scenario_piece(data, 8);
-    state->camera = create_scenario_piece(data, 8);
-    state->scenario = create_scenario_piece(data, 1720);
-    state->end_marker = create_scenario_piece(data, 4);
-}
-
-void save_data_init_scenario_data_current(scenario_data *data)
+void save_data_scenario_init_data(scenario_data *data, int version)
 {
     if (data->num_pieces > 0) {
         for (int i = 0; i < data->num_pieces; i++) {
@@ -104,9 +80,18 @@ void save_data_init_scenario_data_current(scenario_data *data)
     }
 
     int grid_u8 = GRID_SIZE * GRID_SIZE * sizeof(uint8_t);
+    switch (version) {
+        case SCENARIO_VERSION_LEGACY:
+            grid_u8 = 162 * 162 * sizeof(uint8_t);
+            break;
+    }
 
     scenario_state *state = &data->state;
-    state->file_version = create_scenario_piece(data, 4);
+    
+    // legacy doesn't have a scenario version
+    if (version != SCENARIO_VERSION_LEGACY) {
+        state->file_version = create_scenario_piece(data, 4);
+    }
     state->graphic_ids = create_scenario_piece(data, grid_u8 * 2);
     state->edge = create_scenario_piece(data, grid_u8);
     state->terrain = create_scenario_piece(data, grid_u8 * 2);
@@ -119,7 +104,7 @@ void save_data_init_scenario_data_current(scenario_data *data)
     state->end_marker = create_scenario_piece(data, 4);
 }
 
-void save_data_init_savegame_data_legacy(savegame_data *data)
+void save_data_savegame_init_data_legacy(savegame_data *data)
 {
     if (data->num_pieces > 0) {
         for (int i = 0; i < data->num_pieces; i++) {
@@ -214,7 +199,7 @@ void save_data_init_savegame_data_legacy(savegame_data *data)
     state->end_marker = create_savegame_piece(data, 284, 0); // 71x 4-bytes emptiness
 }
 
-void save_data_init_savegame_data_augustus(savegame_data *data, int version)
+void save_data_savegame_init_data_augustus(savegame_data *data, int version)
 {
     if (data->num_pieces > 0) {
         for (int i = 0; i < data->num_pieces; i++) {
