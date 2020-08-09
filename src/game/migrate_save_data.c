@@ -22,7 +22,8 @@ void migrate_buffer_mapsize(buffer *new_buf, buffer *old_buf, int bytesize, int 
     }
 }
 
-void migrate_scenario_map_camera_data(buffer *new_scenario, buffer *old_scenario, buffer *new_camera, buffer *old_camera, int old_size, int new_size)
+void migrate_scenario_map_camera_data(buffer *new_scenario, buffer *old_scenario,
+    buffer *new_camera, buffer *old_camera, int old_size, int new_size)
 {
     // store resized information in original state
     // fetch incoming map data from old_data
@@ -40,7 +41,8 @@ void migrate_scenario_map_camera_data(buffer *new_scenario, buffer *old_scenario
 
     // store modified map data back into new_data
     scenario.map.grid_border_size = new_size - scenario.map.width;
-    scenario.map.grid_start = (new_size - scenario.map.height) / 2 * new_size + (new_size - scenario.map.width) / 2;
+    scenario.map.grid_start = (new_size - scenario.map.height) / 2 *
+        new_size + (new_size - scenario.map.width) / 2;
     scenario_save_state(new_scenario);
 
     // apply new map boundary to previous camera offset
@@ -51,7 +53,8 @@ void migrate_scenario_map_camera_data(buffer *new_scenario, buffer *old_scenario
     city_view_save_scenario_state(new_camera);
 }
 
-void migrate_scenario_mapsize(scenario_data *new_data, scenario_data *old_data, int old_size, int new_size, short has_ver)
+void migrate_scenario_mapsize(scenario_data *new_data, scenario_data *old_data,
+    int old_size, int new_size, short has_ver)
 {
     // migrating map sizes requires replacing scenario pieces:
     // 1 graphic_ids (16bit)
@@ -86,13 +89,14 @@ void migrate_scenario_mapsize(scenario_data *new_data, scenario_data *old_data, 
     }
 }
 
-int migrate_scenario_and_load_from_state(scenario_data *migrated_data, scenario_data *data, int version)
+int migrate_scenario_data(scenario_data *migrated_data, scenario_data *data, int version)
 {
     switch (version) {
         case 0: // classic maps are 162x162, have no version buffer
             log_info("Migrating legacy map", 0, 0);
             migrate_scenario_mapsize(migrated_data, data, 162, GRID_SIZE, 0);
-            migrate_scenario_map_camera_data(migrated_data->state.scenario, data->state.scenario, migrated_data->state.camera, data->state.camera, 162, GRID_SIZE);
+            migrate_scenario_map_camera_data(migrated_data->state.scenario, data->state.scenario,
+                migrated_data->state.camera, data->state.camera, 162, GRID_SIZE);
             break;
         default:
             return 0; // unsupported scenario version
@@ -131,14 +135,15 @@ void migrate_savegame_mapsize(savegame_data *new_data, savegame_data *old_data, 
     }
 }
 
-int migrate_savegame_and_load_from_state(savegame_data *migrated_data, savegame_data *data, int version)
+int migrate_savegame_data(savegame_data *migrated_data, savegame_data *data, int version)
 {
     switch (version) {
         case SAVE_GAME_VERSION_LEGACY: // classic maps are 162x162, have no version buffer
         case SAVE_GAME_VERSION_AUG_V1:  // same for the initial augustus expanded save version
             log_info("Migrating legacy map size", 0, 0);
             migrate_savegame_mapsize(migrated_data, data, 162, GRID_SIZE);
-            migrate_scenario_map_camera_data(migrated_data->state.scenario, data->state.scenario, migrated_data->state.city_view_camera, data->state.city_view_camera, 162, GRID_SIZE);
+            migrate_scenario_map_camera_data(migrated_data->state.scenario, data->state.scenario,
+                migrated_data->state.city_view_camera, data->state.city_view_camera, 162, GRID_SIZE);
             //migrate_figure_data(&migrated_data, data);
             break;
         default:

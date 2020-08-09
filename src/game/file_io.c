@@ -56,7 +56,7 @@ int game_file_io_read_scenario(const char *filename)
         // migrate buffers and load state
         scenario_data migrated_data = {0};
         save_data_scenario_init_data(&migrated_data, SCENARIO_VERSION);
-        if (!migrate_scenario_and_load_from_state(&migrated_data, &data, scenario_ver)) {
+        if (!migrate_scenario_data(&migrated_data, &data, scenario_ver)) {
             log_error("Failed to migrate and load scenario current version", 0, 0);
             return 0;
         }
@@ -64,6 +64,7 @@ int game_file_io_read_scenario(const char *filename)
         return 1;
     }
 
+    // load normal, non-migrated data
     save_data_scenario_load_from_state(&data.state, scenario_ver);
     return 1;
 }
@@ -220,7 +221,7 @@ int game_file_io_read_saved_game(const char *filename, int offset)
         // migrate buffers and load state
         savegame_data migrated_data = {0};
         save_data_savegame_init_data_augustus(&migrated_data, SAVE_GAME_VERSION);
-        if (!migrate_savegame_and_load_from_state(&migrated_data, &data, savegame_version)) {
+        if (!migrate_savegame_data(&migrated_data, &data, savegame_version)) {
             log_error("Failed to migrate and load savegame current version", 0, 0);
             return 0;
         }
