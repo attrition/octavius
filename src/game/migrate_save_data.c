@@ -1,8 +1,11 @@
 #include "migrate_save_data.h"
 
+#include "building/building.h"
 #include "city/view.h"
 #include "core/buffer.h"
 #include "core/log.h"
+#include "figure/figure.h"
+#include "figure/formation.h"
 #include "game/save_data.h"
 #include "map/grid.h"
 #include "scenario/data.h"
@@ -25,6 +28,12 @@ void migrate_buffer_mapsize(buffer *new_buf, buffer *old_buf, int bytesize, int 
 void migrate_scenario_map_camera_data(buffer *new_scenario, buffer *old_scenario,
     buffer *new_camera, buffer *old_camera, int old_size, int new_size)
 {
+    // prep buffers for reading/writing
+    buffer_reset(old_camera);
+    buffer_reset(old_scenario);
+    buffer_reset(new_camera);
+    buffer_reset(new_scenario);
+
     // store resized information in original state
     // fetch incoming map data from old_data
     int width, height;
@@ -74,18 +83,13 @@ void migrate_scenario_mapsize(scenario_data *new_data, scenario_data *old_data,
         buffer *old_buf = &old_data->pieces[i + has_ver].buf;
         buffer *new_buf = &new_data->pieces[i + 1].buf;
 
-        buffer_reset(old_buf);
-        buffer_reset(new_buf);
-
         if (i < 6) {
             int bytesize = piece_bytesize[i];
             migrate_buffer_mapsize(new_buf, old_buf, bytesize, old_size, new_size);
         } else {
+            buffer_reset(new_buf);
             buffer_write_raw(new_buf, old_buf->data, old_buf->size);
         }
-
-        buffer_reset(old_buf);
-        buffer_reset(new_buf);
     }
 }
 
@@ -113,25 +117,141 @@ void migrate_savegame_mapsize(savegame_data *new_data, savegame_data *old_data, 
 {
     // only needed for the map-related buffers
     int piece_bytesize[] = {
-        1, 1, // mission and file_version, skipped
         2, 1, 2, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1
     };
 
-    for (int i = 0; i < old_data->num_pieces; ++i) {
+    for (int i = 2; i < 16; ++i) {
         buffer *old_buf = &old_data->pieces[i].buf;
         buffer *new_buf = &new_data->pieces[i].buf;
 
-        buffer_reset(old_buf);
-        buffer_reset(new_buf);
+        migrate_buffer_mapsize(new_buf, old_buf, piece_bytesize[i - 2], old_size, new_size);
+    }
+}
 
-        if (i > 1 && i < 16) {
-            migrate_buffer_mapsize(new_buf, old_buf, piece_bytesize[i], old_size, new_size);
-        } else { //if (i > 20 && i != 25 && (i < 57 || i > 59)) { // skip figures/routes/buildings
-            buffer_write_raw(new_buf, old_buf->data, old_buf->size);
+void copy_raw_buffers(file_piece *new_pieces, file_piece *old_pieces, int num_pieces)
+{
+    for (int i = 0; i < num_pieces; ++i) {
+        buffer *old_buf = &old_pieces[i].buf;
+        buffer *new_buf = &new_pieces[i].buf;
+
+        buffer_reset(new_buf); // defensive reset
+        buffer_write_raw(new_buf, old_buf->data, old_buf->size);
+    }
+}
+
+void insert_offsets_with_array(buffer *new_buf, buffer *old_buf, int offset_count,
+    int offsets[], int insert_bytes[], int obj_size, int obj_count, int initial_offset)
+{
+    int padding = 0;
+    buffer_reset(new_buf);
+
+    // there may be data before the array portion begins
+    if (initial_offset) {
+        buffer_write_raw(new_buf, old_buf->data, initial_offset);
+    }
+
+    for (int idx_object = 0; idx_object < obj_count; ++idx_object) {
+        int offset_prev = 0;
+        int offset_into_all_obj = initial_offset + (idx_object * obj_size);
+        for (int idx_offset = 0; idx_offset < offset_count; ++idx_offset) {
+            int offset_curr = offsets[idx_offset];
+            
+            int length = offset_curr - offset_prev;
+
+            // first copy the data up to the offset
+            buffer_write_raw(new_buf, old_buf->data + offset_into_all_obj + offset_prev, length);
+            // then insert the padding
+            buffer_write_raw(new_buf, &padding, insert_bytes[idx_offset]);
+
+            offset_prev = offset_curr;
         }
+        // copy remainder from last offset to end of object
+        buffer_write_raw(new_buf, old_buf-> data + offset_into_all_obj + offset_prev,
+            obj_size - offset_prev);
+    }
+    
+    // lastly copy any data after the array portion
+    int offset_post = initial_offset + (obj_count * obj_size);
+    buffer_write_raw(new_buf, old_buf->data + offset_post, old_buf->size - offset_post);
+}
 
-        buffer_reset(old_buf);
-        buffer_reset(new_buf);
+void migration_strategy_savegame_classic(savegame_data *migrated_data, savegame_data *data, int version)
+{
+    log_info("Migrating legacy map size", 0, 0);
+    // naively copy raw buffers, then go back and spot-update buffers we know need fixing
+    copy_raw_buffers(migrated_data->pieces, data->pieces, data->num_pieces);
+    migrate_savegame_mapsize(migrated_data, data, 162, GRID_SIZE);
+    migrate_scenario_map_camera_data(migrated_data->state.scenario, data->state.scenario,
+        migrated_data->state.city_view_camera, data->state.city_view_camera, 162, GRID_SIZE);
+
+    // fixes needed/piece number:
+
+    // figure       16
+    {
+        int arr_offsets[] = { // where to punch in extra bytes
+            21, 22, 23, 24, 27, 29,
+            30, 31, 33, 34, 35, 36
+        };
+        int arr_insert_bytes[] = { // how many bytes to punch in, parallel to arr_offsets
+            1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1
+        };
+        int arr_count = 12;
+
+        int old_obj_size = sizeof(figure) - 14;
+        int item_count = MAX_FIGURES;
+        if (version == SAVE_GAME_VERSION_LEGACY) {
+            item_count = 1000;
+        }
+        int initial_offset = 0;
+        insert_offsets_with_array(&migrated_data->pieces[16].buf, &data->pieces[16].buf,
+            arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, initial_offset);
+    }
+
+    // formations   19
+    {
+        int arr_offsets[] = { // where to punch in extra bytes
+            47, 48, 49, 50, 51, 52, 53, 54, 101, 102
+        };
+        int arr_insert_bytes[] = { // how many bytes to punch in, parallel to arr_offsets
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+        };
+
+        int arr_count = 10;
+        int old_obj_size = sizeof(formation) - 10;
+        int item_count = MAX_FORMATIONS;
+        int global_offset = 0;
+        insert_offsets_with_array(&migrated_data->pieces[19].buf, &data->pieces[19].buf,
+            arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, global_offset);
+    }
+
+    // city_data    21
+    {
+        int arr_offsets[] = { // where to punch in extra bytes
+            21, 22, 23, 24, 27, 29,
+            30, 31, 33, 34, 35, 36
+        };
+        int arr_insert_bytes[] = { // how many bytes to punch in, parallel to arr_offsets
+            1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1
+        };
+
+        int arr_count = 12;
+        int old_obj_size = sizeof(figure) - 14;
+        int item_count = MAX_FIGURES;
+        int global_offset = 0;
+        //insert_offsets_with_array(&migrated_data->pieces[16].buf, &data->pieces[16].buf,
+        //    arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, global_offset);
+    }
+
+    // building     25
+    {
+        int arr_offsets[] = { 7, 8, 10, 32, 33 };
+        int arr_insert_bytes[] = { 1, 1, 2, 1, 1 };
+        int arr_count = 5;
+        int old_obj_size = sizeof(building) - 6;
+        int item_count = MAX_BUILDINGS;
+        int initial_offset = 0;
+        insert_offsets_with_array(&migrated_data->pieces[25].buf, &data->pieces[25].buf,
+            arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, initial_offset);
     }
 }
 
@@ -139,12 +259,8 @@ int migrate_savegame_data(savegame_data *migrated_data, savegame_data *data, int
 {
     switch (version) {
         case SAVE_GAME_VERSION_LEGACY: // classic maps are 162x162, have no version buffer
-        case SAVE_GAME_VERSION_AUG_V1:  // same for the initial augustus expanded save version
-            log_info("Migrating legacy map size", 0, 0);
-            migrate_savegame_mapsize(migrated_data, data, 162, GRID_SIZE);
-            migrate_scenario_map_camera_data(migrated_data->state.scenario, data->state.scenario,
-                migrated_data->state.city_view_camera, data->state.city_view_camera, 162, GRID_SIZE);
-            //migrate_figure_data(&migrated_data, data);
+        case SAVE_GAME_VERSION_AUG_V1: // same for the initial augustus expanded save version
+            migration_strategy_savegame_classic(migrated_data, data, version);
             break;
         default:
             return 0; // unsupported savegame version            
