@@ -166,7 +166,7 @@ void insert_offsets_with_array(buffer *new_buf, buffer *old_buf, int offset_coun
             offset_prev = offset_curr;
         }
         // copy remainder from last offset to end of object
-        buffer_write_raw(new_buf, old_buf-> data + offset_into_all_obj + offset_prev,
+        buffer_write_raw(new_buf, old_buf->data + offset_into_all_obj + offset_prev,
             obj_size - offset_prev);
     }
     
@@ -197,11 +197,8 @@ void migration_strategy_savegame_classic(savegame_data *migrated_data, savegame_
         };
         int arr_count = 12;
 
-        int old_obj_size = sizeof(figure) - 14;
-        int item_count = MAX_FIGURES;
-        if (version == SAVE_GAME_VERSION_LEGACY) {
-            item_count = 1000;
-        }
+        int old_obj_size = 128;
+        int item_count = 1000;
         int initial_offset = 0;
         insert_offsets_with_array(&migrated_data->pieces[16].buf, &data->pieces[16].buf,
             arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, initial_offset);
@@ -209,16 +206,16 @@ void migration_strategy_savegame_classic(savegame_data *migrated_data, savegame_
 
     // formations   19
     {
-        int arr_offsets[] = { // where to punch in extra bytes
+        int arr_offsets[] = {
             47, 48, 49, 50, 51, 52, 53, 54, 101, 102
         };
-        int arr_insert_bytes[] = { // how many bytes to punch in, parallel to arr_offsets
+        int arr_insert_bytes[] = {
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1
         };
-
         int arr_count = 10;
-        int old_obj_size = sizeof(formation) - 10;
-        int item_count = MAX_FORMATIONS;
+
+        int old_obj_size = 128;
+        int item_count = 50;
         int global_offset = 0;
         insert_offsets_with_array(&migrated_data->pieces[19].buf, &data->pieces[19].buf,
             arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, global_offset);
@@ -226,29 +223,34 @@ void migration_strategy_savegame_classic(savegame_data *migrated_data, savegame_
 
     // city_data    21
     {
-        int arr_offsets[] = { // where to punch in extra bytes
-            21, 22, 23, 24, 27, 29,
-            30, 31, 33, 34, 35, 36
+        int arr_offsets[] = {
+            28172, 28173, 28174, // entry point
+            28176, 28177, 28178, // exit point
+            28180, 28181, 28182, // senate
+            35264, 35265, 35266, // barracks
+            35597, 35598, 35599  // distribution center
         };
-        int arr_insert_bytes[] = { // how many bytes to punch in, parallel to arr_offsets
-            1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1
+        int arr_insert_bytes[] = {
+            1, 1, 2, 1, 1, 2, 1, 1, 2,
+            1, 1, 2, 1, 1, 2
         };
+        int arr_count = 15;
 
-        int arr_count = 12;
-        int old_obj_size = sizeof(figure) - 14;
-        int item_count = MAX_FIGURES;
-        int global_offset = 0;
-        //insert_offsets_with_array(&migrated_data->pieces[16].buf, &data->pieces[16].buf,
-        //    arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, global_offset);
+        int old_obj_size = 36136;
+        int item_count = 1;
+        int initial_offset = 0;
+        insert_offsets_with_array(&migrated_data->pieces[21].buf, &data->pieces[21].buf,
+            arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, initial_offset);
     }
 
     // building     25
     {
-        int arr_offsets[] = { 7, 8, 10, 32, 33 };
+        int arr_offsets[] = { 6, 7, 9, 32, 33 };
         int arr_insert_bytes[] = { 1, 1, 2, 1, 1 };
         int arr_count = 5;
-        int old_obj_size = sizeof(building) - 6;
-        int item_count = MAX_BUILDINGS;
+
+        int old_obj_size = 128;
+        int item_count = 2000;
         int initial_offset = 0;
         insert_offsets_with_array(&migrated_data->pieces[25].buf, &data->pieces[25].buf,
             arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, initial_offset);

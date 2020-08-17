@@ -233,12 +233,12 @@ void save_data_savegame_init_data_augustus(savegame_data *data, int version)
     state->building_damage_grid = create_savegame_piece(data, grid_u8, 1);
     state->aqueduct_backup_grid = create_savegame_piece(data, grid_u8, 1);
     state->sprite_backup_grid = create_savegame_piece(data, grid_u8, 1);
-    state->figures = create_savegame_piece(data, 640000, 1);
+    state->figures = create_savegame_piece(data, 710000, 1);
     state->route_figures = create_savegame_piece(data, 6000, 1);
     state->route_paths = create_savegame_piece(data, 1500000, 1);
-    state->formations = create_savegame_piece(data, 32000, 1);
+    state->formations = create_savegame_piece(data, 34500, 1);
     state->formation_totals = create_savegame_piece(data, 12, 0);
-    state->city_data = create_savegame_piece(data, 36136, 1);
+    state->city_data = create_savegame_piece(data, 36156, 1);
     state->city_faction_unknown = create_savegame_piece(data, 2, 0);
     state->player_name = create_savegame_piece(data, 64, 0);
     state->city_faction = create_savegame_piece(data, 4, 0);
