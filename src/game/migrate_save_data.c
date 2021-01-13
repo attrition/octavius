@@ -12,6 +12,23 @@
 #include "scenario/map.h"
 #include "scenario/scenario.h"
 
+typedef enum {
+    TRANSLATE_NONE,
+    TRANSLATE_X,
+    TRANSLATE_Y,
+    TRANSLATE_OFFSET
+} translate_instruction;
+
+typedef struct {
+    int offset;
+    int old_size;
+    int new_size;
+    translate_instruction translation;
+    int sign;
+} change_item;
+
+static int old_grid_border_size;
+
 void migrate_buffer_mapsize(buffer *new_buf, buffer *old_buf, int bytesize, int old_size, int new_size)
 {
     // find new top left starting index of larger, centered map
@@ -25,7 +42,25 @@ void migrate_buffer_mapsize(buffer *new_buf, buffer *old_buf, int bytesize, int 
     }
 }
 
-void migrate_scenario_map_camera_data(buffer *new_scenario, buffer *old_scenario,
+static int64_t translate_old_xy_value(int64_t value, translate_instruction instruction)
+{
+    if (value == 0) { return value; }
+
+    switch (instruction) {
+        case TRANSLATE_X:
+            return value - (old_grid_border_size / 2) + (scenario.map.grid_border_size / 2);
+        case TRANSLATE_Y:
+            return value - old_grid_border_size + scenario.map.grid_border_size;
+        case TRANSLATE_OFFSET: {
+            int x = value % (scenario.map.width + (int64_t)old_grid_border_size);
+            int y = value / (scenario.map.width + (int64_t)old_grid_border_size);
+            return ((y + (int64_t)scenario.map.grid_border_size) * (int64_t)scenario.map.width) + (x + (int64_t)scenario.map.grid_border_size);
+        }
+    }
+    return 0;
+}
+
+static void migrate_scenario_map_camera_data(buffer *new_scenario, buffer *old_scenario,
     buffer *new_camera, buffer *old_camera, int old_size, int new_size)
 {
     // prep buffers for reading/writing
@@ -47,6 +82,7 @@ void migrate_scenario_map_camera_data(buffer *new_scenario, buffer *old_scenario
     city_view_get_camera(&oldx, &oldy);
     oldx -= scenario.map.grid_border_size / 2;
     oldy -= scenario.map.grid_border_size;
+    old_grid_border_size = scenario.map.grid_border_size;
 
     // store modified map data back into new_data
     scenario.map.grid_border_size = new_size - scenario.map.width;
@@ -140,7 +176,7 @@ void copy_raw_buffers(file_piece *new_pieces, file_piece *old_pieces, int num_pi
 }
 
 void insert_offsets_with_array(buffer *new_buf, buffer *old_buf, int offset_count,
-    int offsets[], int insert_bytes[], int obj_size, int obj_count, int initial_offset)
+    change_item *changeset, int obj_size, int obj_count, int initial_offset)
 {
     int padding = 0;
     buffer_reset(new_buf);
@@ -154,16 +190,25 @@ void insert_offsets_with_array(buffer *new_buf, buffer *old_buf, int offset_coun
         int offset_prev = 0;
         int offset_into_all_obj = initial_offset + (idx_object * obj_size);
         for (int idx_offset = 0; idx_offset < offset_count; ++idx_offset) {
-            int offset_curr = offsets[idx_offset];
+            int offset_curr = changeset[idx_offset].offset;
             
             int length = offset_curr - offset_prev;
 
             // first copy the data up to the offset
             buffer_write_raw(new_buf, old_buf->data + offset_into_all_obj + offset_prev, length);
-            // then insert the padding
-            buffer_write_raw(new_buf, &padding, insert_bytes[idx_offset]);
 
-            offset_prev = offset_curr;
+            // then read the old data into a temporary
+            uint64_t value = 0;
+            buffer_set(old_buf, offset_into_all_obj + offset_prev + length);
+            buffer_read_raw(old_buf, &value, changeset[idx_offset].old_size);
+
+            // translate the value to the new xy space, if needed
+            value = translate_old_xy_value(value, changeset[idx_offset].translation);
+
+            // write translated value into new buffer
+            buffer_write_raw(new_buf, &value, changeset[idx_offset].new_size);
+
+            offset_prev = offset_curr + changeset[idx_offset].old_size;
         }
         // copy remainder from last offset to end of object
         buffer_write_raw(new_buf, old_buf->data + offset_into_all_obj + offset_prev,
@@ -173,6 +218,7 @@ void insert_offsets_with_array(buffer *new_buf, buffer *old_buf, int offset_coun
     // lastly copy any data after the array portion
     int offset_post = initial_offset + (obj_count * obj_size);
     buffer_write_raw(new_buf, old_buf->data + offset_post, old_buf->size - offset_post);
+    buffer_reset(old_buf);
 }
 
 void migration_strategy_savegame_classic(savegame_data *migrated_data, savegame_data *data, int version)
@@ -180,28 +226,35 @@ void migration_strategy_savegame_classic(savegame_data *migrated_data, savegame_
     log_info("Migrating legacy map size", 0, 0);
     // naively copy raw buffers, then go back and spot-update buffers we know need fixing
     copy_raw_buffers(migrated_data->pieces, data->pieces, data->num_pieces);
-    migrate_savegame_mapsize(migrated_data, data, 162, GRID_SIZE);
     migrate_scenario_map_camera_data(migrated_data->state.scenario, data->state.scenario,
         migrated_data->state.city_view_camera, data->state.city_view_camera, 162, GRID_SIZE);
+    migrate_savegame_mapsize(migrated_data, data, 162, GRID_SIZE);
 
     // fixes needed/piece number:
 
     // figure       16
     {
-        int arr_offsets[] = { // where to punch in extra bytes
-            21, 22, 23, 24, 27, 29,
-            30, 31, 33, 34, 35, 36
+        change_item changeset[] = {
+            { 21, 1, 2, TRANSLATE_X, 0 },
+            { 22, 1, 2, TRANSLATE_Y, 0 },
+            { 23, 1, 2, TRANSLATE_X, 0 },
+            { 24, 1, 2, TRANSLATE_Y, 0 },
+            { 27, 2, 4, TRANSLATE_OFFSET, 0 },
+            { 29, 1, 2, TRANSLATE_X, 0 },
+            { 30, 1, 2, TRANSLATE_Y, 0 },
+            { 31, 2, 4, TRANSLATE_OFFSET, 0 },
+            { 33, 1, 2, TRANSLATE_X, 0 },
+            { 34, 1, 2, TRANSLATE_Y, 0 },
+            { 35, 1, 2, TRANSLATE_X, 0 },
+            { 36, 1, 2, TRANSLATE_Y, 0 },
         };
-        int arr_insert_bytes[] = { // how many bytes to punch in, parallel to arr_offsets
-            1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1
-        };
-        int arr_count = 12;
+        int change_count = 12;
 
         int old_obj_size = 128;
         int item_count = 1000;
         int initial_offset = 0;
         insert_offsets_with_array(&migrated_data->pieces[16].buf, &data->pieces[16].buf,
-            arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, initial_offset);
+            change_count, changeset, old_obj_size, item_count, initial_offset);
     }
 
     // formations   19
@@ -209,51 +262,84 @@ void migration_strategy_savegame_classic(savegame_data *migrated_data, savegame_
         int arr_offsets[] = {
             47, 48, 49, 50, 51, 52, 53, 54, 101, 102
         };
-        int arr_insert_bytes[] = {
+        int arr_old_bytes[] = {
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1
         };
-        int arr_count = 10;
+        int arr_new_bytes[] = {
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+        };
+        translate_instruction arr_translate[] = {
+            TRANSLATE_X, TRANSLATE_Y,
+            TRANSLATE_X, TRANSLATE_Y,
+            TRANSLATE_X, TRANSLATE_Y,
+            TRANSLATE_X, TRANSLATE_Y,
+            TRANSLATE_X, TRANSLATE_Y,
+        };
+        change_item changeset[] = {
+            {  47, 1, 2, TRANSLATE_X, 0 },
+            {  48, 1, 2, TRANSLATE_Y, 0 },
+            {  49, 1, 2, TRANSLATE_X, 0 },
+            {  50, 1, 2, TRANSLATE_Y, 0 },
+            {  51, 1, 2, TRANSLATE_X, 0 },
+            {  52, 1, 2, TRANSLATE_Y, 0 },
+            {  53, 1, 2, TRANSLATE_X, 0 },
+            {  54, 1, 2, TRANSLATE_Y, 0 },
+            { 101, 1, 2, TRANSLATE_X, 0 },
+            { 102, 1, 2, TRANSLATE_Y, 0 },
+        };
+        int change_count = 10;
 
         int old_obj_size = 128;
         int item_count = 50;
         int global_offset = 0;
         insert_offsets_with_array(&migrated_data->pieces[19].buf, &data->pieces[19].buf,
-            arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, global_offset);
+            change_count, changeset, old_obj_size, item_count, global_offset);
     }
 
     // city_data    21
     {
-        int arr_offsets[] = {
-            28172, 28173, 28174, // entry point
-            28176, 28177, 28178, // exit point
-            28180, 28181, 28182, // senate
-            35264, 35265, 35266, // barracks
-            35597, 35598, 35599  // distribution center
+        change_item changeset[] = {
+            { 28172, 1, 2, TRANSLATE_X, 0 },
+            { 28173, 1, 2, TRANSLATE_Y, 0 },
+            { 28174, 2, 4, TRANSLATE_OFFSET, 0 },
+            { 28176, 1, 2, TRANSLATE_X, 0 },
+            { 28177, 1, 2, TRANSLATE_Y, 0 },
+            { 28178, 2, 4, TRANSLATE_OFFSET, 0 },
+            { 28180, 1, 2, TRANSLATE_X, 0 },
+            { 28181, 1, 2, TRANSLATE_Y, 0 },
+            { 28182, 2, 4, TRANSLATE_OFFSET, 0 },
+            { 35264, 1, 2, TRANSLATE_X, 0 },
+            { 35265, 1, 2, TRANSLATE_Y, 0 },
+            { 35266, 2, 4, TRANSLATE_OFFSET, 0 },
+            { 35597, 1, 2, TRANSLATE_X, 0 },
+            { 35598, 1, 2, TRANSLATE_Y, 0 },
+            { 35599, 2, 4, TRANSLATE_OFFSET, 0 },
         };
-        int arr_insert_bytes[] = {
-            1, 1, 2, 1, 1, 2, 1, 1, 2,
-            1, 1, 2, 1, 1, 2
-        };
-        int arr_count = 15;
+        int change_count = 15;
 
         int old_obj_size = 36136;
         int item_count = 1;
         int initial_offset = 0;
         insert_offsets_with_array(&migrated_data->pieces[21].buf, &data->pieces[21].buf,
-            arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, initial_offset);
+            change_count, changeset, old_obj_size, item_count, initial_offset);
     }
 
     // building     25
     {
-        int arr_offsets[] = { 6, 7, 9, 32, 33 };
-        int arr_insert_bytes[] = { 1, 1, 2, 1, 1 };
-        int arr_count = 5;
+        change_item changeset[] = {
+            {  6, 1, 2, TRANSLATE_X, 0 },
+            {  7, 1, 2, TRANSLATE_Y, 0 },
+            {  9, 2, 4, TRANSLATE_OFFSET, 0 },
+            { 32, 1, 2, TRANSLATE_X, 0 },
+            { 33, 1, 2, TRANSLATE_Y, 0 },
+        };
+        int change_count = 5;
 
         int old_obj_size = 128;
         int item_count = 2000;
         int initial_offset = 0;
         insert_offsets_with_array(&migrated_data->pieces[25].buf, &data->pieces[25].buf,
-            arr_count, arr_offsets, arr_insert_bytes, old_obj_size, item_count, initial_offset);
+            change_count, changeset, old_obj_size, item_count, initial_offset);
     }
 }
 
