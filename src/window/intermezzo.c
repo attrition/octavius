@@ -1,9 +1,7 @@
 #include "intermezzo.h"
 
 #include "core/time.h"
-#include "graphics/graphics.h"
 #include "graphics/image.h"
-#include "graphics/screen.h"
 #include "graphics/window.h"
 #include "scenario/property.h"
 #include "sound/music.h"

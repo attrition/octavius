@@ -1,4 +1,4 @@
-#include "image_button.h"
+#include "build_button.h"
 
 #include "core/config.h"
 #include "graphics/image.h"
@@ -8,11 +8,15 @@
 #define PRESSED_REPEAT_INITIAL_MILLIS 300
 #define PRESSED_REPEAT_MILLIS 50
 
-static void fade_pressed_effect(image_button *buttons, int num_buttons)
+void build_button_none(int param1, int param2, int param3)
+{
+}
+
+static void fade_pressed_effect(build_button *buttons, int num_buttons)
 {
     time_millis current_time = time_get_millis();
     for (int i = 0; i < num_buttons; i++) {
-        image_button *btn = &buttons[i];
+        build_button *btn = &buttons[i];
         if (btn->pressed) {
             if (current_time - btn->pressed_since > PRESSED_EFFECT_MILLIS) {
                 if (btn->button_type == IB_NORMAL) {
@@ -25,62 +29,44 @@ static void fade_pressed_effect(image_button *buttons, int num_buttons)
     }
 }
 
-static void fade_pressed_effect_build(image_button *buttons, int num_buttons)
+static void remove_pressed_effect_build(build_button *buttons, int num_buttons)
 {
     for (int i = 0; i < num_buttons; i++) {
-        image_button *btn = &buttons[i];
+        build_button *btn = &buttons[i];
         if (btn->pressed && btn->button_type == IB_BUILD) {
-            btn->pressed--;
+            btn->pressed = 0;
         }
     }
 }
 
-void image_buttons_draw(int x, int y, image_button *buttons, int num_buttons)
+void build_buttons_draw(int x, int y, build_button *buttons, int num_buttons)
 {
     fade_pressed_effect(buttons, num_buttons);
     for (int i = 0; i < num_buttons; i++) {
-        image_button *btn = &buttons[i];
-        int image_id = 0;
-        if (btn->image_collection) {
-            image_id = image_group(btn->image_collection) + btn->image_offset;
-            if (btn->enabled) {
-                if (btn->pressed) {
-                    image_id += 2;
-                }
-                else if (btn->focused) {
-                    image_id += 1;
-                }
+        build_button *btn = &buttons[i];
+        int image_id = image_group(btn->image_collection) + btn->image_offset;
+        if (btn->enabled) {
+            if (btn->pressed) {
+                image_id += 2;
+            } else if (btn->focused) {
+                image_id += 1;
             }
-            else {
-                image_id += 3;
-            }
+        } else {
+            image_id += 3;
         }
         image_draw(image_id, x + btn->x_offset, y + btn->y_offset);
     }
 }
 
-static int should_be_pressed(const image_button *btn, const mouse *m)
-{
-    if ((m->left.went_down || m->left.is_down) && btn->left_click_handler != button_none) {
-        return 1;
-    }
-    if ((m->right.went_down || m->right.is_down) && btn->right_click_handler != button_none) {
-        return 1;
-    }
-    return 0;
-}
-
-int image_buttons_handle_mouse(
-    const mouse *m, int x, int y, image_button *buttons, int num_buttons, int *focus_button_id)
+int build_buttons_handle_mouse(const mouse *m, int x, int y, build_button *buttons, int num_buttons, int *focus_button_id)
 {
     fade_pressed_effect(buttons, num_buttons);
-    fade_pressed_effect_build(buttons, num_buttons);
-    image_button *hit_button = 0;
+    build_button *hit_button = 0;
     if (focus_button_id) {
         *focus_button_id = 0;
     }
     for (int i = 0; i < num_buttons; i++) {
-        image_button *btn = &buttons[i];
+        build_button *btn = &buttons[i];
         if (btn->focused) {
             btn->focused--;
         }
@@ -97,37 +83,39 @@ int image_buttons_handle_mouse(
             }
         }
     }
+    if (!hit_button && m->right.went_up) {
+        remove_pressed_effect_build(buttons, num_buttons);
+        return 0;
+    }
     if (!hit_button) {
         return 0;
+    }
+    if (m->left.went_up) {
+        remove_pressed_effect_build(buttons, num_buttons);
     }
     if (hit_button->button_type == IB_SCROLL) {
         if (!m->left.went_down && !m->left.is_down) {
             return 0;
         }
     } else if (hit_button->button_type == IB_BUILD || hit_button->button_type == IB_NORMAL) {
-        if (should_be_pressed(hit_button, m)) {
-            hit_button->pressed = 2;
-            hit_button->pressed_since = time_get_millis();
-        }
         if (!m->left.went_up && !m->right.went_up) {
             return 0;
         }
     }
     if (m->left.went_up) {
         sound_effect_play(SOUND_EFFECT_ICON);
-        hit_button->left_click_handler(hit_button->parameter1, hit_button->parameter2);
-        return hit_button->left_click_handler != button_none;
+        hit_button->pressed = 1;
+        hit_button->pressed_since = time_get_millis();
+        hit_button->left_click_handler(hit_button->parameter1, hit_button->parameter2, hit_button->parameter3);
     } else if (m->right.went_up) {
-        hit_button->right_click_handler(hit_button->parameter1, hit_button->parameter2);
-        return hit_button->right_click_handler != button_none;
+        hit_button->right_click_handler(hit_button->parameter1, hit_button->parameter2, hit_button->parameter3);
     } else if (hit_button->button_type == IB_SCROLL && m->left.is_down) {
         time_millis delay = hit_button->pressed == 2 ? PRESSED_REPEAT_MILLIS : PRESSED_REPEAT_INITIAL_MILLIS;
         if (time_get_millis() - hit_button->pressed_since >= delay) {
             hit_button->pressed = 2;
             hit_button->pressed_since = time_get_millis();
-            hit_button->left_click_handler(hit_button->parameter1, hit_button->parameter2);
+            hit_button->left_click_handler(hit_button->parameter1, hit_button->parameter2, hit_button->parameter3);
         }
-        return 1;
     }
-    return 0;
+    return 1;
 }

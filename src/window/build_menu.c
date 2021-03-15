@@ -4,16 +4,19 @@
 #include "building/menu.h"
 #include "building/model.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "graphics/generic_button.h"
 #include "graphics/image.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
+#include "graphics/screen.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/input.h"
 #include "scenario/property.h"
 #include "translation/translation.h"
 #include "widget/city.h"
+#include "widget/octavius_ui/city.h"
 #include "widget/sidebar/city.h"
 #include "window/city.h"
 
@@ -80,7 +83,11 @@ static int init(build_menu_group submenu)
 {
     data.selected_submenu = submenu;
     data.num_items = building_menu_count_items(submenu);
-    data.y_offset = Y_MENU_OFFSETS[data.num_items];
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        data.y_offset = screen_height() - 250;
+    } else {
+        data.y_offset = Y_MENU_OFFSETS[data.num_items];
+    }
     if (submenu == BUILD_MENU_VACANT_HOUSE ||
         submenu == BUILD_MENU_CLEAR_LAND ||
         submenu == BUILD_MENU_ROAD) {
@@ -160,22 +167,49 @@ static int is_all_button(building_type type)
            (type == BUILDING_MENU_LARGE_TEMPLES && data.selected_submenu == BUILD_MENU_LARGE_TEMPLES);
 }
 
+static int get_parent_submenu(void)
+{
+    switch (data.selected_submenu) {
+        case BUILD_MENU_SMALL_TEMPLES:
+        case BUILD_MENU_LARGE_TEMPLES:
+            return BUILD_MENU_TEMPLES;
+        case BUILD_MENU_FORTS:
+            return BUILD_MENU_SECURITY;
+        case BUILD_MENU_FARMS:
+        case BUILD_MENU_RAW_MATERIALS:
+        case BUILD_MENU_WORKSHOPS:
+            return BUILD_MENU_INDUSTRY;
+    }
+    return data.selected_submenu;
+}
+
 static void draw_menu_buttons(void)
 {
+    int octavius_ui = config_get(CONFIG_UI_OCTAVIUS_UI);    
+    
     int x_offset = get_sidebar_x_offset();
     int item_index = -1;
+    int y_step = MENU_ITEM_HEIGHT;
+
+    if (octavius_ui) {
+        x_offset = (screen_width() / 2) - ((12 * 52) / 2) + 164 + (get_parent_submenu() * 52);
+        y_step = -24;
+    }
+
     int item_x_align = x_offset - MENU_X_OFFSET - 8;
     for (int i = 0; i < data.num_items; i++) {
         item_index = building_menu_next_index(data.selected_submenu, item_index);
-        label_draw(item_x_align, data.y_offset + MENU_Y_OFFSET + MENU_ITEM_HEIGHT * i, 16,
-            data.focus_button_id == i + 1 ? 1 : 2);
+
+        int real_index = (octavius_ui ? data.num_items - i - 1 : i);
+
+        label_draw(item_x_align, data.y_offset + MENU_Y_OFFSET + y_step * real_index, 16, data.focus_button_id == i + 1 ? 1 : 2);
         int type = building_menu_type(data.selected_submenu, item_index);
         if (is_all_button(type)) {
             text_draw_centered(translation_for(TR_BUILD_ALL_TEMPLES),
-                item_x_align, data.y_offset + MENU_Y_OFFSET + 3 + MENU_ITEM_HEIGHT * i,
+                item_x_align, data.y_offset + MENU_Y_OFFSET + 3 + MENU_ITEM_HEIGHT * real_index,
                 MENU_ITEM_WIDTH, FONT_NORMAL_GREEN, 0);
         } else {
-            lang_text_draw_centered(28, type, item_x_align, data.y_offset + MENU_Y_OFFSET + 3 + MENU_ITEM_HEIGHT * i,
+            lang_text_draw_centered(28, type, item_x_align, data.y_offset + MENU_ITEM_HEIGHT + 3 + MENU_ITEM_HEIGHT * real_index,
                 MENU_ITEM_WIDTH, FONT_NORMAL_GREEN);
         }
         if (type == BUILDING_DRAGGABLE_RESERVOIR) {
@@ -195,7 +229,7 @@ static void draw_menu_buttons(void)
             cost = model_get_building(BUILDING_LARGE_TEMPLE_CERES)->cost;
         }
         if (cost) {
-            text_draw_money(cost, x_offset - 82, data.y_offset + MENU_Y_OFFSET + 4 + MENU_ITEM_HEIGHT * i,
+            text_draw_money(cost, x_offset - 82, data.y_offset + MENU_Y_OFFSET + 4 + y_step * i,
                 FONT_NORMAL_GREEN);
         }
     }
@@ -203,7 +237,11 @@ static void draw_menu_buttons(void)
 
 static void draw_foreground(void)
 {
-    window_city_draw();
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        window_city_draw_all();
+    } else {
+        window_city_draw();
+    }
     draw_menu_buttons();
 }
 
@@ -218,15 +256,24 @@ static int click_outside_menu(const mouse *m, int x_offset)
 
 static int handle_build_submenu(const mouse *m)
 {
+    int x_offset = get_sidebar_x_offset() - MENU_X_OFFSET;
+    int y_offset = data.y_offset + MENU_Y_OFFSET;
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        x_offset = (screen_width() / 2) - ((12 * 52) / 2) + (get_parent_submenu() * 52) - 102;
+        y_offset = data.y_offset + 110 + (data.num_items - 1) * -24;
+    }
+
     return generic_buttons_handle_mouse(
-        m, get_sidebar_x_offset() - MENU_X_OFFSET, data.y_offset + MENU_Y_OFFSET,
-               build_menu_buttons, data.num_items, &data.focus_button_id);
+        m, x_offset, y_offset, build_menu_buttons, data.num_items, &data.focus_button_id);
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)
 {
+    int octavius_ui = config_get(CONFIG_UI_OCTAVIUS_UI);
     if (handle_build_submenu(m) ||
-        widget_sidebar_city_handle_mouse_build_menu(m)) {
+        (octavius_ui
+            ? widget_octavius_ui_city_handle_mouse_build_menu(m)
+            : widget_sidebar_city_handle_mouse_build_menu(m))) {
         return;
     }
     if (input_go_back_requested(m, h) || click_outside_menu(m, get_sidebar_x_offset())) {
@@ -305,7 +352,11 @@ static void button_menu_item(int item)
 
     if (set_submenu_for_type(type)) {
         data.num_items = building_menu_count_items(data.selected_submenu);
-        data.y_offset = Y_MENU_OFFSETS[data.num_items];
+        if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+            data.y_offset = screen_height() - 250;
+        } else {
+            data.y_offset = Y_MENU_OFFSETS[data.num_items];
+        }
         building_construction_clear_type();
         window_invalidate();
     } else {

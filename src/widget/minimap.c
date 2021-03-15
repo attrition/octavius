@@ -4,6 +4,7 @@
 #include "building/building.h"
 #include "building/monument.h"
 #include "city/view.h"
+#include "core/config.h"
 #include "figure/figure.h"
 #include "figure/formation.h"
 #include "graphics/graphics.h"
@@ -146,7 +147,9 @@ static int draw_figure(int x_view, int y_view, int grid_offset)
 static void draw_minimap_tile(int x_view, int y_view, int grid_offset)
 {
     if (grid_offset < 0) {
-        image_draw(image_group(GROUP_MINIMAP_BLACK), x_view, y_view);
+        if (!config_get(CONFIG_UI_OCTAVIUS_UI)) {
+            image_draw(image_group(GROUP_MINIMAP_BLACK), x_view, y_view);
+        }
         return;
     }
 
@@ -258,7 +261,11 @@ static void draw_minimap(void)
 {
     graphics_set_clip_rectangle(data.x_offset, data.y_offset, data.width, data.height);
     foreach_map_tile(draw_minimap_tile);
-    cache_minimap();
+    
+    if (!config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        cache_minimap();
+    }
+
     draw_viewport_rectangle();
     graphics_reset_clip_rectangle();
 }
@@ -266,7 +273,11 @@ static void draw_minimap(void)
 static void draw_uncached(int x_offset, int y_offset, int width, int height)
 {
     data.enemy_color = ENEMY_COLOR_BY_CLIMATE[scenario_property_climate()];
-    prepare_minimap_cache(width, height);
+    if (!config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        prepare_minimap_cache(2 * width, height);
+    } else {
+        prepare_minimap_cache(width, height);
+    }
     set_bounds(x_offset, y_offset, width, height);
     draw_minimap();
 }
@@ -315,10 +326,12 @@ void widget_minimap_draw(int x_offset, int y_offset, int width, int height, int 
         } else {
             draw_using_cache(x_offset, y_offset, width, height);
         }
-        graphics_draw_horizontal_line(x_offset - 1, x_offset - 1 + width, y_offset - 1, COLOR_MINIMAP_DARK);
-        graphics_draw_vertical_line(x_offset - 1, y_offset, y_offset + height, COLOR_MINIMAP_DARK);
-        graphics_draw_vertical_line(x_offset - 1 + width, y_offset,
-            y_offset + height, COLOR_MINIMAP_LIGHT);
+        if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        } else {
+            graphics_draw_horizontal_line(x_offset - 1, x_offset - 1 + width * 2, y_offset - 1, COLOR_MINIMAP_DARK);
+            graphics_draw_vertical_line(x_offset - 1, y_offset, y_offset + height, COLOR_MINIMAP_DARK);
+            graphics_draw_vertical_line(x_offset - 1 + width * 2, y_offset, y_offset + height, COLOR_MINIMAP_LIGHT);
+        }
     }
 }
 
@@ -349,7 +362,7 @@ static int is_in_minimap(const mouse *m)
 
 int widget_minimap_handle_mouse(const mouse *m)
 {
-    if ((m->left.went_down || m->right.went_down) && is_in_minimap(m)) {
+    if ((m->left.is_down || m->right.is_down) && is_in_minimap(m)) {
         int grid_offset = get_mouse_grid_offset(m);
         if (grid_offset > 0) {
             city_view_go_to_grid_offset(grid_offset);

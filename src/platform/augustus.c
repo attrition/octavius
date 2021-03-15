@@ -493,7 +493,6 @@ static int pre_init(const char *custom_data_dir)
         "Caesar 3 installation, or run:\naugustus path-to-c3-directory",
         NULL);
 #endif
-
     return 0;
 }
 

@@ -329,6 +329,17 @@ int building_menu_count_items(int submenu)
     return count;
 }
 
+int building_menu_check_index_enabled(int submenu, int index)
+{
+    if (MENU_BUILDING_TYPE[submenu][index] <= 0) {
+        return 0;
+    }
+    if (menu_enabled[submenu][index]) {
+        return 1;
+    }
+    return 0;
+}
+
 int building_menu_next_index(int submenu, int current_index)
 {
     for (int i = current_index + 1; i < BUILD_MENU_ITEM_MAX; i++) {

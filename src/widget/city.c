@@ -511,7 +511,8 @@ void widget_city_handle_input_military(const mouse *m, const hotkeys *h, int leg
 {
     map_tile *tile = &data.current_tile;
     update_city_view_coords(m->x, m->y, tile);
-    if (!city_view_is_sidebar_collapsed() && widget_minimap_handle_mouse(m)) {
+    if (config_get(CONFIG_UI_OCTAVIUS_UI) ||
+        !city_view_is_sidebar_collapsed() && widget_minimap_handle_mouse(m)) {
         return;
     }
     if (m->is_touch) {
@@ -544,6 +545,11 @@ void widget_city_handle_input_military(const mouse *m, const hotkeys *h, int leg
 int widget_city_current_grid_offset(void)
 {
     return data.current_tile.grid_offset;
+}
+
+int widget_city_building_at_current_tile(void)
+{
+    return map_building_at(data.current_tile.grid_offset);
 }
 
 void widget_city_get_tooltip(tooltip_context *c)

@@ -2,6 +2,7 @@
 
 #include "building/clone.h"
 #include "building/construction.h"
+#include "city/buildings.h"
 #include "building/menu.h"
 #include "building/rotation.h"
 #include "city/message.h"
@@ -26,11 +27,13 @@
 #include "map/building.h"
 #include "map/grid.h"
 #include "map/property.h"
+#include "map/sprite.h"
 #include "map/terrain.h"
 #include "scenario/building.h"
 #include "scenario/criteria.h"
 #include "widget/city.h"
 #include "widget/city_with_overlay.h"
+#include "widget/octavius_ui/city.h"
 #include "widget/top_menu.h"
 #include "widget/sidebar/city.h"
 #include "widget/sidebar/military.h"
@@ -50,9 +53,13 @@ static void clear_city_view(int force)
 
 static void draw_background(void)
 {
-    clear_city_view(1);
-    widget_sidebar_city_draw_background();
-    widget_top_menu_draw(1);
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        widget_octavius_ui_city_draw_background();
+    } else {
+        clear_city_view(1);
+        widget_sidebar_city_draw_background();
+        widget_top_menu_draw(1);
+    }
 }
 
 static void draw_background_military(void)
@@ -127,7 +134,14 @@ static void draw_foreground(void)
     clear_city_view(0);
     widget_top_menu_draw(0);
     window_city_draw();
-    widget_sidebar_city_draw_foreground();
+
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        widget_octavius_ui_city_draw_foreground();
+    } else {
+        widget_top_menu_draw(0);
+        widget_sidebar_city_draw_foreground();
+    }
+
     if (window_is(WINDOW_CITY) || window_is(WINDOW_CITY_MILITARY)) {
         draw_paused_and_time_left();
         draw_cancel_construction();
@@ -143,7 +157,9 @@ static void draw_foreground_military(void)
     clear_city_view(0);
     widget_top_menu_draw(0);
     window_city_draw();
-    if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR)) {
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        widget_octavius_ui_city_draw_foreground_military();
+    } else if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR)) {
         widget_sidebar_military_draw_foreground();
     } else {
         widget_sidebar_city_draw_foreground();
@@ -399,6 +415,117 @@ static void cycle_legion(void)
     }
 }
 
+/** 
+    Takes a building and retrieve its proper type for cloning.
+    For example, given a fort, return the enumaration value corresponding to
+    the specific type of fort rather than the general value
+
+    @param building Building to examine
+    @return the building_type value to clone, or BUILDING_NONE if not cloneable
+*/
+static short get_clone_type_from_building(building* building)
+{
+    short clone_type = building->type;
+
+    if (building_is_house(clone_type)) {
+        return BUILDING_HOUSE_VACANT_LOT;
+    }
+
+    switch (clone_type) {
+        case BUILDING_RESERVOIR:
+            return BUILDING_DRAGGABLE_RESERVOIR;
+        case BUILDING_FORT:
+            switch (building->subtype.fort_figure_type) {
+                case FIGURE_FORT_LEGIONARY: return BUILDING_FORT_LEGIONARIES;
+                case FIGURE_FORT_JAVELIN: return BUILDING_FORT_JAVELIN;
+                case FIGURE_FORT_MOUNTED: return BUILDING_FORT_MOUNTED;
+            }
+            return BUILDING_NONE;
+        case BUILDING_TRIUMPHAL_ARCH:
+            // Triumphal arches don't seem to have any protection around making
+            // more than you've earned, so check that here
+            if (city_buildings_triumphal_arch_available()) {
+                break;
+            }
+            // fallthrough
+        case BUILDING_NATIVE_CROPS:
+        case BUILDING_NATIVE_HUT:
+        case BUILDING_NATIVE_MEETING:
+        case BUILDING_BURNING_RUIN:
+            return BUILDING_NONE;
+    }
+
+    return clone_type;
+}
+
+/**
+    Enter construction mode with the same building as cursor is currently over
+*/
+static void clone_building_at_current_tile(void)
+{
+    int building_id = widget_city_building_at_current_tile();
+    if (building_id) {
+        building* target_building = building_main(building_get(building_id));
+
+        short clone_type = get_clone_type_from_building(target_building);
+        if (clone_type) {
+            building_construction_cancel();
+            building_construction_set_type(clone_type);
+        }
+    }
+}
+
+/**
+    Helper function for retrieving which construction mode to enter.
+
+    @param grid_offset the grid_offset of the tile to examine
+    @return type to use in building_construction_set_type (0 if none)
+*/
+static int get_clone_type_from_grid_offset(int grid_offset)
+{
+    int terrain = map_terrain_get(grid_offset);
+
+    if (terrain & TERRAIN_BUILDING) {
+        int building_id = map_building_at(grid_offset);
+        if (building_id) {
+            building *building = building_main(building_get(building_id));
+            return get_clone_type_from_building(building);
+        }
+    } else if (terrain & TERRAIN_AQUEDUCT) {
+        return BUILDING_AQUEDUCT;
+    } else if (terrain & TERRAIN_WALL) {
+        return BUILDING_WALL;
+    } else if (terrain & TERRAIN_GARDEN) {
+        return BUILDING_GARDENS;
+    } else if (terrain & TERRAIN_ROAD) {
+        if (terrain & TERRAIN_WATER) {
+            if (map_sprite_bridge_at(grid_offset) > 6) {
+                return BUILDING_SHIP_BRIDGE;
+            }
+            return BUILDING_LOW_BRIDGE;
+        } else if (map_property_is_plaza_or_earthquake(grid_offset)) {
+            return BUILDING_PLAZA;
+        }
+        return BUILDING_ROAD;
+    }
+
+    return BUILDING_NONE;
+}
+
+/**
+    Enter construction mode with the same building as cursor is currently over
+*/
+static void clone_building_at_current_grid_offset(void)
+{
+    int grid_offset = widget_city_current_grid_offset();
+    short clone_type = get_clone_type_from_grid_offset(grid_offset);
+
+    if (clone_type) {
+        building_construction_cancel();
+        building_construction_set_type(clone_type);
+    }
+}
+
 static void toggle_pause(void)
 {
     game_state_toggle_paused();
@@ -462,8 +589,14 @@ static void handle_hotkeys(const hotkeys *h)
             building_construction_set_type(h->building);
         }
     }
+
     if (h->clone_building) {
         building_clone_from_grid_offset(widget_city_current_grid_offset());
+    }
+    if (h->toggle_octavius_ui) {
+        config_set(CONFIG_UI_OCTAVIUS_UI, !config_get(CONFIG_UI_OCTAVIUS_UI));
+        city_view_init();
+        window_city_show();
     }
     if (h->show_overlay_relative) {
         show_overlay_from_grid_offset(widget_city_current_grid_offset());
@@ -474,11 +607,17 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     handle_hotkeys(h);
     if (!building_construction_in_progress()) {
-        if (widget_top_menu_handle_input(m, h)) {
-            return;
-        }
-        if (widget_sidebar_city_handle_mouse(m)) {
-            return;
+        if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+            if (widget_octavius_ui_city_handle_mouse(m)) {
+                return;
+            }
+        } else {
+            if (widget_top_menu_handle_input(m, h)) {
+                return;
+            }
+            if (widget_sidebar_city_handle_mouse(m)) {
+                return;
+            }
         }
     }
     widget_city_handle_input(m, h);
@@ -498,12 +637,22 @@ static void handle_input_military(const mouse *m, const hotkeys *h)
 
 static void get_tooltip(tooltip_context *c)
 {
-    int text_id = widget_top_menu_get_tooltip_text(c);
-    if (!text_id) {
-        if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR) && formation_get_selected()) {
-            text_id = widget_sidebar_military_get_tooltip_text(c);
-        } else {
-            text_id = widget_sidebar_city_get_tooltip_text();
+    int text_id = 0;
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        text_id = widget_octavius_ui_city_get_tooltip_text(c);
+        if (text_id) {
+            c->type = TOOLTIP_BUTTON;
+            c->text_id = text_id;
+            return;
+        }
+    } else {
+        text_id = widget_top_menu_get_tooltip_text(c);
+        if (!text_id) {
+            if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR) && formation_get_selected()) {
+                text_id = widget_sidebar_military_get_tooltip_text(c);
+            } else {
+                text_id = widget_sidebar_city_get_tooltip_text();
+            }
         }
     }
     if (text_id) {

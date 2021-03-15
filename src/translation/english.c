@@ -38,6 +38,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HEADER_UI_CHANGES, "User Interface"},
     {TR_CONFIG_HEADER_GAMEPLAY_CHANGES, "Difficulty"},
     {TR_CONFIG_SHOW_INTRO_VIDEO, "Play intro videos"},
+    {TR_CONFIG_OCTAVIUS_UI, "Use Octavius UI"},
     {TR_CONFIG_SIDEBAR_INFO, "Extra information in the control panel"},
     {TR_CONFIG_SMOOTH_SCROLLING, "Enable smooth scrolling"},
     {TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING, "Disable map scrolling on window edge"},
@@ -96,14 +97,12 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_ARROW_RIGHT, "Right"},
     {TR_HOTKEY_TOGGLE_FULLSCREEN, "Toggle fullscreen"},
     {TR_HOTKEY_CENTER_WINDOW, "Center window"},
-    {TR_HOTKEY_RESIZE_TO_640, "Resize window to 640x480"},
-    {TR_HOTKEY_RESIZE_TO_800, "Resize window to 800x600"},
-    {TR_HOTKEY_RESIZE_TO_1024, "Resize window to 1024x768"},
     {TR_HOTKEY_SAVE_SCREENSHOT, "Save screenshot"},
     {TR_HOTKEY_SAVE_CITY_SCREENSHOT, "Save full city screenshot"},
     {TR_HOTKEY_BUILD_CLONE, "Clone building under cursor"},
     {TR_HOTKEY_LOAD_FILE, "Load file"},
     {TR_HOTKEY_SAVE_FILE, "Save file"},
+    {TR_HOTKEY_TOGGLE_OCTAVIUS_UI, "Toggle Octavius UI"},
     {TR_HOTKEY_INCREASE_GAME_SPEED, "Increase game speed"},
     {TR_HOTKEY_DECREASE_GAME_SPEED, "Decrease game speed"},
     {TR_HOTKEY_TOGGLE_PAUSE, "Toggle pause"},
@@ -386,7 +385,10 @@ static translation_string all_strings[] = {
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_TAX_COLLECTOR, "Toggle tax collector access" },
     {TR_TOOLTIP_BUTTON_ROADBLOCK_PERMISSION_LABOR_SEEKER, "Toggle labor seekers access" },
     {TR_HOTKEY_DUPLICATE_TITLE, "Hotkey already used"},
-    {TR_HOTKEY_DUPLICATE_MESSAGE, "This key combination is already assigned to the following action:"}
+    {TR_HOTKEY_DUPLICATE_MESSAGE, "This key combination is already assigned to the following action:"},
+    {TR_HOTKEY_RESIZE_TO_720, "1280x720"},
+    {TR_HOTKEY_RESIZE_TO_1080, "1920x1080"},
+    {TR_HOTKEY_RESIZE_TO_1440, "2560x1440"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

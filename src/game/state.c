@@ -1,10 +1,13 @@
 #include "state.h"
 
+#include "building/construction.h"
 #include "city/victory.h"
 #include "city/view.h"
 #include "city/warning.h"
 #include "core/random.h"
+#include "game/undo.h"
 #include "map/ring.h"
+#include "window/main_menu.h"
 #include "map/building.h"
 
 static struct {
@@ -69,4 +72,12 @@ void game_state_set_overlay(int overlay)
     }
     data.current_overlay = overlay;
     map_clear_highlights();
+}
+
+void game_state_new_game(void)
+{
+    building_construction_clear_type();
+    game_undo_disable();
+    game_state_reset_overlay();
+    window_main_menu_show(1);
 }

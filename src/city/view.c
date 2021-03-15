@@ -3,10 +3,12 @@
 #include "core/calc.h"
 #include "core/config.h"
 #include "core/direction.h"
+#include "core/config.h"
 #include "graphics/menu.h"
 #include "map/grid.h"
 #include "map/image.h"
 #include "widget/minimap.h"
+#include "widget/octavius_ui/city.h"
 
 #define TILE_WIDTH_PIXELS 60
 #define TILE_HEIGHT_PIXELS 30
@@ -155,13 +157,6 @@ static void adjust_camera_position_for_pixels(void)
         data.camera.tile.y += 2;
         data.camera.pixel.y -= TILE_HEIGHT_PIXELS;
     }
-}
-
-void city_view_init(void)
-{
-    calculate_lookup();
-    city_view_set_scale(100);
-    widget_minimap_invalidate();
 }
 
 int city_view_orientation(void)
@@ -383,6 +378,34 @@ static void set_viewport_without_sidebar(void)
     set_viewport(0, config_get(CONFIG_UI_ZOOM) ? 0 : TOP_MENU_HEIGHT, data.screen_width - 40, data.screen_height - TOP_MENU_HEIGHT);
 }
 
+static void set_viewport_octavius_ui(void)
+{
+    set_viewport(0, 0, data.screen_width, data.screen_height);
+}
+
+void reset_viewport(void)
+{
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        set_viewport_octavius_ui();
+    } else if (data.sidebar_collapsed) {
+        set_viewport_without_sidebar();
+    } else {
+        set_viewport_with_sidebar();
+    }
+}
+
+void city_view_init(void)
+{
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+        widget_octavius_ui_city_init();
+    }
+    calculate_lookup();
+    city_view_set_scale(100);
+    reset_viewport();
+    check_camera_boundaries();
+    widget_minimap_invalidate();
+}
+
 void city_view_set_scale(int scale)
 {
     if (config_get(CONFIG_UI_ZOOM)) {
@@ -403,11 +426,7 @@ void city_view_set_viewport(int screen_width, int screen_height)
 {
     data.screen_width = screen_width;
     data.screen_height = screen_height;
-    if (data.sidebar_collapsed) {
-        set_viewport_without_sidebar();
-    } else {
-        set_viewport_with_sidebar();
-    }
+    reset_viewport();
     check_camera_boundaries();
 }
 

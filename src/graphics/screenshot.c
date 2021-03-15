@@ -243,7 +243,8 @@ static void create_full_city_screenshot(void)
         return;
     }
 
-    int canvas_width = city_width_pixels + (city_view_is_sidebar_collapsed() ? 40 : 160);
+    int sidebar_width = (city_view_is_sidebar_collapsed() ? 40 : 160);
+    int canvas_width = city_width_pixels + (config_get(CONFIG_UI_OCTAVIUS_UI) ? 0 : sidebar_width);
     int zoom_active = config_get(CONFIG_UI_ZOOM);
     int old_scale = 100;
     if (zoom_active) {
