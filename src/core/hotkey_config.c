@@ -11,7 +11,7 @@
 #define MAX_LINE 100
 #define MAX_MAPPINGS HOTKEY_MAX_ITEMS * 2
 
-static const char *INI_FILENAME = "julius-hotkeys.ini";
+static const char *INI_FILENAME = "octavius-hotkeys.ini";
 
 // Keep this in the same order as the actions in hotkey_config.h
 static const char *ini_keys[] = {
@@ -72,12 +72,13 @@ static const char *ini_keys[] = {
     "set_bookmark_4",
     "center_screen",
     "toggle_fullscreen",
-    "resize_to_640",
-    "resize_to_800",
-    "resize_to_1024",
+    "resize_to_720",
+    "resize_to_1080",
+    "resize_to_1440",
     "save_screenshot",
     "save_city_screenshot",
-    "clone_building"
+    "clone_building",
+    "toggle_octavius_ui"
 };
 
 static struct {
@@ -172,9 +173,9 @@ static void init_defaults(void)
     set_mapping(KEY_TYPE_F5, KEY_MOD_NONE, HOTKEY_CENTER_WINDOW);
     set_mapping(KEY_TYPE_F6, KEY_MOD_NONE, HOTKEY_TOGGLE_FULLSCREEN);
     set_mapping(KEY_TYPE_ENTER, KEY_MOD_ALT, HOTKEY_TOGGLE_FULLSCREEN);
-    set_mapping(KEY_TYPE_F7, KEY_MOD_NONE, HOTKEY_RESIZE_TO_640);
-    set_mapping(KEY_TYPE_F8, KEY_MOD_NONE, HOTKEY_RESIZE_TO_800);
-    set_mapping(KEY_TYPE_F9, KEY_MOD_NONE, HOTKEY_RESIZE_TO_1024);
+    set_mapping(KEY_TYPE_F7, KEY_MOD_NONE, HOTKEY_RESIZE_TO_720);
+    set_mapping(KEY_TYPE_F8, KEY_MOD_NONE, HOTKEY_RESIZE_TO_1080);
+    set_mapping(KEY_TYPE_F9, KEY_MOD_NONE, HOTKEY_RESIZE_TO_1440);
     set_mapping(KEY_TYPE_F12, KEY_MOD_NONE, HOTKEY_SAVE_SCREENSHOT);
     set_mapping(KEY_TYPE_F12, KEY_MOD_ALT, HOTKEY_SAVE_SCREENSHOT); // mac specific
     set_mapping(KEY_TYPE_F12, KEY_MOD_CTRL, HOTKEY_SAVE_CITY_SCREENSHOT);

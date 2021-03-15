@@ -1,4 +1,4 @@
-# Julius ![](res/julius_48.png)
+# Octavius ![](res/octavius_48.png)
 
 [![Github Actions](https://github.com/bvschaik/julius/workflows/Build%20Julius/badge.svg)](https://github.com/bvschaik/julius/actions)
 
@@ -10,7 +10,7 @@ Android version on Google Play: [install release](https://play.google.com/store/
 
 Chat: [Discord](http://www.discord.gg/GamerZakh) (kindly hosted by GamerZakh) or [Gitter](https://gitter.im/julius-game/community)
 
-## Julius: an open source re-implementation of Caesar III
+## Octavius: an open source re-implementation of Caesar III derived from [Julius](https://github.com/bvschaik/julius)
 
 Julius is a fully working open-source version of Caesar 3, with the same logic
 as the original, but with some UI enhancements, that can be played on multiple platforms.

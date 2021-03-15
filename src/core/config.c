@@ -8,7 +8,7 @@
 
 #define MAX_LINE 100
 
-static const char *INI_FILENAME = "julius.ini";
+static const char *INI_FILENAME = "octavius.ini";
 
 // Keep this in the same order as the config_keys in config.h
 static const char *ini_keys[] = {
@@ -16,6 +16,7 @@ static const char *ini_keys[] = {
     "gameplay_fix_100y_ghosts",
     "screen_display_scale",
     "screen_cursor_scale",
+    "ui_octavius_ui",
     "ui_sidebar_info",
     "ui_show_intro_video",
     "ui_smooth_scrolling",

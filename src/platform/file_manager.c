@@ -202,7 +202,7 @@ int platform_file_manager_compare_filename_prefix(const char *filename, const ch
 int platform_file_manager_set_base_path(const char *path)
 {
     if (!path) {
-        log_error("set_base_path: path was not set. Julius will probably crash.", 0, 0);
+        log_error("set_base_path: path was not set. Octavius will probably crash.", 0, 0);
         return 0;
     }
 #ifdef __ANDROID__

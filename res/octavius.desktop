@@ -2,9 +2,9 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Exec=julius
-Icon=com.github.bvschaik.julius
-Name=Julius
+Exec=octavius
+Icon=com.github.attrition.octavius
+Name=Octavius
 GenericName=Roman city management game
 Comment=Open Source re-implementation of Caesar 3.
 Categories=Game;Simulation;

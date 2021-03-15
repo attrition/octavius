@@ -27,7 +27,7 @@ static translation_string all_strings[] = {
     {TR_BUTTON_CANCEL, "Cancel"},
     {TR_BUTTON_RESET_DEFAULTS, "Reset defaults"},
     {TR_BUTTON_CONFIGURE_HOTKEYS, "Configure hotkeys"},
-    {TR_CONFIG_TITLE, "Julius configuration options"},
+    {TR_CONFIG_TITLE, "Octavius configuration options"},
     {TR_CONFIG_LANGUAGE_LABEL, "Language:"},
     {TR_CONFIG_LANGUAGE_DEFAULT, "(default)"},
     {TR_CONFIG_DISPLAY_SCALE, "Display scale:"},
@@ -35,6 +35,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_HEADER_UI_CHANGES, "User interface changes"},
     {TR_CONFIG_HEADER_GAMEPLAY_CHANGES, "Gameplay changes"},
     {TR_CONFIG_SHOW_INTRO_VIDEO, "Play intro videos"},
+    {TR_CONFIG_OCTAVIUS_UI, "Use Octavius UI"},
     {TR_CONFIG_SIDEBAR_INFO, "Extra information in the control panel"},
     {TR_CONFIG_SMOOTH_SCROLLING, "Enable smooth scrolling"},
     {TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING, "Disable map scrolling on window edge"},
@@ -47,7 +48,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SHOW_MILITARY_SIDEBAR, "Enable military sidebar"},
     {TR_CONFIG_FIX_IMMIGRATION_BUG, "Fix immigration bug on very hard"},
     {TR_CONFIG_FIX_100_YEAR_GHOSTS, "Fix 100-year-old ghosts"},
-    {TR_HOTKEY_TITLE, "Julius hotkey configuration"},
+    {TR_HOTKEY_TITLE, "Octavius hotkey configuration"},
     {TR_HOTKEY_LABEL, "Hotkey"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Alternative"},
     {TR_HOTKEY_HEADER_ARROWS, "Arrow keys"},
@@ -64,14 +65,12 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_ARROW_RIGHT, "Right"},
     {TR_HOTKEY_TOGGLE_FULLSCREEN, "Toggle fullscreen"},
     {TR_HOTKEY_CENTER_WINDOW, "Center window"},
-    {TR_HOTKEY_RESIZE_TO_640, "Resize window to 640x480"},
-    {TR_HOTKEY_RESIZE_TO_800, "Resize window to 800x600"},
-    {TR_HOTKEY_RESIZE_TO_1024, "Resize window to 1024x768"},
     {TR_HOTKEY_SAVE_SCREENSHOT, "Save screenshot"},
     {TR_HOTKEY_SAVE_CITY_SCREENSHOT, "Save full city screenshot"},
     {TR_HOTKEY_BUILD_CLONE, "Clone building under cursor"},
     {TR_HOTKEY_LOAD_FILE, "Load file"},
     {TR_HOTKEY_SAVE_FILE, "Save file"},
+    {TR_HOTKEY_TOGGLE_OCTAVIUS_UI, "Toggle Octavius UI"},
     {TR_HOTKEY_INCREASE_GAME_SPEED, "Increase game speed"},
     {TR_HOTKEY_DECREASE_GAME_SPEED, "Decrease game speed"},
     {TR_HOTKEY_TOGGLE_PAUSE, "Toggle pause"},
@@ -107,7 +106,10 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, "Toggle battle info"},
     {TR_HOTKEY_EDIT_TITLE, "Press new hotkey"},
     {TR_HOTKEY_DUPLICATE_TITLE, "Hotkey already used"},
-    {TR_HOTKEY_DUPLICATE_MESSAGE, "This key combination is already assigned to the following action:"}
+    {TR_HOTKEY_DUPLICATE_MESSAGE, "This key combination is already assigned to the following action:"},
+    {TR_HOTKEY_RESIZE_TO_720, "1280x720"},
+    {TR_HOTKEY_RESIZE_TO_1080, "1920x1080"},
+    {TR_HOTKEY_RESIZE_TO_1440, "2560x1440"}
 };
 
 void translation_english(const translation_string **strings, int *num_strings)

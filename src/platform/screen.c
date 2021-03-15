@@ -30,7 +30,7 @@ static struct {
 static struct {
     const int WIDTH;
     const int HEIGHT;
-} MINIMUM = {640, 480};
+} MINIMUM = { 1280, 720 };
 
 static int scale_percentage = 100;
 static color_t *framebuffer;

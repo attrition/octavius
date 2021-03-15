@@ -118,9 +118,12 @@ void settings_load(void)
 {
     load_default_settings();
 
-    int size = io_read_file_into_buffer("c3.inf", NOT_LOCALIZED, data.inf_file, INF_SIZE);
+    int size = io_read_file_into_buffer("octavius.inf", NOT_LOCALIZED, data.inf_file, INF_SIZE);
     if (!size) {
-        return;
+        size = io_read_file_into_buffer("c3.inf", NOT_LOCALIZED, data.inf_file, INF_SIZE);
+        if (!size) {
+            return;
+        }
     }
 
     buffer buf;
@@ -129,8 +132,8 @@ void settings_load(void)
 
     if (data.window_width + data.window_height < 500) {
         // most likely migration from Caesar 3
-        data.window_width = 800;
-        data.window_height = 600;
+        data.window_width = 1280;
+        data.window_height = 720;
     }
 }
 
@@ -177,7 +180,7 @@ void settings_save(void)
     buffer_write_i32(buf, data.difficulty);
     buffer_write_i32(buf, data.gods_enabled);
 
-    io_write_buffer_to_file("c3.inf", data.inf_file, INF_SIZE);
+    io_write_buffer_to_file("octavius.inf", data.inf_file, INF_SIZE);
 }
 
 int setting_fullscreen(void)

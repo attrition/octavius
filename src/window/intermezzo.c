@@ -1,9 +1,7 @@
 #include "intermezzo.h"
 
 #include "core/time.h"
-#include "graphics/graphics.h"
 #include "graphics/image.h"
-#include "graphics/screen.h"
 #include "graphics/window.h"
 #include "scenario/property.h"
 #include "sound/music.h"
@@ -90,27 +88,11 @@ static void init(intermezzo_type type, void (*callback)(void))
 
 static void draw_background(void)
 {
-    graphics_clear_screen();
-    int x_offset = (screen_width() - 1024) / 2;
-    int y_offset = (screen_height() - 768) / 2;
+    int scenario = (scenario_is_custom() ^ 2) * scenario_campaign_mission();
+    int image_offset = !!data.type * (scenario + data.type);
+    int background = image_group(GROUP_INTERMEZZO_BACKGROUND) + image_offset;
 
-    int mission = scenario_campaign_mission();
-    int image_base = image_group(GROUP_INTERMEZZO_BACKGROUND);
-    if (data.type == INTERMEZZO_MISSION_BRIEFING) {
-        if (scenario_is_custom()) {
-            image_draw(image_base + 1, x_offset, y_offset);
-        } else {
-            image_draw(image_base + 1 + 2 * mission, x_offset, y_offset);
-        }
-    } else if (data.type == INTERMEZZO_FIRED) {
-        image_draw(image_base, x_offset, y_offset);
-    } else if (data.type == INTERMEZZO_WON) {
-        if (scenario_is_custom()) {
-            image_draw(image_base + 2, x_offset, y_offset);
-        } else {
-            image_draw(image_base + 2 + 2 * mission, x_offset, y_offset);
-        }
-    }
+    image_draw_fullscreen_background(background);
 }
 
 static void handle_input(const mouse *m, const hotkeys *h)

@@ -142,7 +142,9 @@ int game_init_editor(void)
     game_file_editor_clear_data();
     game_file_editor_create_scenario(2);
 
-    if (city_view_is_sidebar_collapsed()) {
+    if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
+
+    } else if (city_view_is_sidebar_collapsed()) {
         city_view_toggle_sidebar();
     }
 

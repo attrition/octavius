@@ -101,8 +101,8 @@ void mouse_set_inside_window(int inside)
 
 static void update_button_state(mouse_button *button)
 {
+    button->went_up = (button->is_down || button->went_down) && ((button->system_change & SYSTEM_UP) == SYSTEM_UP);
     button->went_down = (button->system_change & SYSTEM_DOWN) == SYSTEM_DOWN;
-    button->went_up = (button->system_change & SYSTEM_UP) == SYSTEM_UP;
     button->double_click = (button->system_change & SYSTEM_DOUBLE_CLICK) == SYSTEM_DOUBLE_CLICK;
     button->system_change = SYSTEM_NONE;
     button->is_down = (button->is_down || button->went_down) && !button->went_up;
