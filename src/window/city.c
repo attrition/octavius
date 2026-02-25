@@ -26,6 +26,7 @@
 #include "map/property.h"
 #include "map/sprite.h"
 #include "map/terrain.h"
+#include "building/menu.h"
 #include "scenario/building.h"
 #include "scenario/criteria.h"
 #include "widget/city.h"

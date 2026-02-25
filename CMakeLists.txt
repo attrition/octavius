@@ -619,7 +619,6 @@ set(TRANSLATION_FILES
 )
 
 set(MACOSX_FILES "")
-<<<<<<< HEAD
 if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     set(MACOSX_FILES ${PROJECT_SOURCE_DIR}/res/octavius.icns)
 endif()
