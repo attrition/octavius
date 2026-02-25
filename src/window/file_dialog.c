@@ -28,7 +28,7 @@
 #include <string.h>
 
 #define NUM_FILES_IN_VIEW 12
-#define MAX_FILE_WINDOW_TEXT_WIDTH (18 * INPUT_BOX_BLOCK_SIZE)
+#define MAX_FILE_WINDOW_TEXT_WIDTH (18 * BLOCK_SIZE)
 
 static const time_millis NOT_EXIST_MESSAGE_TIMEOUT = 500;
 
@@ -55,7 +55,7 @@ static generic_button file_buttons[] = {
     {160, 304, 288, 16, button_select_file, button_none, 11, 0},
 };
 
-static scrollbar_type scrollbar = {464, 120, 206, on_scroll};
+static scrollbar_type scrollbar = {464, 120, 206, 320, NUM_FILES_IN_VIEW, on_scroll, 1};
 
 typedef struct {
     char extension[4];
@@ -97,7 +97,8 @@ static int find_first_file_with_prefix(const char *prefix)
             left = middle + 1;
         }
     }
-    if (platform_file_manager_compare_filename_prefix(data.file_list->files[left], prefix, len) == 0) {
+    if (left < data.file_list->num_files &&
+        platform_file_manager_compare_filename_prefix(data.file_list->files[left], prefix, len) == 0) {
         return left;
     } else {
         return -1;
@@ -141,7 +142,7 @@ static void init(file_type type, file_dialog_type dialog_type)
     string_copy(data.typed_name, data.previously_seen_typed_name, FILE_NAME_MAX);
 
     data.file_list = dir_find_files_with_extension(data.file_data->extension);
-    scrollbar_init(&scrollbar, 0, data.file_list->num_files - NUM_FILES_IN_VIEW);
+    scrollbar_init(&scrollbar, 0, data.file_list->num_files);
     scroll_to_typed_text();
 
     strncpy(data.selected_file, data.file_data->last_loaded_file, FILE_NAME_MAX);
@@ -210,10 +211,11 @@ static void handle_input(const mouse *m, const hotkeys *h)
     }
 
     const mouse *m_dialog = mouse_in_dialog(m);
-    if (input_box_handle_mouse(m_dialog, &file_name_input) ||
+    data.focus_button_id = 0;
+    if (scrollbar_handle_mouse(&scrollbar, m_dialog) ||
+        input_box_handle_mouse(m_dialog, &file_name_input) ||
         generic_buttons_handle_mouse(m_dialog, 0, 0, file_buttons, NUM_FILES_IN_VIEW, &data.focus_button_id) ||
-        image_buttons_handle_mouse(m_dialog, 0, 0, image_buttons, 2, 0) ||
-        scrollbar_handle_mouse(&scrollbar, m_dialog)) {
+        image_buttons_handle_mouse(m_dialog, 0, 0, image_buttons, 2, 0)) {
         return;
     }
     if (input_go_back_requested(m, h)) {

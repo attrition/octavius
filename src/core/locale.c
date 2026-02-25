@@ -12,6 +12,8 @@ static const uint8_t NEW_GAME_FRENCH[] =
     {0x4e, 0x6f, 0x75, 0x76, 0x65, 0x6c, 0x6c, 0x65, 0x20, 0x70, 0x61, 0x72, 0x74, 0x69, 0x65, 0}; // Nouvelle partie
 static const uint8_t NEW_GAME_GERMAN[] =
     {0x4e, 0x65, 0x75, 0x65, 0x73, 0x20, 0x53, 0x70, 0x69, 0x65, 0x6c, 0}; // Neues Spiel
+static const uint8_t NEW_GAME_GREEK[] =
+    {0xcd, 0xdd, 0xef, 0x20, 0xd0, 0xe1, 0xe9, 0xf7, 0xed, 0xdf, 0xe4, 0xe9, 0};
 static const uint8_t NEW_GAME_ITALIAN[] =
     {0x4e, 0x75, 0x6f, 0x76, 0x61, 0x20, 0x70, 0x61, 0x72, 0x74, 0x69, 0x74, 0x61, 0}; // Nuova partita
 static const uint8_t NEW_GAME_SPANISH[] =
@@ -27,6 +29,9 @@ static const uint8_t NEW_GAME_SWEDISH[] =
 static const uint8_t NEW_GAME_TRADITIONAL_CHINESE[] = {0x83, 0x80, 0x20, 0x84, 0x80, 0x20, 0x85, 0x80, 0};
 static const uint8_t NEW_GAME_SIMPLIFIED_CHINESE[] = {0x82, 0x80, 0x20, 0x83, 0x80, 0x20, 0x84, 0x80, 0};
 static const uint8_t NEW_GAME_KOREAN[] = {0xbb, 0xf5, 0x20, 0xb0, 0xd4, 0xc0, 0xd3, 0};
+static const uint8_t NEW_GAME_JAPANESE[] = {0x83, 0x6a, 0x83, 0x85, 0x81, 0x5b, 0x83, 0x51, 0x81, 0x5b, 0x83, 0x80, 0};
+static const uint8_t NEW_GAME_CZECH[] =
+    {0x4e, 0x6f, 0x76, 0xe1, 0x20, 0x68, 0x72, 0x61, 0}; // Nova hra
 
 static struct {
     language_type last_determined_language;
@@ -43,6 +48,8 @@ static language_type determine_language(void)
         return LANGUAGE_FRENCH;
     } else if (string_equals(NEW_GAME_GERMAN, new_game_string)) {
         return LANGUAGE_GERMAN;
+    } else if (string_equals(NEW_GAME_GREEK, new_game_string)) {
+        return LANGUAGE_GREEK;
     } else if (string_equals(NEW_GAME_ITALIAN, new_game_string)) {
         return LANGUAGE_ITALIAN;
     } else if (string_equals(NEW_GAME_SPANISH, new_game_string)) {
@@ -55,12 +62,16 @@ static language_type determine_language(void)
         return LANGUAGE_RUSSIAN;
     } else if (string_equals(NEW_GAME_SWEDISH, new_game_string)) {
         return LANGUAGE_SWEDISH;
+    } else if (string_equals(NEW_GAME_CZECH, new_game_string)) {
+        return LANGUAGE_CZECH;
     } else if (string_equals(NEW_GAME_TRADITIONAL_CHINESE, new_game_string)) {
         return LANGUAGE_TRADITIONAL_CHINESE;
     } else if (string_equals(NEW_GAME_SIMPLIFIED_CHINESE, new_game_string)) {
         return LANGUAGE_SIMPLIFIED_CHINESE;
     } else if (string_equals(NEW_GAME_KOREAN, new_game_string)) {
         return LANGUAGE_KOREAN;
+    } else if (string_equals(NEW_GAME_JAPANESE, new_game_string)) {
+        return LANGUAGE_JAPANESE;
     } else {
         return LANGUAGE_UNKNOWN;
     }
@@ -73,6 +84,7 @@ static void log_language(void)
         case LANGUAGE_ENGLISH: desc = "English"; break;
         case LANGUAGE_FRENCH: desc = "French"; break;
         case LANGUAGE_GERMAN: desc = "German"; break;
+        case LANGUAGE_GREEK: desc = "Greek"; break;
         case LANGUAGE_ITALIAN: desc = "Italian"; break;
         case LANGUAGE_SPANISH: desc = "Spanish"; break;
         case LANGUAGE_POLISH: desc = "Polish"; break;
@@ -82,6 +94,8 @@ static void log_language(void)
         case LANGUAGE_TRADITIONAL_CHINESE: desc = "Traditional Chinese"; break;
         case LANGUAGE_SIMPLIFIED_CHINESE: desc = "Simplified Chinese"; break;
         case LANGUAGE_KOREAN: desc = "Korean"; break;
+        case LANGUAGE_JAPANESE: desc = "Japanese"; break;
+        case LANGUAGE_CZECH: desc = "Czech"; break;
         default: desc = "Unknown"; break;
     }
     log_info("Detected language:", desc, 0);
@@ -91,6 +105,11 @@ language_type locale_determine_language(void)
 {
     data.last_determined_language = determine_language();
     log_language();
+    return data.last_determined_language;
+}
+
+language_type locale_last_determined_language(void)
+{
     return data.last_determined_language;
 }
 
@@ -107,6 +126,11 @@ int locale_translate_money_dn(void)
     return data.last_determined_language != LANGUAGE_KOREAN;
 }
 
+int locale_paragraph_indent(void)
+{
+    return data.last_determined_language == LANGUAGE_JAPANESE ? 17 : 50;
+}
+
 int locale_translate_rank_autosaves(void)
 {
     switch (data.last_determined_language) {
@@ -119,8 +143,10 @@ int locale_translate_rank_autosaves(void)
         case LANGUAGE_SPANISH:
         case LANGUAGE_SWEDISH:
         case LANGUAGE_RUSSIAN:
+        case LANGUAGE_CZECH:
             return 1;
 
+        case LANGUAGE_JAPANESE:
         case LANGUAGE_KOREAN:
         case LANGUAGE_TRADITIONAL_CHINESE: // original adds 01_ prefixes
         case LANGUAGE_SIMPLIFIED_CHINESE:

@@ -135,6 +135,9 @@ void settings_load(void)
         data.window_width = 1280;
         data.window_height = 720;
     }
+    if (data.last_advisor <= ADVISOR_NONE || data.last_advisor > ADVISOR_CHIEF) {
+        data.last_advisor = ADVISOR_LABOR;
+    }
 }
 
 void settings_save(void)

@@ -5,11 +5,6 @@
 #  SDL2_MIXER_FOUND, if false, do not try to link against
 #  SDL2_MIXER_VERSION_STRING - human-readable string containing the version of SDL_mixer
 #
-# For backward compatiblity the following variables are also set:
-#  SDLMIXER_LIBRARY (same value as SDL2_MIXER_LIBRARIES)
-#  SDLMIXER_INCLUDE_DIR (same value as SDL2_MIXER_INCLUDE_DIRS)
-#  SDLMIXER_FOUND (same value as SDL2_MIXER_FOUND)
-#
 # $SDLDIR is an environment variable that would
 # correspond to the ./configure --prefix=$SDLDIR
 # used in building SDL.
@@ -34,18 +29,10 @@
 
 GET_SDL_EXT_DIR(SDL_MIXER_EXT_DIR "mixer")
 
-IF(ANDROID_BUILD)
-    STRING(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
-    SET(SDL2_MIXER_LIBRARY SDL2_mixer)
-    link_directories(${PROJECT_SOURCE_DIR}/android/SDL2/build/intermediates/ndkBuild/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI})
-
-    SET(SDL2_MIXER_INCLUDE_DIR_TEMP ${SDL_MIXER_EXT_DIR} ${SDL_MIXER_EXT_DIR}/include)
-    FOREACH(CURRENT_INCLUDE_DIR ${SDL2_MIXER_INCLUDE_DIR_TEMP})
-        IF(EXISTS "${CURRENT_INCLUDE_DIR}/SDL_mixer.h")
-            SET(SDL2_MIXER_INCLUDE_DIR ${CURRENT_INCLUDE_DIR})
-            BREAK()
-        ENDIF()
-    ENDFOREACH()
+IF(${TARGET_PLATFORM} STREQUAL "android")
+    find_package(SDL2 REQUIRED CONFIG)
+    string(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
+    set(SDL2_MIXER_LIBRARY SDL2::SDL2_mixer)
 ELSE()
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(SDL2_ARCH_64 TRUE)
@@ -64,23 +51,17 @@ ELSE()
     endif()
 
     SET(SDL2_SEARCH_PATHS
+        ${SDL_MIXER_EXT_DIR}
+        ${SDL_MINGW_EXT_DIR}
         ~/Library/Frameworks
         /Library/Frameworks
-        /usr/local
-        /usr
         /sw # Fink
         /opt/local # DarwinPorts
         /opt/csw # Blastwave
         /opt
-        ${SDL_MIXER_EXT_DIR}
-        ${SDL_MINGW_EXT_DIR}
+        /boot/system/develop/headers/SDL2 # Haiku
         ${CMAKE_FIND_ROOT_PATH}
     )
-
-    if(NOT SDL2_MIXER_INCLUDE_DIR AND SDL2MIXER_INCLUDE_DIR)
-      set(SDL2_MIXER_INCLUDE_DIR ${SDL2MIXER_INCLUDE_DIR} CACHE PATH "directory cache
-    entry initialized from old variable name")
-    endif()
 
     if(APPLE)
       # Try to find the include in the SDL2_mixer framework bundle
@@ -102,13 +83,10 @@ ELSE()
           ENV SDL2DIR
         PATH_SUFFIXES include include/SDL2
         PATHS ${SDL2_SEARCH_PATHS}
+        NO_CMAKE_FIND_ROOT_PATH
       )
     endif()
 
-    if(NOT SDL2_MIXER_LIBRARY AND SDL2MIXER_LIBRARY)
-      set(SDL2_MIXER_LIBRARY ${SDL2MIXER_LIBRARY} CACHE FILEPATH "file cache entry
-    initialized from old variable name")
-    endif()
     find_library(SDL2_MIXER_LIBRARY
       NAMES SDL2_mixer
       HINTS
@@ -116,6 +94,7 @@ ELSE()
         ENV SDL2DIR
       PATH_SUFFIXES lib64 lib lib/${SDL2_PROCESSOR_ARCH}
       PATHS ${SDL2_SEARCH_PATHS}
+      NO_CMAKE_FIND_ROOT_PATH
     )
 ENDIF()
 
@@ -142,12 +121,5 @@ set(SDL2_MIXER_INCLUDE_DIRS ${SDL2_MIXER_INCLUDE_DIR})
 include(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL2_mixer
-                                  REQUIRED_VARS SDL2_MIXER_LIBRARIES SDL2_MIXER_INCLUDE_DIRS
+                                  REQUIRED_VARS SDL2_MIXER_LIBRARIES
                                   VERSION_VAR SDL2_MIXER_VERSION_STRING)
-
-# for backward compatiblity
-set(SDL2MIXER_LIBRARY ${SDL2_MIXER_LIBRARIES})
-set(SDL2MIXER_INCLUDE_DIR ${SDL2_MIXER_INCLUDE_DIRS})
-set(SDL2MIXER_FOUND ${SDL2_MIXER_FOUND})
-
-mark_as_advanced(SDL2_MIXER_LIBRARY SDL2_MIXER_INCLUDE_DIR)

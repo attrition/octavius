@@ -44,7 +44,7 @@ static generic_button generic_buttons_messages[] = {
     {0, 180, 412, 18, button_message, button_delete, 9, 0},
 };
 
-static scrollbar_type scrollbar = {432, 112, 208, on_scroll};
+static scrollbar_type scrollbar = {432, 112, 208, 416, MAX_MESSAGES, on_scroll, 1};
 
 static struct {
     int width_blocks;
@@ -60,7 +60,7 @@ static struct {
 static void init(void)
 {
     city_message_sort_and_compact();
-    scrollbar_init(&scrollbar, city_message_scroll_position(), city_message_count() - MAX_MESSAGES);
+    scrollbar_init(&scrollbar, city_message_scroll_position(), city_message_count());
 }
 
 static void draw_background(void)
@@ -76,19 +76,19 @@ static void draw_background(void)
     data.text_height_blocks = data.height_blocks - 9;
 
     outer_panel_draw(0, 32, data.width_blocks, data.height_blocks);
-    lang_text_draw_centered(63, 0, 0, 48, 16 * data.width_blocks, FONT_LARGE_BLACK);
+    lang_text_draw_centered(63, 0, 0, 48, BLOCK_SIZE * data.width_blocks, FONT_LARGE_BLACK);
     inner_panel_draw(data.x_text, data.y_text, data.text_width_blocks, data.text_height_blocks);
 
     if (city_message_count() > 0) {
         lang_text_draw(63, 2, data.x_text + 42, data.y_text - 12, FONT_SMALL_PLAIN);
         lang_text_draw(63, 3, data.x_text + 180, data.y_text - 12, FONT_SMALL_PLAIN);
         lang_text_draw_multiline(63, 4,
-            data.x_text + 50, data.y_text + 12 + 16 * data.text_height_blocks,
-            16 * data.text_width_blocks - 100, FONT_NORMAL_BLACK);
+            data.x_text + 50, data.y_text + 12 + BLOCK_SIZE * data.text_height_blocks,
+            BLOCK_SIZE * data.text_width_blocks - 100, FONT_NORMAL_BLACK);
     } else {
         lang_text_draw_multiline(63, 1,
             data.x_text + 16, data.y_text + 80,
-            16 * data.text_width_blocks - 48, FONT_NORMAL_GREEN);
+            BLOCK_SIZE * data.text_width_blocks - 48, FONT_NORMAL_GREEN);
     }
     graphics_reset_dialog();
 }
@@ -128,8 +128,9 @@ static void draw_messages(int total_messages)
 static void draw_foreground(void)
 {
     graphics_in_dialog();
-    image_buttons_draw(16, 32 + 16 * data.height_blocks - 42, &image_button_help, 1);
-    image_buttons_draw(16 * data.width_blocks - 38, 32 + 16 * data.height_blocks - 36, &image_button_close, 1);
+    image_buttons_draw(16, 32 + BLOCK_SIZE * data.height_blocks - 42, &image_button_help, 1);
+    image_buttons_draw(BLOCK_SIZE * data.width_blocks - 38, 32 + BLOCK_SIZE * data.height_blocks - 36,
+        &image_button_close, 1);
 
     int total_messages = city_message_count();
     if (total_messages > 0) {
@@ -145,19 +146,21 @@ static void handle_input(const mouse *m, const hotkeys *h)
     int old_button_id = data.focus_button_id;
     data.focus_button_id = 0;
 
+    if (scrollbar_handle_mouse(&scrollbar, m_dialog)) {
+        data.focus_button_id = 13;
+        return;
+    }
+
     int button_id;
-    int handled = image_buttons_handle_mouse(m_dialog, 16, 32 + 16 * data.height_blocks - 42,
+    int handled = image_buttons_handle_mouse(m_dialog, 16, 32 + BLOCK_SIZE * data.height_blocks - 42,
         &image_button_help, 1, &button_id);
     if (button_id) {
         data.focus_button_id = 11;
     }
-    handled |= image_buttons_handle_mouse(m_dialog, 16 * data.width_blocks - 38,
-        32 + 16 * data.height_blocks - 36, &image_button_close, 1, &button_id);
+    handled |= image_buttons_handle_mouse(m_dialog, BLOCK_SIZE * data.width_blocks - 38,
+        32 + BLOCK_SIZE * data.height_blocks - 36, &image_button_close, 1, &button_id);
     if (button_id) {
         data.focus_button_id = 12;
-    }
-    if (scrollbar_handle_mouse(&scrollbar, m_dialog)) {
-        data.focus_button_id = 13;
     }
     handled |= generic_buttons_handle_mouse(m_dialog, data.x_text, data.y_text + 4,
         generic_buttons_messages, MAX_MESSAGES, &button_id);
@@ -207,7 +210,7 @@ static void button_delete(int id_to_delete, int param2)
     int id = city_message_set_current(scrollbar.scroll_position + id_to_delete);
     if (id < city_message_count()) {
         city_message_delete(id);
-        scrollbar_update_max(&scrollbar, city_message_count() - MAX_MESSAGES);
+        scrollbar_update_total_elements(&scrollbar, city_message_count());
         window_invalidate();
     }
 }

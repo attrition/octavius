@@ -71,15 +71,15 @@ static void draw_foreground(void)
     graphics_in_dialog();
 
     for (int i = 0; i < MAX_BUTTONS; i++) {
-        large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / 16, focus_button_id == i + 1 ? 1 : 0);
+        large_label_draw(buttons[i].x, buttons[i].y, buttons[i].width / BLOCK_SIZE, focus_button_id == i + 1 ? 1 : 0);
     }
 
-    lang_text_draw_centered(30, 1, 192, 106, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 2, 192, 146, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 3, 192, 186, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(9, 8, 192, 226, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(2, 0, 192, 266, 256, FONT_NORMAL_GREEN);
-    lang_text_draw_centered(30, 5, 192, 306, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 1, 192, 107, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 2, 192, 147, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 3, 192, 187, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(9, 8, 192, 227, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(2, 0, 192, 267, 256, FONT_NORMAL_GREEN);
+    lang_text_draw_centered(30, 5, 192, 307, 256, FONT_NORMAL_GREEN);
 
     graphics_reset_dialog();
 }

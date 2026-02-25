@@ -232,11 +232,58 @@ void city_view_get_camera_in_pixels(int *x, int *y)
     *y = data.camera.tile.y * HALF_TILE_HEIGHT_PIXELS + data.camera.pixel.y;
 }
 
+static void adjust_for_orientation(int x, int y, int orientation, int *x_out, int *y_out)
+{
+    switch (orientation) {
+        default:
+        case DIR_0_TOP:
+            *x_out = x;
+            *y_out = y;
+            break;
+        case DIR_2_RIGHT:
+            *x_out = y / 2;
+            *y_out = (VIEW_X_MAX - x) * 2;
+            break;
+        case DIR_4_BOTTOM:
+            *x_out = VIEW_X_MAX - x;
+            *y_out = VIEW_Y_MAX - y;
+            break;
+        case DIR_6_LEFT:
+            *x_out = (VIEW_Y_MAX - y) / 2;
+            *y_out = x * 2;
+            break;
+    }
+}
+
+void city_view_get_camera_absolute(int *x_abs, int *y_abs)
+{
+    int x_offset = data.viewport.width_tiles / 2;
+    int y_offset = data.viewport.height_tiles / 2;
+    int x_center = data.camera.tile.x + x_offset;
+    int y_center = data.camera.tile.y + y_offset;
+    int x_center_abs, y_center_abs;
+    int to_rotate = (DIR_8_NONE - data.orientation) % DIR_8_NONE;
+    adjust_for_orientation(x_center, y_center, to_rotate, &x_center_abs, &y_center_abs);
+    *x_abs = x_center_abs - x_offset;
+    *y_abs = y_center_abs - y_offset;
+}
+
 void city_view_set_camera(int x, int y)
 {
     data.camera.tile.x = x;
     data.camera.tile.y = y;
     check_camera_boundaries();
+}
+
+void city_view_set_camera_absolute(int x_abs, int y_abs)
+{
+    int x_offset = data.viewport.width_tiles / 2;
+    int y_offset = data.viewport.height_tiles / 2;
+    int x_center_abs = x_abs + x_offset;
+    int y_center_abs = y_abs + y_offset;
+    int x_center, y_center;
+    adjust_for_orientation(x_center_abs, y_center_abs, data.orientation, &x_center, &y_center);
+    city_view_set_camera(x_center - x_offset, y_center - y_offset);
 }
 
 void city_view_set_camera_from_pixel_position(int x, int y)
@@ -495,7 +542,38 @@ void city_view_foreach_map_tile(map_callback *callback)
     }
 }
 
-void city_view_foreach_valid_map_tile(map_callback *callback1, map_callback *callback2, map_callback *callback3)
+void city_view_foreach_valid_map_tile(map_callback *callback)
+{
+    int odd = 0;
+    int y_view = data.camera.tile.y - 8;
+    int y_graphic = data.viewport.y - 9 * HALF_TILE_HEIGHT_PIXELS - data.camera.pixel.y;
+    for (int y = 0; y < data.viewport.height_tiles + 21; y++) {
+        if (y_view >= 0 && y_view < VIEW_Y_MAX) {
+            int x_graphic = -(4 * TILE_WIDTH_PIXELS) - data.camera.pixel.x;
+            if (odd) {
+                x_graphic += data.viewport.x - HALF_TILE_WIDTH_PIXELS;
+            } else {
+                x_graphic += data.viewport.x;
+            }
+            int x_view = data.camera.tile.x - 4;
+            for (int x = 0; x < data.viewport.width_tiles + 7; x++) {
+                if (x_view >= 0 && x_view < VIEW_X_MAX) {
+                    int grid_offset = view_to_grid_offset_lookup[x_view][y_view];
+                    if (grid_offset >= 0) {
+                        callback(x_graphic, y_graphic, grid_offset);
+                    }
+                }
+                x_graphic += TILE_WIDTH_PIXELS;
+                x_view++;
+            }
+        }
+        odd = 1 - odd;
+        y_graphic += HALF_TILE_HEIGHT_PIXELS;
+        y_view++;
+    }
+}
+
+void city_view_foreach_valid_map_tile_row(map_callback *callback1, map_callback *callback2, map_callback *callback3)
 {
     int odd = 0;
     int y_view = data.camera.tile.y - 8;

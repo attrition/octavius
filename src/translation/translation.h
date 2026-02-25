@@ -32,6 +32,7 @@ typedef enum {
     TR_CONFIG_SMOOTH_SCROLLING,
     TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING,
     TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG,
+    TR_CONFIG_INVERSE_RIGHT_CLICK_MAP_DRAG,
     TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE,
     TR_CONFIG_ALLOW_CYCLING_TEMPLES,
     TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE,
@@ -102,7 +103,9 @@ typedef enum {
     TR_HOTKEY_EDIT_TITLE,
     TR_HOTKEY_DUPLICATE_TITLE,
     TR_HOTKEY_DUPLICATE_MESSAGE,
-    TRANSLATION_MAX_KEY
+    TR_WARNING_SCREENSHOT_SAVED,
+    TR_FIX_KOREAN_BUILDING_DOCTORS_CLINIC,
+    TRANSLATION_MAX_KEY,
 } translation_key;
 
 typedef struct {
@@ -114,10 +117,13 @@ void translation_load(language_type language);
 
 const uint8_t *translation_for(translation_key key);
 
+void translation_czech(const translation_string **strings, int *num_strings);
 void translation_english(const translation_string **strings, int *num_strings);
 void translation_french(const translation_string **strings, int *num_strings);
 void translation_german(const translation_string **strings, int *num_strings);
+void translation_greek(const translation_string **strings, int *num_strings);
 void translation_italian(const translation_string **strings, int *num_strings);
+void translation_japanese(const translation_string **strings, int *num_strings);
 void translation_korean(const translation_string **strings, int *num_strings);
 void translation_polish(const translation_string **strings, int *num_strings);
 void translation_portuguese(const translation_string **strings, int *num_strings);

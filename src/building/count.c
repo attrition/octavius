@@ -99,9 +99,9 @@ void building_count_update(void)
             case BUILDING_DOCTOR:
             // government
             case BUILDING_FORUM:
-            case BUILDING_FORUM_UPGRADED:
+            case BUILDING_FORUM_2_UNUSED:
+            case BUILDING_SENATE_1_UNUSED:
             case BUILDING_SENATE:
-            case BUILDING_SENATE_UPGRADED:
             // entertainment schools
             case BUILDING_ACTOR_COLONY:
             case BUILDING_GLADIATOR_SCHOOL:

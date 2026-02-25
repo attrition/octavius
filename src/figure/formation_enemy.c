@@ -26,8 +26,8 @@ static const int ENEMY_ATTACK_PRIORITY[4][100] = {
         BUILDING_OLIVE_FARM, BUILDING_VINES_FARM, BUILDING_PIG_FARM, 0
     },
     {
-        BUILDING_SENATE_UPGRADED, BUILDING_SENATE,
-        BUILDING_FORUM_UPGRADED, BUILDING_FORUM, 0
+        BUILDING_SENATE, BUILDING_SENATE_1_UNUSED,
+        BUILDING_FORUM_2_UNUSED, BUILDING_FORUM, 0
     },
     {
         BUILDING_GOVERNORS_PALACE, BUILDING_GOVERNORS_VILLA, BUILDING_GOVERNORS_HOUSE,
@@ -480,6 +480,7 @@ static void update_enemy_movement(formation *m, int roman_distance)
             army->home_x;
         int y_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][2 * m->enemy_legion_index + 1] +
             army->home_y;
+        map_grid_bound(&x_offset, &y_offset);
         int x_tile, y_tile;
         if (formation_enemy_move_formation_to(m, x_offset, y_offset, &x_tile, &y_tile)) {
             formation_set_destination(m, x_tile, y_tile);
@@ -490,6 +491,7 @@ static void update_enemy_movement(formation *m, int roman_distance)
             army->destination_x;
         int y_offset = LAYOUT_ORIENTATION_OFFSETS[layout][m->orientation / 2][2 * m->enemy_legion_index + 1] +
             army->destination_y;
+        map_grid_bound(&x_offset, &y_offset);
         int x_tile, y_tile;
         if (formation_enemy_move_formation_to(m, x_offset, y_offset, &x_tile, &y_tile)) {
             formation_set_destination(m, x_tile, y_tile);
@@ -542,7 +544,7 @@ static void update_enemy_formation(formation *m, int *roman_distance)
         army->home_y = m->y_home;
         army->layout = m->layout;
         *roman_distance = 0;
-        map_routing_noncitizen_can_travel_over_land(m->x_home, m->y_home, -2, -2, 100000, 300);
+        map_routing_noncitizen_can_travel_over_land(m->x_home, m->y_home, -1, -1, 100000, 300);
         int x_tile, y_tile;
         if (map_soldier_strength_get_max(m->x_home, m->y_home, 16, &x_tile, &y_tile)) {
             *roman_distance = 1;

@@ -253,7 +253,7 @@ static int is_fully_blocked(int map_x, int map_y, building_type type, int buildi
     if (!building_construction_can_place_on_terrain(x, y, 0)) {
         return 1;
     }
-    if (type == BUILDING_SENATE_UPGRADED && city_buildings_has_senate()) {
+    if (type == BUILDING_SENATE && city_buildings_has_senate()) {
         return 1;
     }
     if (type == BUILDING_BARRACKS && building_count_total(BUILDING_BARRACKS)) {
@@ -413,19 +413,19 @@ static void draw_draggable_reservoir(const map_tile *tile, int x, int y)
     }
     // mouse pointer = center tile of reservoir instead of north, correct here:
     y -= 30;
+    if (config_get(CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE) && (!building_construction_in_progress() || draw_later)) {
+        if (draw_later) {
+            city_view_foreach_tile_in_range(
+                offset + RESERVOIR_GRID_OFFSETS[orientation_index], 3, 10, draw_first_reservoir_range);
+        }
+        city_view_foreach_tile_in_range(
+            tile->grid_offset + RESERVOIR_GRID_OFFSETS[orientation_index], 3, 10, draw_second_reservoir_range);
+    }
     if (blocked) {
         for (int i = 0; i < 9; i++) {
             draw_flat_tile(x + X_VIEW_OFFSETS[i], y + Y_VIEW_OFFSETS[i], COLOR_MASK_RED);
         }
     } else {
-        if (config_get(CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE) && (!building_construction_in_progress() || draw_later)) {
-            if (draw_later) {
-                city_view_foreach_tile_in_range(
-                    offset + RESERVOIR_GRID_OFFSETS[orientation_index], 3, 10, draw_first_reservoir_range);
-            }
-            city_view_foreach_tile_in_range(
-                tile->grid_offset + RESERVOIR_GRID_OFFSETS[orientation_index], 3, 10, draw_second_reservoir_range);
-        }
         draw_single_reservoir(x, y, has_water);
         if (draw_later) {
             draw_single_reservoir(x_start, y_start, has_water);
@@ -529,7 +529,7 @@ static void draw_bathhouse(const map_tile *tile, int x, int y)
         draw_building(image_id, x, y);
         if (has_water) {
             const image *img = image_get(image_id);
-            image_draw_masked(image_id - 1, x + img->sprite_offset_x, y + img->sprite_offset_y, COLOR_MASK_GREEN);
+            image_draw_masked(image_id - 1, x + img->sprite_offset_x - 7, y + img->sprite_offset_y + 6, COLOR_MASK_GREEN);
         }
     }
 }

@@ -1,21 +1,15 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.10)
 include(CMakeDependentOption)
 
-if(VITA_BUILD AND SWITCH_BUILD)
-    message(FATAL_ERROR "Cannot build with -DVITA_BUILD=ON and -DSWITCH_BUILD=ON at the same time")
-endif()
+set(TARGET_PLATFORM "default" CACHE STRING "Platform to cross-compile for. Options: vita switch android ios emscripten. Leave blank for no cross compilation")
+set_property(CACHE TARGET_PLATFORM PROPERTY STRINGS default vita switch android ios emscripten)
 
-if((VITA_BUILD OR SWITCH_BUILD) AND ANDROID_BUILD)
-    message(FATAL_ERROR "Cannot build with -DVITA_BUILD=ON or -DSWITCH_BUILD=ON and -DANDROID_BUILD=ON at the same time")
-endif()
+string(TOLOWER ${TARGET_PLATFORM} TARGET_PLATFORM)
 
 option(DRAW_FPS "Draw FPS on the top left corner of the window." OFF)
 option(SYSTEM_LIBS "Use system libraries when available." ON)
-cmake_dependent_option(VITA_BUILD "Build for the PlayStation Vita handheld game console." OFF "NOT MSVC" OFF)
-cmake_dependent_option(SWITCH_BUILD "Build for the Nintendo Switch handheld game console." OFF "NOT MSVC; NOT VITA_BUILD" OFF)
-cmake_dependent_option(ANDROID_BUILD "Build for the Android environment." OFF "NOT MSVC; NOT VITA_BUILD; NOT SWITCH_BUILD" OFF)
 
-if(VITA_BUILD AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+if(${TARGET_PLATFORM} STREQUAL "vita" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VITASDK})
         set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "toolchain file")
     else()
@@ -23,44 +17,79 @@ if(VITA_BUILD AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     endif()
 endif()
 
-if(SWITCH_BUILD AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    if(DEFINED ENV{DEVKITPRO})
-        set(DEVKITPRO $ENV{DEVKITPRO})
-        set(CMAKE_TOOLCHAIN_FILE "./cmake/switch.cmake" CACHE PATH "toolchain file")
+if(${TARGET_PLATFORM} STREQUAL "switch" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    message(FATAL_ERROR "Please use /opt/devkitpro/portlibs/switch/bin/aarch64-none-elf-cmake to configure")
+endif()
+
+if(${TARGET_PLATFORM} STREQUAL "emscripten" AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    if(DEFINED ENV{EMSDK})
+        set(EMSDK $ENV{EMSDK})
+        set(CMAKE_TOOLCHAIN_FILE "$ENV{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake" CACHE PATH "toolchain file")
     else()
-        message(FATAL_ERROR "Please define DEVKITPRO to point to your SDK path!")
+        message(FATAL_ERROR "Please define EMSDK to point to your Emscripten SDK path!")
     endif()
 endif()
+    
+if(${TARGET_PLATFORM} STREQUAL "ios")
+
+    set(CMAKE_SYSTEM_NAME "iOS")
+
+    set(SYSTEM_LIBS OFF)
+
+    # Build SDL2 as static library
+    set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
+    set(SDL_SHARED OFF)
+    set(SDL_STATIC ON)
+
+    # Build SDL2_mixer as static library
+    set(BUILD_SHARED_LIBS OFF)
+
+    # Disable stuff that breaks the build and we don't need.
+    set(SDL2MIXER_WAVPACK OFF) 
+    set(SDL2MIXER_OPUS OFF) 
+    set(SDL2MIXER_MIDI OFF) 
+    set(SDL2MIXER_MOD OFF) 
+
+    # Explicitly set SDKROOT (called Base SDK in Xcode), otherwise it is set incorrectly.
+    set(CMAKE_XCODE_ATTRIBUTE_SDKROOT iphoneos)
+
+    # Support iPhone (1) and iPad (2) Destinations
+    set(CMAKE_XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2")
+endif()
+
 
 set(SHORT_NAME octavius)
 set(USER_FRIENDLY_NAME Octavius)
 project(${SHORT_NAME} C)
 
-if (VITA_BUILD)
+if (NINTENDO_SWITCH)
+    find_package(PkgConfig REQUIRED)
+endif()
+
+if (${TARGET_PLATFORM} STREQUAL "vita")
     include("${VITASDK}/share/vita.cmake" REQUIRED)
     set(VITA_TITLEID  "OCTAVIUS001")
 endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/")
 
-if (CMAKE_VERSION VERSION_LESS 3.1)
-    if (CMAKE_COMPILER_IS_GNUCC)
-        set(CMAKE_C_FLAGS "-std=gnu99 ${CMAKE_C_FLAGS}")
-    endif()
-else()
-    set(CMAKE_C_STANDARD 99)
-endif()
+set(CMAKE_C_STANDARD 99)
 
-if (CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror=implicit-function-declaration")
-
-    if (CMAKE_C_COMPILER_VERSION VERSION_GREATER 5.0)
+if(CMAKE_COMPILER_IS_GNUCC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wno-missing-field-initializers -Wno-sign-compare -Werror=implicit-function-declaration")
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER 5.0)
         set(CMAKE_C_FLAGS "-Werror=incompatible-pointer-types -Werror=int-conversion -Wstrict-prototypes ${CMAKE_C_FLAGS}")
     endif()
+
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0)
+        set(CMAKE_C_FLAGS "-Walloc-zero -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wformat=2 -Wformat-signedness -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-prototypes -Wundef -Wunused-macros -Wwrite-strings ${CMAKE_C_FLAGS}")
+    endif()
+elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug" AND NOT ${TARGET_PLATFORM} STREQUAL "android")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=undefined")
 endif()
 
 set(PROJECT_VERSION_MAJOR 1)
-set(PROJECT_VERSION_MINOR 6)
+set(PROJECT_VERSION_MINOR 8)
 set(PROJECT_VERSION_PATCH 0)
 set(IS_RELEASE_VERSION FALSE)
 
@@ -84,7 +113,7 @@ elseif (EXISTS "${CMAKE_SOURCE_DIR}/.git")
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
         execute_process(
-            COMMAND git diff-index --quiet HEAD --
+            COMMAND git diff --quiet HEAD --
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             RESULT_VARIABLE VERSION_COMMIT_DIRTY
         )
@@ -110,7 +139,7 @@ else()
     set(VERSION_REVISION " unknown development version")
 endif()
 
-if(VITA_BUILD)
+if(${TARGET_PLATFORM} STREQUAL "vita")
     string(LENGTH "${PROJECT_VERSION_MAJOR}" NUM_DIGITS)
     if(NUM_DIGITS EQUAL 1)
         set(VITA_VERSION_MAJOR "0${PROJECT_VERSION_MAJOR}")
@@ -132,13 +161,17 @@ if(VITA_BUILD)
     set(VITA_VERSION "${VITA_VERSION_MAJOR}.${VITA_VERSION_MINOR}")
 endif()
 
-if (SWITCH_BUILD)
+if (NINTENDO_SWITCH)
     string(SUBSTRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}" 0 15 SWITCH_VERSION)
 endif()
 
 configure_file(${PROJECT_SOURCE_DIR}/gen/version.c.in ${PROJECT_SOURCE_DIR}/src/platform/version.c)
 configure_file(${PROJECT_SOURCE_DIR}/gen/version.rc.in ${PROJECT_SOURCE_DIR}/res/version.rc)
 configure_file(${PROJECT_SOURCE_DIR}/gen/version.txt.in ${PROJECT_SOURCE_DIR}/res/version.txt)
+
+if(${TARGET_PLATFORM} STREQUAL "emscripten")
+    configure_file(${PROJECT_SOURCE_DIR}/gen/shell.html.in ${PROJECT_SOURCE_DIR}/res/shell.html)
+endif()
 
 if(DRAW_FPS)
   add_definitions(-DDRAW_FPS)
@@ -185,21 +218,27 @@ set(PLATFORM_FILES
     ${PROJECT_SOURCE_DIR}/src/platform/virtual_keyboard.c
 )
 
-if (VITA_BUILD)
+if (${TARGET_PLATFORM} STREQUAL "vita")
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
         ${PROJECT_SOURCE_DIR}/src/platform/vita/vita.c
         ${PROJECT_SOURCE_DIR}/src/platform/vita/vita_keyboard.c
     )
-elseif (SWITCH_BUILD)
+elseif (NINTENDO_SWITCH)
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
         ${PROJECT_SOURCE_DIR}/src/platform/switch/switch.c
     )
-elseif (ANDROID_BUILD)
+elseif (${TARGET_PLATFORM} STREQUAL "android")
     set(PLATFORM_FILES
         ${PLATFORM_FILES}
         ${PROJECT_SOURCE_DIR}/src/platform/android/android.c
+    )
+elseif (${TARGET_PLATFORM} STREQUAL "ios")
+    set(PLATFORM_FILES
+        ${PLATFORM_FILES}
+        ${PROJECT_SOURCE_DIR}/src/platform/ios/ios.m
+        ${PROJECT_SOURCE_DIR}/src/platform/ios/GameDataPickerController.m
     )
 endif()
 
@@ -210,6 +249,7 @@ set(CORE_FILES
     ${PROJECT_SOURCE_DIR}/src/core/config.c
     ${PROJECT_SOURCE_DIR}/src/core/dir.c
     ${PROJECT_SOURCE_DIR}/src/core/encoding.c
+    ${PROJECT_SOURCE_DIR}/src/core/encoding_japanese.c
     ${PROJECT_SOURCE_DIR}/src/core/encoding_korean.c
     ${PROJECT_SOURCE_DIR}/src/core/encoding_simp_chinese.c
     ${PROJECT_SOURCE_DIR}/src/core/encoding_trad_chinese.c
@@ -560,10 +600,13 @@ set(EDITOR_FILES
     ${PROJECT_SOURCE_DIR}/src/editor/tool_restriction.c
 )
 set(TRANSLATION_FILES
+    ${PROJECT_SOURCE_DIR}/src/translation/czech.c
     ${PROJECT_SOURCE_DIR}/src/translation/english.c
     ${PROJECT_SOURCE_DIR}/src/translation/french.c
     ${PROJECT_SOURCE_DIR}/src/translation/german.c
+    ${PROJECT_SOURCE_DIR}/src/translation/greek.c
     ${PROJECT_SOURCE_DIR}/src/translation/italian.c
+    ${PROJECT_SOURCE_DIR}/src/translation/japanese.c
     ${PROJECT_SOURCE_DIR}/src/translation/korean.c
     ${PROJECT_SOURCE_DIR}/src/translation/polish.c
     ${PROJECT_SOURCE_DIR}/src/translation/portuguese.c
@@ -576,8 +619,24 @@ set(TRANSLATION_FILES
 )
 
 set(MACOSX_FILES "")
-if(APPLE)
+<<<<<<< HEAD
+if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     set(MACOSX_FILES ${PROJECT_SOURCE_DIR}/res/octavius.icns)
+endif()
+
+
+set(IOS_FILES "")
+if(${TARGET_PLATFORM} STREQUAL "ios")
+    set(IOS_FILES 
+        ${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets
+    )
+
+endif()
+
+
+set(EMSCRIPTEN_FILES "")
+if(${TARGET_PLATFORM} STREQUAL "emscripten")
+    set(EMSCRIPTEN_FILES ${PROJECT_SOURCE_DIR}/res/shell.html)
 endif()
 
 set(SOURCE_FILES
@@ -601,6 +660,8 @@ set(SOURCE_FILES
     ${TINYFD_FILES}
     ${PROJECT_SOURCE_DIR}/res/octavius.rc
     ${MACOSX_FILES}
+    ${IOS_FILES}
+    ${EMSCRIPTEN_FILES}
 )
 
 function(GET_SDL_EXT_DIR result module)
@@ -624,20 +685,49 @@ function(GET_SDL_EXT_DIR result module)
     endforeach()
 endfunction()
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_mixer REQUIRED)
+if(${TARGET_PLATFORM} STREQUAL "emscripten")
+    set(USE_FLAGS "-s USE_SDL=2 -s USE_SDL_MIXER=2 -s SDL2_MIXER_FORMATS=[\"mp3\"] -s USE_MPG123=1")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_FLAGS}")
 
-if(ANDROID_BUILD)
+elseif(${TARGET_PLATFORM} STREQUAL "ios")
+    GET_SDL_EXT_DIR(SDL_EXT_DIR "")
+    add_subdirectory(${SDL_EXT_DIR})
+    find_library(SDL2 NAMES SDL2-static SDL2main)
+    list(APPEND SDL2_LIBRARY
+        # We don't need to add SDL2-static here because SDL2_mixer will include it
+        SDL2main
+    )
+    GET_SDL_EXT_DIR(SDL_MIXER_EXT_DIR "mixer")
+    add_subdirectory(${SDL_MIXER_EXT_DIR})
+    find_library(SDL2_mixer NAMES SDL2_mixer-static)
+    list(APPEND SDL2_MIXER_LIBRARY
+        SDL2_mixer
+    )
+else()
+    find_package(SDL2 REQUIRED)
+    find_package(SDL2_mixer REQUIRED)
+endif()
+
+if(${TARGET_PLATFORM} STREQUAL "android")
     add_library(${SHORT_NAME} SHARED ${SDL2_ANDROID_HOOK} ${SOURCE_FILES})
+elseif(${TARGET_PLATFORM} STREQUAL "ios")
+    add_executable(${SHORT_NAME} MACOSX_BUNDLE ${SOURCE_FILES})
 else()
     add_executable(${SHORT_NAME} WIN32 ${SOURCE_FILES})
 endif()
 
-if(MSVC)
-    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+if(${TARGET_PLATFORM} STREQUAL "emscripten")
+    set(CMAKE_EXECUTABLE_SUFFIX .html)
+    set_target_properties(${SHORT_NAME} PROPERTIES LINK_FLAGS "-lidbfs.js -s SINGLE_FILE=1 -s DYNCALLS=1 --shell-file ${PROJECT_SOURCE_DIR}/res/shell.html -s INITIAL_MEMORY=268435456 -s ALLOW_MEMORY_GROWTH=1 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 -s SAFE_HEAP=1 -s INVOKE_RUN=0 -s 'EXPORTED_FUNCTIONS=[\"_main\"]' -s 'EXPORTED_RUNTIME_METHODS=[\"callMain\",\"FS\"]'  --bind")
 endif()
 
-if(APPLE)
+if(MSVC)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /utf-8")
+endif()
+
+if(APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "ios")
     # generating a macOS icns file (see https://stackoverflow.com/a/20703594)
     add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/res/octavius.icns
         COMMAND mkdir -p octavius.iconset
@@ -667,7 +757,7 @@ if(APPLE)
 
     set_target_properties(${SHORT_NAME} PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/res/Info.plist")
+        MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/res/macos/Info.plist")
 
     set(DIRS "")
     set(LIBS "")
@@ -693,58 +783,91 @@ if(APPLE)
         include(BundleUtilities)
         fixup_bundle(${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app \"${LIBS}\" \"${DIRS}\")
     " BUNDLE DESTINATION ${CMAKE_BINARY_DIR})
+
+    # perform ad-hoc codesigning
+	set(codesignCommand "codesign --verbose=4 --force --deep --options=runtime --timestamp=none --sign -")
+	set(codesignCommandWithEntitlements "${codesignCommand} --entitlements \"${PROJECT_SOURCE_DIR}/res/macos/Entitlements.plist\"")
+	install(CODE "
+		execute_process(COMMAND
+			${codesignCommandWithEntitlements} \"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME}\"
+		)
+	")
 endif()
 
-include_directories(${SDL2_INCLUDE_DIR})
-include_directories(${SDL2_MIXER_INCLUDE_DIR})
+if(${TARGET_PLATFORM} STREQUAL "ios")
+    # setting variables that will populate Info.plist
+    set_target_properties(${SHORT_NAME} PROPERTIES
+
+        MACOSX_BUNDLE_BUNDLE_NAME  ${USER_FRIENDLY_NAME}
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${VERSION_REVISION}"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.bvschaik.julius"
+        MACOSX_BUNDLE_INFO_PLIST "${PROJECT_SOURCE_DIR}/res/ios/Info.plist"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+        MACOSX_BUNDLE_UI_LAUNCH_STORYBOARD_NAME "LaunchScreen"
+        OUTPUT_NAME "${PROJECT_NAME}"
+        XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
+        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY 1,2
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.github.bvschaik.julius"
+    )
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum OS X deployment version" FORCE)
+    set_source_files_properties(${PROJECT_SOURCE_DIR}/res/ios/Assets.xcassets PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources)
+endif()
+
+if(SDL2_INCLUDE_DIR)
+    include_directories(SYSTEM ${SDL2_INCLUDE_DIR})
+endif()
+if(SDL2_MIXER_INCLUDE_DIR)
+    include_directories(SYSTEM ${SDL2_MIXER_INCLUDE_DIR})
+endif()
 
 if(SYSTEM_LIBS)
     find_package(PNG)
 endif()
 if(PNG_FOUND)
-    include_directories(${PNG_INCLUDE_DIRS})
+    include_directories(SYSTEM ${PNG_INCLUDE_DIRS})
     target_link_libraries(${SHORT_NAME} ${PNG_LIBRARIES})
 else()
     if(SYSTEM_LIBS)
         message(STATUS "PNG was not found but that's ok: falling back to internal version")
     endif()
-    include_directories("ext/png")
+
+    include_directories(SYSTEM "ext/png")
     target_sources(${SHORT_NAME} PRIVATE "${PNG_FILES}" "${ZLIB_FILES}")
 endif()
 
-if(VITA_BUILD)
-    include_directories(
+if(${TARGET_PLATFORM} STREQUAL "vita")
+    include_directories(SYSTEM
         $ENV{VITASDK}/arm-vita-eabi/include
         ${CMAKE_CURRENT_SOURCE_DIR}
     )
-elseif (SWITCH_BUILD)
-    include_directories(
-        ${DEVKITPRO}/portlibs/switch/include/SDL2
-        ${DEVKITPRO}/libnx/include
-        ${DEVKITPRO}/portlibs/switch/include
-        ${CMAKE_CURRENT_SOURCE_DIR}
-    )
 endif()
 
-include_directories(ext)
+include_directories(SYSTEM ext)
 include_directories(src)
 if(MSVC)
-    include_directories(ext/dirent)
+    include_directories(SYSTEM ext/dirent)
 endif()
 
-if (VITA_BUILD)
+if (${TARGET_PLATFORM} STREQUAL "vita")
     target_link_libraries (${SHORT_NAME}
         ${SDL2_MIXER_LIBRARY}
         ${SDL2_LIBRARY}
         vorbisfile
         vorbis
         mikmod
+        xmp
+        modplug
         mpg123
         FLAC
         ogg
+        opusfile
+        opus
+        stdc++
         m
         SceAppUtil_stub
         SceAudio_stub
+        SceAudioIn_stub
         SceCommonDialog_stub
         SceCtrl_stub
         SceDisplay_stub
@@ -772,55 +895,47 @@ if (VITA_BUILD)
         FILE res/vita/startup.png sce_sys/livearea/contents/startup.png
         FILE res/vita/template.xml sce_sys/livearea/contents/template.xml
     )
-elseif(SWITCH_BUILD)
-    target_link_libraries (${SHORT_NAME}
-        SDL2_mixer
-        SDL2
-        EGL
-        GLESv2
-        glapi
-        drm_nouveau
-        vorbisidec
-        modplug
-        mpg123
-        FLAC
-        opusfile
-        opus
-        ogg
-        m
-        z
-        nx
-        stdc++
-    )
+elseif(NINTENDO_SWITCH)
 
-    set(FLAGS
-        -fPIE
-        -L${DEVKITPRO}/portlibs/switch/lib
-        -L${DEVKITPRO}/libnx/lib
-    )
+    pkg_check_modules(SDL2 REQUIRED IMPORTED_TARGET sdl2 SDL2_mixer)
+    target_link_libraries(${SHORT_NAME} PkgConfig::SDL2)
 
-    foreach(flag ${FLAGS})
-        set(FLAGS_GENERAL "${FLAGS_GENERAL} ${flag}")
-    endforeach(flag ${FLAGS})
+nx_generate_nacp (${PROJECT_NAME}.nacp
+    NAME   "Julius"
+    AUTHOR "Bianca van Schaik"
+)
 
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${FLAGS_GENERAL}")
+nx_create_nro (${PROJECT_NAME}
+    NACP ${PROJECT_NAME}.nacp
+    ICON ${CMAKE_SOURCE_DIR}/res/switch/icon0.jpg
+)
 
-    target_compile_options(${SHORT_NAME} PRIVATE ${FLAGS})
-    add_custom_command(TARGET ${SHORT_NAME}
-        POST_BUILD
-        COMMAND ${DEVKITPRO}/tools/bin/nacptool --create "${SHORT_NAME}" "rsn8887" ${SWITCH_VERSION} ${SHORT_NAME}.nacp
-        COMMAND ${DEVKITPRO}/tools/bin/elf2nro ${SHORT_NAME} ${SHORT_NAME}.nro --icon=${CMAKE_SOURCE_DIR}/res/switch/icon0.jpg --nacp=${SHORT_NAME}.nacp
-    )
 else()
     if (UNIX AND NOT APPLE AND (CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang"))
         target_link_libraries(${SHORT_NAME} m)
     endif()
-    if(ANDROID_BUILD)
-        find_library(log-lib log)
-        target_link_libraries(${SHORT_NAME} ${log-lib})
+    if(${TARGET_PLATFORM} STREQUAL "android")
+        find_library(LOG_LIB log)
+        target_link_libraries(${SHORT_NAME} ${LOG_LIB})
     endif()
-    target_link_libraries (${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
-    if(NOT APPLE AND NOT ANDROID_BUILD)
+
+    if(${TARGET_PLATFORM} STREQUAL "ios")
+        set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -DUSE_SDL_MAIN")
+        # Add SDL2 and SDL_Mixer headers, or they won't be found
+        target_include_directories(${SHORT_NAME} PRIVATE "${SDL_EXT_DIR}/include")
+        target_include_directories(${SHORT_NAME} PRIVATE "${SDL_MIXER_EXT_DIR}/include")
+
+        # Add UniformTypeIdentifiers to the list of linked frameworks
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-framework,UniformTypeIdentifiers")
+
+        set_target_properties(${SHORT_NAME}  PROPERTIES
+            XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+            XCODE_ATTRIBUTE_SKIP_INSTALL "No"
+        )
+    endif()
+
+    target_link_libraries(${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+    if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()
 
@@ -833,7 +948,7 @@ else()
     endif()
 
     # Unit tests
-    if(NOT VITA_BUILD AND NOT SWITCH_BUILD AND NOT ANDROID_BUILD)
+    if(${TARGET_PLATFORM} STREQUAL "default")
         enable_testing()
         add_subdirectory(test)
     endif()

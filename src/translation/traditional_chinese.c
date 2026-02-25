@@ -30,14 +30,16 @@ static translation_string all_strings[] = {
     {TR_CONFIG_TITLE, "Octavius 配置設定"},
     {TR_CONFIG_LANGUAGE_LABEL, "語言包:"},
     {TR_CONFIG_LANGUAGE_DEFAULT, "默認"},
-    {TR_CONFIG_DISPLAY_SCALE, "顯示大小:"},
-    {TR_CONFIG_CURSOR_SCALE, "滑鼠大小:"},
+    {TR_CONFIG_DISPLAY_SCALE, "顯示比例:"},
+    {TR_CONFIG_CURSOR_SCALE, "滑鼠比例:"},
     {TR_CONFIG_HEADER_UI_CHANGES, "使用者介面更變"},
     {TR_CONFIG_HEADER_GAMEPLAY_CHANGES, "遊戲內容更變"},
     {TR_CONFIG_SHOW_INTRO_VIDEO, "播放啓動動畫"},
     {TR_CONFIG_SIDEBAR_INFO, "控制台更多資訊"},
     {TR_CONFIG_SMOOTH_SCROLLING, "平滑視角滾動"},
+    {TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING, "禁用螢幕邊緣滾動地圖"},
     {TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG, "禁用右鍵拖動地圖"},
+    {TR_CONFIG_INVERSE_RIGHT_CLICK_MAP_DRAG, "用滑鼠右鍵反向拖動地圖"},
     {TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE, "優化清理土地視覺回饋"},
     {TR_CONFIG_ALLOW_CYCLING_TEMPLES, "允許連續建造每種神廟"},
     {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, "建造時顯示貯水池水泉及水井覆蓋範圍"},
@@ -46,7 +48,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SHOW_MILITARY_SIDEBAR, "顯示軍隊資訊側欄"},
     {TR_CONFIG_FIX_IMMIGRATION_BUG, "修復非常困難不來人BUG"},
     {TR_CONFIG_FIX_100_YEAR_GHOSTS, "修復人口百歲仍占房BUG"},
-    {TR_HOTKEY_TITLE, "Julius 熱鍵綁定"},
+    {TR_HOTKEY_TITLE, "Octavius 熱鍵綁定"},
     {TR_HOTKEY_LABEL, "熱鍵"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "可替代鍵"},
     {TR_HOTKEY_HEADER_ARROWS, "方向鍵"},
@@ -104,7 +106,10 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SET_BOOKMARK_3, "設定視角標簽 3"},
     {TR_HOTKEY_SET_BOOKMARK_4, "設定視角標簽 4"},
     {TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, "戰鬥資訊切換"},
-    {TR_HOTKEY_EDIT_TITLE, "按下新熱鍵"}
+    {TR_HOTKEY_EDIT_TITLE, "按下新熱鍵"},
+    {TR_HOTKEY_DUPLICATE_TITLE, "熱鍵已佔用"},
+    {TR_HOTKEY_DUPLICATE_MESSAGE, "該鍵位已設定為以下功能:"},
+    {TR_WARNING_SCREENSHOT_SAVED, "截圖已保存: "}, // TODO: Google translate
 };
 
 void translation_traditional_chinese(const translation_string **strings, int *num_strings)

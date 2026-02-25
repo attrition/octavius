@@ -14,7 +14,7 @@
 #include "game/settings.h"
 #include "game/state.h"
 #include "game/time.h"
-#include "graphics/image.h"
+#include "graphics/graphics.h"
 #include "graphics/lang_text.h"
 #include "graphics/panel.h"
 #include "graphics/screen.h"
@@ -65,7 +65,16 @@ static int center_in_city(int element_width_pixels)
     return x + margin;
 }
 
-static void draw_paused_and_time_left(void)
+static void draw_paused_banner(void)
+{
+    if (game_state_is_paused()) {
+        int x_offset = center_in_city(448);
+        outer_panel_draw(x_offset, 40, 28, 3);
+        lang_text_draw_centered(13, 2, x_offset, 58, 448, FONT_NORMAL_BLACK);
+    }
+}
+
+static void draw_time_left(void)
 {
     if (scenario_criteria_time_limit_enabled() && !city_victory_has_won()) {
         int years;
@@ -90,39 +99,34 @@ static void draw_paused_and_time_left(void)
         int width = lang_text_draw(6, 3, 6, 29, FONT_NORMAL_BLACK);
         text_draw_number(total_months, '@', " ", 6 + width, 29, FONT_NORMAL_BLACK);
     }
-    if (game_state_is_paused()) {
-        int x_offset = center_in_city(448);
-        outer_panel_draw(x_offset, 40, 28, 3);
-        lang_text_draw_centered(13, 2, x_offset, 58, 448, FONT_NORMAL_BLACK);
-    }
 }
 
-static void draw_cancel_construction(void)
+static void draw_speedrun_info(void)
 {
-    if (!mouse_get()->is_touch || !building_construction_type()) {
-        return;
+    if (config_get(CONFIG_UI_SHOW_SPEEDRUN_INFO)) {
+        int s_height = screen_height();
+        large_label_draw(0, s_height - 25, 10, 0);
+        lang_text_draw_centered(153, setting_difficulty() + 1, 4, s_height - 18, 150, FONT_NORMAL_WHITE);
     }
-    int x, y, width, height;
-    city_view_get_viewport(&x, &y, &width, &height);
-    width -= 4 * 16;
-    inner_panel_draw(width - 4, 40, 3, 2);
-    image_draw(image_group(GROUP_OK_CANCEL_SCROLL_BUTTONS) + 4, width, 44);
 }
 
 static void draw_foreground(void)
 {
     window_city_draw();
-
     if (config_get(CONFIG_UI_OCTAVIUS_UI)) {
         widget_octavius_ui_city_draw_foreground();
     } else {
         widget_top_menu_draw(0);
         widget_sidebar_city_draw_foreground();
+        draw_speedrun_info();
     }
-
     if (window_is(WINDOW_CITY) || window_is(WINDOW_CITY_MILITARY)) {
-        draw_paused_and_time_left();
-        draw_cancel_construction();
+        draw_time_left();
+        if (mouse_get()->is_touch) {
+            widget_city_draw_touch_buttons();
+        } else {
+            draw_paused_banner();
+        }
     }
     widget_city_draw_construction_cost_and_size();
     if (window_is(WINDOW_CITY)) {
@@ -141,7 +145,12 @@ static void draw_foreground_military(void)
     } else {
         widget_sidebar_city_draw_foreground();
     }
-    draw_paused_and_time_left();
+    draw_time_left();
+    if (mouse_get()->is_touch) {
+        widget_city_draw_touch_buttons();
+    } else {
+        draw_paused_banner();
+    }
 }
 
 static void exit_military_command(void)
@@ -185,11 +194,7 @@ static void cycle_legion(void)
         if (current_legion_id > 0) {
             const formation *m = formation_get(current_legion_id);
             city_view_go_to_grid_offset(map_grid_offset(m->x_home, m->y_home));
-            if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR) && window_is(WINDOW_CITY_MILITARY)) {
-                window_city_military_show(current_legion_id);
-            } else {
-                window_invalidate();
-            }
+            window_city_military_show(current_legion_id);
         }
     }
 }
@@ -311,6 +316,15 @@ static void toggle_pause(void)
     city_warning_clear_all();
 }
 
+static void set_construction_building_type(building_type type)
+{
+    if (scenario_building_allowed(type) && building_menu_is_enabled(type)) {
+        building_construction_cancel();
+        building_construction_set_type(type);
+        window_request_refresh();
+    }
+}
+
 static void handle_hotkeys(const hotkeys *h)
 {
     if (h->toggle_pause) {
@@ -360,14 +374,14 @@ static void handle_hotkeys(const hotkeys *h)
         window_file_dialog_show(FILE_TYPE_SAVED_GAME, FILE_DIALOG_SAVE);
     }
     if (h->building) {
-        if (scenario_building_allowed(h->building) && building_menu_is_enabled(h->building)) {
-            building_construction_cancel();
-            building_construction_set_type(h->building);
-        }
+        set_construction_building_type(h->building);
     }
 
     if (h->clone_building) {
-        building_clone_from_grid_offset(widget_city_current_grid_offset());
+        building_type type = building_clone_type_from_grid_offset(widget_city_current_grid_offset());
+        if (type) {
+            set_construction_building_type(type);
+        }
     }
     if (h->toggle_octavius_ui) {
         config_set(CONFIG_UI_OCTAVIUS_UI, !config_get(CONFIG_UI_OCTAVIUS_UI));
@@ -492,6 +506,10 @@ void window_city_show(void)
 
 void window_city_military_show(int legion_formation_id)
 {
+    if (building_construction_type()) {
+        building_construction_cancel();
+        building_construction_clear_type();
+    }
     formation_set_selected(legion_formation_id);
     if (config_get(CONFIG_UI_SHOW_MILITARY_SIDEBAR) && widget_sidebar_military_enter(legion_formation_id)) {
         return;

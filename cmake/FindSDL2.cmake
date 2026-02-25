@@ -67,19 +67,11 @@
 
 GET_SDL_EXT_DIR(SDL_EXT_DIR "")
 
-IF(ANDROID_BUILD)
+IF(${TARGET_PLATFORM} STREQUAL "android")
+    find_package(SDL2 REQUIRED CONFIG)
     STRING(TOLOWER ${CMAKE_BUILD_TYPE} ANDROID_BUILD_DIR)
-    SET(SDL2_LIBRARY SDL2)
+    SET(SDL2_LIBRARY SDL2::SDL2)
     SET(SDL2_ANDROID_HOOK ${SDL_EXT_DIR}/src/main/android/SDL_android_main.c)
-    link_directories(${PROJECT_SOURCE_DIR}/android/SDL2/build/intermediates/ndkBuild/${ANDROID_BUILD_DIR}/obj/local/${ANDROID_ABI})
-
-    SET(SDL2_INCLUDE_DIR_TEMP ${SDL_EXT_DIR}/include)
-    FOREACH(CURRENT_INCLUDE_DIR ${SDL2_INCLUDE_DIR_TEMP})
-        IF(EXISTS "${CURRENT_INCLUDE_DIR}/SDL_version.h")
-            SET(SDL2_INCLUDE_DIR ${CURRENT_INCLUDE_DIR})
-            BREAK()
-        ENDIF()
-    ENDFOREACH()
 ELSE()
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(SDL2_ARCH_64 TRUE)
@@ -98,16 +90,15 @@ ELSE()
     endif()
 
     SET(SDL2_SEARCH_PATHS
+        ${SDL_EXT_DIR}
+        ${SDL_MINGW_EXT_DIR}
         ~/Library/Frameworks
         /Library/Frameworks
-        /usr/local
-        /usr
         /sw # Fink
         /opt/local # DarwinPorts
         /opt/csw # Blastwave
         /opt
-        ${SDL_EXT_DIR}
-        ${SDL_MINGW_EXT_DIR}
+        /boot/system/develop/headers/SDL2 # Haiku
         ${CMAKE_FIND_ROOT_PATH}
     )
 
@@ -116,6 +107,7 @@ ELSE()
         $ENV{SDL2DIR}
         PATH_SUFFIXES include/SDL2 include
         PATHS ${SDL2_SEARCH_PATHS}
+        NO_CMAKE_FIND_ROOT_PATH
     )
 
     FIND_LIBRARY(SDL2_LIBRARY_TEMP
@@ -124,6 +116,7 @@ ELSE()
         $ENV{SDL2DIR}
         PATH_SUFFIXES lib64 lib lib/${SDL2_PROCESSOR_ARCH}
         PATHS ${SDL2_SEARCH_PATHS}
+        NO_CMAKE_FIND_ROOT_PATH
     )
 
     IF(NOT SDL2_BUILDING_LIBRARY)
@@ -147,9 +140,9 @@ ENDIF()
 # The Apple build may not need an explicit flag because one of the
 # frameworks may already provide it.
 # But for non-OSX systems, I will use the CMake Threads package.
-IF(NOT APPLE)
+IF(NOT APPLE AND NOT EMSCRIPTEN)
     FIND_PACKAGE(Threads)
-ENDIF(NOT APPLE)
+ENDIF()
 
 # MinGW needs an additional library, mwindows
 # It's total link flags should look like -lmingw32 -lSDL2main -lSDL2 -lmwindows
@@ -214,5 +207,5 @@ endif()
 INCLUDE(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL2
-                                  REQUIRED_VARS SDL2_LIBRARY SDL2_INCLUDE_DIR
+                                  REQUIRED_VARS SDL2_LIBRARY
                                   VERSION_VAR SDL2_VERSION_STRING)

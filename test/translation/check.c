@@ -16,6 +16,7 @@ int main(void)
     check_language("German", LANGUAGE_GERMAN);
     check_language("Italian", LANGUAGE_ITALIAN);
     check_language("Spanish", LANGUAGE_SPANISH);
+    check_language("Japanese", LANGUAGE_JAPANESE);
     check_language("Korean", LANGUAGE_KOREAN);
     check_language("Polish", LANGUAGE_POLISH);
     check_language("Portuguese", LANGUAGE_PORTUGUESE);
@@ -23,5 +24,7 @@ int main(void)
     check_language("Swedish", LANGUAGE_SWEDISH);
     check_language("Simplified Chinese", LANGUAGE_SIMPLIFIED_CHINESE);
     check_language("Traditional Chinese", LANGUAGE_TRADITIONAL_CHINESE);
+    check_language("Czech", LANGUAGE_CZECH);
+    check_language("Greek", LANGUAGE_GREEK);
     return 0;
 }

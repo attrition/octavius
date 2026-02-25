@@ -389,15 +389,16 @@ int text_draw_multiline(const uint8_t *str, int x_offset, int y_offset, int box_
         }
         int current_width = 0;
         int line_index = 0;
-        while (has_more_characters && current_width < box_width) {
+        while (has_more_characters) {
             int word_num_chars;
             int word_width = get_word_width(str, font, &word_num_chars);
-            current_width += word_width;
-            if (current_width >= box_width) {
+            if (current_width + word_width >= box_width) {
                 if (current_width == 0) {
                     has_more_characters = 0;
                 }
+                break;
             } else {
+                current_width += word_width;
                 for (int i = 0; i < word_num_chars; i++) {
                     if (line_index == 0 && *str <= ' ') {
                         str++; // skip whitespace at start of line
@@ -419,8 +420,11 @@ int text_draw_multiline(const uint8_t *str, int x_offset, int y_offset, int box_
     return y - y_offset;
 }
 
-int text_measure_multiline(const uint8_t *str, int box_width, font_t font)
+int text_measure_multiline(const uint8_t *str, int box_width, font_t font, int *largest_width)
 {
+    if (largest_width) {
+        *largest_width = 0;
+    }
     int has_more_characters = 1;
     int guard = 0;
     int num_lines = 0;
@@ -429,15 +433,16 @@ int text_measure_multiline(const uint8_t *str, int box_width, font_t font)
             break;
         }
         int current_width = 0;
-        while (has_more_characters && current_width < box_width) {
+        while (has_more_characters) {
             int word_num_chars;
             int word_width = get_word_width(str, font, &word_num_chars);
-            current_width += word_width;
-            if (current_width >= box_width) {
+            if (current_width + word_width >= box_width) {
                 if (current_width == 0) {
                     has_more_characters = 0;
                 }
+                break;
             } else {
+                current_width += word_width;
                 str += word_num_chars;
                 if (!*str) {
                     has_more_characters = 0;
@@ -446,6 +451,9 @@ int text_measure_multiline(const uint8_t *str, int box_width, font_t font)
                     break;
                 }
             }
+        }
+        if (largest_width && current_width > *largest_width) {
+            *largest_width = current_width;
         }
         num_lines += 1;
     }

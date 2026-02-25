@@ -53,7 +53,7 @@ task getVersion {
             if (isDirty) {
                 versionDetail += "-dirty"
             }
-        } catch (Exception) {
+        } catch (ignored) {
             versionDetail = " unknown development version"
         }
     }
@@ -65,21 +65,21 @@ task getVersion {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
-    ndkVersion "22.0.7026061"
+    compileSdk 36
+    ndkVersion "28.1.13356709"
 
     defaultConfig {
         applicationId "com.github.bvschaik.julius"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 36
 
         versionName getVersion.versionName
         versionCode getVersion.versionCode
 
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_BUILD=ON", "-DSYSTEM_LIBS=OFF"
+                version "3.22.1"
+                arguments "-DTARGET_PLATFORM=android", "-DSYSTEM_LIBS=OFF","-DANDROID_STL=c++_shared"
             }
         }
         ndk {
@@ -88,6 +88,9 @@ android {
         sourceSets {
             main.res.srcDirs += '../../res/android'
         }
+    }
+    buildFeatures {
+        prefab true
     }
     signingConfigs {
         release {
@@ -113,9 +116,11 @@ android {
     }
     externalNativeBuild {
         cmake {
+            version "3.22.1"
             path "../../CMakeLists.txt"
         }
     }
+    namespace 'com.github.bvschaik.julius'
 }
 
 play {
@@ -124,10 +129,10 @@ play {
 
 repositories {
     google()
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
     implementation project(':SDL2')
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 }

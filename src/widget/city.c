@@ -11,7 +11,10 @@
 #include "figure/formation_legion.h"
 #include "game/settings.h"
 #include "game/state.h"
+#include "graphics/button.h"
 #include "graphics/graphics.h"
+#include "graphics/image.h"
+#include "graphics/panel.h"
 #include "graphics/text.h"
 #include "graphics/window.h"
 #include "input/scroll.h"
@@ -97,6 +100,73 @@ void widget_city_draw_construction_cost_and_size(void)
         text_draw_number_colored(size_y, '@', " ", x - 15 + width, y + 25, FONT_SMALL_PLAIN, COLOR_FONT_YELLOW);
     }
     graphics_reset_clip_rectangle();
+}
+
+static void draw_pause_icon(int x_offset, int y_offset)
+{
+    graphics_draw_horizontal_line(x_offset + 3, x_offset + 11, y_offset + 3, COLOR_BLACK);
+    graphics_draw_vertical_line(x_offset + 3, y_offset + 4, y_offset + 16, COLOR_BLACK);
+    graphics_fill_rect(x_offset + 4, y_offset + 4, 8, 13, COLOR_WHITE);
+
+    x_offset += 13;
+
+    graphics_draw_horizontal_line(x_offset + 3, x_offset + 11, y_offset + 3, COLOR_BLACK);
+    graphics_draw_vertical_line(x_offset + 3, y_offset + 4, y_offset + 16, COLOR_BLACK);
+    graphics_fill_rect(x_offset + 4, y_offset + 4, 8, 13, COLOR_WHITE);
+}
+
+static void draw_pause_button(void)
+{
+    inner_panel_draw(16, 40, 3, 2);
+    button_border_draw(16, 40, 3 * BLOCK_SIZE, 2 * BLOCK_SIZE, 0);
+    if (game_state_is_paused()) {
+        image_draw(image_group(GROUP_ARROW_MESSAGE_PROBLEMS), 26, 46);
+    } else {
+        draw_pause_icon(26, 46);
+    }
+}
+
+static void draw_cancel_construction_button(void)
+{
+    if (!building_construction_type()) {
+        return;
+    }
+    int city_x, city_y, width, height;
+    city_view_get_viewport(&city_x, &city_y, &width, &height);
+    int x_offset = width - 4 * BLOCK_SIZE;
+    int y_offset = 40;
+    inner_panel_draw(x_offset, y_offset, 3, 2);
+    button_border_draw(x_offset, y_offset, 3 * BLOCK_SIZE, 2 * BLOCK_SIZE, 0);
+    // Use clip rectangle to remove the border of the "X" image
+    graphics_set_clip_rectangle(x_offset + 5, y_offset + 5, 37, 24);
+    image_draw(image_group(GROUP_OK_CANCEL_SCROLL_BUTTONS) + 4, x_offset + 4, y_offset + 4);
+    graphics_reset_clip_rectangle();
+}
+
+void widget_city_draw_touch_buttons(void)
+{
+    draw_pause_button();
+    draw_cancel_construction_button();
+}
+
+static int is_pause_button(int x, int y)
+{
+    return x < 5 * BLOCK_SIZE && y >= 24 && y < 24 + 4 * BLOCK_SIZE;
+}
+
+static int is_cancel_construction_button(int x, int y)
+{
+    if (!building_construction_type()) {
+        return 0;
+    }
+    int city_x, city_y, width, height;
+    city_view_get_viewport(&city_x, &city_y, &width, &height);
+
+    int touch_width = 5 * BLOCK_SIZE;
+    int touch_height = 4 * BLOCK_SIZE;
+    int x_offset = width - touch_width;
+    int y_offset = 24;
+    return x >= x_offset && x < x_offset + touch_width && y >= y_offset && y < y_offset + touch_height;
 }
 
 // INPUT HANDLING
@@ -213,6 +283,9 @@ static int has_confirmed_construction(int ghost_offset, int tile_offset, int ran
 
 static int input_coords_in_city(int x, int y)
 {
+    if (is_pause_button(x, y) || is_cancel_construction_button(x, y)) {
+        return 0;
+    }
     int x_offset, y_offset, width, height;
     city_view_get_viewport(&x_offset, &y_offset, &width, &height);
 
@@ -258,25 +331,27 @@ static void handle_last_touch(void)
     const touch *last = touch_get_latest();
     if (last->in_use && touch_was_click(last)) {
         building_construction_cancel();
+        window_request_refresh();
     }
+}
+
+static int handle_play_pause_button(const touch *t)
+{
+    if (is_pause_button(t->current_point.x, t->current_point.y)) {
+        game_state_toggle_paused();
+        return 1;
+    }
+    return 0;
 }
 
 static int handle_cancel_construction_button(const touch *t)
 {
-    if (!building_construction_type()) {
-        return 0;
+    if (is_cancel_construction_button(t->current_point.x, t->current_point.y)) {
+        building_construction_cancel();
+        window_request_refresh();
+        return 1;
     }
-    int x, y, width, height;
-    city_view_get_viewport(&x, &y, &width, &height);
-    int box_size = 5 * 16;
-    width -= box_size;
-
-    if (t->current_point.x < width || t->current_point.x >= width + box_size ||
-        t->current_point.y < 24 || t->current_point.y >= 40 + box_size) {
-        return 0;
-    }
-    building_construction_cancel();
-    return 1;
+    return 0;
 }
 
 static void handle_first_touch(map_tile *tile)
@@ -285,7 +360,7 @@ static void handle_first_touch(map_tile *tile)
     building_type type = building_construction_type();
 
     if (touch_was_click(first)) {
-        if (handle_cancel_construction_button(first) || handle_legion_click(tile)) {
+        if (handle_play_pause_button(first) || handle_cancel_construction_button(first) || handle_legion_click(tile)) {
             return;
         }
         if (type == BUILDING_NONE && handle_right_click_allow_building_info(tile)) {
@@ -416,6 +491,7 @@ static void handle_mouse(const mouse *m)
             }
         } else {
             building_construction_cancel();
+            window_request_refresh();
         }
     }
 }
@@ -433,6 +509,7 @@ void widget_city_handle_input(const mouse *m, const hotkeys *h)
     if (h->escape_pressed) {
         if (building_construction_type()) {
             building_construction_cancel();
+            window_request_refresh();
         } else {
             hotkey_handle_escape();
         }
@@ -469,6 +546,9 @@ void widget_city_handle_input_military(const mouse *m, const hotkeys *h, int leg
     if (m->is_touch) {
         const touch *t = touch_get_earliest();
         if (!t->in_use) {
+            return;
+        }
+        if (touch_was_click(t) && handle_play_pause_button(t)) {
             return;
         }
         if (t->has_started) {
@@ -518,7 +598,7 @@ void widget_city_get_tooltip(tooltip_context *c)
     int building_id = map_building_at(grid_offset);
     int overlay = game_state_overlay();
     // regular tooltips
-    if (overlay == OVERLAY_NONE && building_id && building_get(building_id)->type == BUILDING_SENATE_UPGRADED) {
+    if (overlay == OVERLAY_NONE && building_id && building_get(building_id)->type == BUILDING_SENATE) {
         c->type = TOOLTIP_SENATE;
         c->high_priority = 1;
         return;

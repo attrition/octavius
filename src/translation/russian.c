@@ -21,7 +21,7 @@ static translation_string all_strings[] = {
     {TR_INVALID_LANGUAGE_TITLE, "Ошибка пути к локализации"},
     {TR_INVALID_LANGUAGE_MESSAGE,
         "Выбранная папка не содержит необходимых файлов локализации."
-        "Для просмотра ошибок обратитесь к  log-файлу."},
+        "Для просмотра ошибок обратитесь к log-файлу."},
     {TR_BUILD_ALL_TEMPLES, "Все"},
     {TR_BUTTON_OK, "Да"},
     {TR_BUTTON_CANCEL, "Отмена"},
@@ -37,7 +37,9 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SHOW_INTRO_VIDEO, "Воспроизводить вступительные видео"},
     {TR_CONFIG_SIDEBAR_INFO, "Дополнительная информация на контрольной панели"},
     {TR_CONFIG_SMOOTH_SCROLLING, "Включить плавный скроллинг"},
+    {TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING, "Откл. перемещение по карте при движении за край дисплея"},
     {TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG, "Откл. перемещение по карте по клику правой кнопкой"},
+    {TR_CONFIG_INVERSE_RIGHT_CLICK_MAP_DRAG, "Противоположное перемещение по карте щелчком правой кнопки"},
     {TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE, "Улучшить граф. эффект при очистке территории"},
     {TR_CONFIG_ALLOW_CYCLING_TEMPLES, "Постройка храмов в циклической последовательности"},
     {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, "Зона покрытия при постройке резервуаров, колодцев и фонтанов"},
@@ -46,7 +48,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SHOW_MILITARY_SIDEBAR, "Отображать боковую панель армии"},
     {TR_CONFIG_FIX_IMMIGRATION_BUG, "Исправить баг иммиграции в режиме \"Очень сложный\""},
     {TR_CONFIG_FIX_100_YEAR_GHOSTS, "Исправить баг 100-летних жителей"},
-    {TR_HOTKEY_TITLE, "Горячие клавиши Julius"},
+    {TR_HOTKEY_TITLE, "Горячие клавиши Octavius"},
     {TR_HOTKEY_LABEL, "Горячие клавиши"},
     {TR_HOTKEY_ALTERNATIVE_LABEL, "Альтернативные"},
     {TR_HOTKEY_HEADER_ARROWS, "Клавиши стрелок"},
@@ -104,7 +106,10 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SET_BOOKMARK_3, "Установить точку 3"},
     {TR_HOTKEY_SET_BOOKMARK_4, "Установить точку 4"},
     {TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, "Вкл./выкл. инфо о битвах"},
-    {TR_HOTKEY_EDIT_TITLE, "Новая клавиша"}
+    {TR_HOTKEY_EDIT_TITLE, "Новая клавиша"},
+    {TR_HOTKEY_DUPLICATE_TITLE, "Горячая клавиша уже назначена"},
+    {TR_HOTKEY_DUPLICATE_MESSAGE, "Эта комбинация клавиш уже назначена на следующее действие:"},
+    {TR_WARNING_SCREENSHOT_SAVED, "Скриншот сохранен: "}, // TODO: Google translate
 };
 
 void translation_russian(const translation_string **strings, int *num_strings)

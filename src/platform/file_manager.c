@@ -4,6 +4,7 @@
 #include "core/log.h"
 #include "core/string.h"
 #include "platform/android/android.h"
+#include "platform/emscripten/emscripten.h"
 #include "platform/file_manager_cache.h"
 #include "platform/vita/vita.h"
 
@@ -12,7 +13,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#if _MSC_VER
+#ifdef _MSC_VER
 // Of course MSVC is the only compiler that doesn't have POSIX strcasecmp...
 #include <mbstring.h>
 #else
@@ -27,8 +28,9 @@
 #define fs_dir_open _wopendir
 #define fs_dir_close _wclosedir
 #define fs_dir_read _wreaddir
-#define dir_entry_name(d) wchar_to_utf8(d->d_name)
-typedef const wchar_t * dir_name;
+#define fs_chdir _wchdir
+#define dir_entry_name(d) wchar_to_utf8((d)->d_name)
+typedef const wchar_t *dir_name;
 
 static const char *wchar_to_utf8(const wchar_t *str)
 {
@@ -37,7 +39,7 @@ static const char *wchar_to_utf8(const wchar_t *str)
     int size_needed = WideCharToMultiByte(CP_UTF8, 0, str, -1, NULL, 0, NULL, NULL);
     if (size_needed > filename_buffer_size) {
         free(filename_buffer);
-        filename_buffer = (char*) malloc(sizeof(char) * size_needed);
+        filename_buffer = (char *) malloc(sizeof(char) * size_needed);
         filename_buffer_size = size_needed;
     }
     WideCharToMultiByte(CP_UTF8, 0, str, -1, filename_buffer, size_needed, NULL, NULL);
@@ -53,13 +55,16 @@ static wchar_t *utf8_to_wchar(const char *str)
 }
 
 #else // not _WIN32
+#ifndef USE_FILE_CACHE
 #define fs_dir_type DIR
 #define fs_dir_entry struct dirent
 #define fs_dir_open opendir
 #define fs_dir_close closedir
 #define fs_dir_read readdir
 #define dir_entry_name(d) ((d)->d_name)
-typedef const char * dir_name;
+#endif
+#define fs_chdir chdir
+typedef const char *dir_name;
 #endif
 
 #ifndef S_ISLNK
@@ -70,11 +75,7 @@ typedef const char * dir_name;
 #define S_ISSOCK(m) 0
 #endif
 
-#ifdef __vita__
-#define CURRENT_DIR VITA_PATH_PREFIX
-#define set_dir_name(n) vita_prepend_path(n)
-#define free_dir_name(n)
-#elif defined(_WIN32)
+#if defined(_WIN32)
 #define CURRENT_DIR L"."
 #define set_dir_name(n) utf8_to_wchar(n)
 #define free_dir_name(n)
@@ -84,11 +85,14 @@ typedef const char * dir_name;
 #define free_dir_name(n)
 #endif
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <direct.h>
-#define chdir _chdir
-#elif !defined(__vita__)
+#else
 #include <unistd.h>
+#endif
+
+#ifdef __EMSCRIPTEN__
+static int writing_to_file;
 #endif
 
 #ifndef USE_FILE_CACHE
@@ -183,8 +187,8 @@ int platform_file_manager_should_case_correct_file(void)
 
 int platform_file_manager_compare_filename(const char *a, const char *b)
 {
-#if _MSC_VER
-    return _mbsicmp((const unsigned char *)a, (const unsigned char *)b);
+#ifdef _MSC_VER
+    return _mbsicmp((const unsigned char *) a, (const unsigned char *) b);
 #else
     return strcasecmp(a, b);
 #endif
@@ -192,8 +196,8 @@ int platform_file_manager_compare_filename(const char *a, const char *b)
 
 int platform_file_manager_compare_filename_prefix(const char *filename, const char *prefix, int prefix_len)
 {
-#if _MSC_VER
-    return _mbsnicmp((const unsigned char *)filename, (const unsigned char *)prefix, prefix_len);
+#ifdef _MSC_VER
+    return _mbsnicmp((const unsigned char *) filename, (const unsigned char *) prefix, prefix_len);
 #else
     return strncasecmp(filename, prefix, prefix_len);
 #endif
@@ -208,30 +212,20 @@ int platform_file_manager_set_base_path(const char *path)
 #ifdef __ANDROID__
     return android_set_base_path(path);
 #else
-    return chdir(path) == 0;
+    dir_name set_path = set_dir_name(path);
+    int result = fs_chdir(set_path);
+    free_dir_name(set_path);
+    if (result == 0) {
+#ifdef USE_FILE_CACHE
+        platform_file_manager_cache_invalidate();
+#endif
+        return 1;
+    }
+    return 0;
 #endif
 }
 
-#ifdef __vita__
-FILE *platform_file_manager_open_file(const char *filename, const char *mode)
-{
-    if (strchr(mode, 'w')) {
-        char temp_filename[FILE_NAME_MAX];
-        strncpy(temp_filename, filename, FILE_NAME_MAX - 1);
-        if (!file_exists(temp_filename, NOT_LOCALIZED)) {
-            platform_file_manager_cache_add_file_info(filename);
-        }
-    }
-    return fopen(vita_prepend_path(filename), mode);
-}
-
-int platform_file_manager_remove_file(const char *filename)
-{
-    platform_file_manager_cache_delete_file_info(filename);
-    return remove(vita_prepend_path(filename)) == 0;
-}
-
-#elif defined(_WIN32)
+#if defined(_WIN32)
 
 FILE *platform_file_manager_open_file(const char *filename, const char *mode)
 {
@@ -270,6 +264,25 @@ int platform_file_manager_remove_file(const char *filename)
     return android_remove_file(filename);
 }
 
+#elif defined(__EMSCRIPTEN__)
+
+FILE *platform_file_manager_open_file(const char *filename, const char *mode)
+{
+    writing_to_file = strchr(mode, 'w') != 0;
+    return fopen(filename, mode);
+}
+
+int platform_file_manager_remove_file(const char *filename)
+{
+    if (remove(filename) == 0) {
+        EM_ASM(
+            Module.syncFS();
+        );
+        return 1;
+    }
+    return 0;
+}
+
 #else
 
 FILE *platform_file_manager_open_file(const char *filename, const char *mode)
@@ -295,3 +308,17 @@ int platform_file_manager_remove_file(const char *filename)
 }
 
 #endif
+
+int platform_file_manager_close_file(FILE *stream)
+{
+    int result = fclose(stream);
+#ifdef __EMSCRIPTEN__
+    if (writing_to_file) {
+        writing_to_file = 0;
+        EM_ASM(
+            Module.syncFS();
+        );
+    }
+#endif
+    return result;
+}

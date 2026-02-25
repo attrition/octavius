@@ -12,15 +12,17 @@ import java.util.HashMap;
 
 public class FileManager {
     private static Uri baseUri = Uri.EMPTY;
-    private static HashMap<Uri, HashMap<String, FileInfo>> directoryStructureCache = new HashMap<>();
+    private static final HashMap<Uri, HashMap<String, FileInfo>> directoryStructureCache = new HashMap<>();
 
     private static final int FILE_TYPE_DIR = 1;
     private static final int FILE_TYPE_FILE = 2;
 
+    @SuppressWarnings("unused")
     public static String getC3Path() {
         return baseUri.toString();
     }
 
+    @SuppressWarnings("unused")
     public static int setBaseUri(String path) {
         directoryStructureCache.clear();
         if (baseUri != Uri.EMPTY) {
@@ -36,7 +38,8 @@ public class FileManager {
     static int setBaseUri(Uri newUri) {
         try {
             baseUri = newUri;
-            FileInfo.base = new FileInfo(DocumentsContract.getTreeDocumentId(newUri), null, DocumentsContract.Document.MIME_TYPE_DIR, Uri.EMPTY);
+            FileInfo.base = new FileInfo(DocumentsContract.getTreeDocumentId(newUri), null,
+                DocumentsContract.Document.MIME_TYPE_DIR, Uri.EMPTY);
             return 1;
         } catch (Exception e) {
             Log.e("julius", "Error in setBaseUri: " + e);
@@ -66,7 +69,8 @@ public class FileManager {
         Cursor cursor = activity.getContentResolver().query(children, columns, null, null, null);
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                result.put(cursor.getString(1).toLowerCase(), new FileInfo(cursor.getString(0), cursor.getString(1), cursor.getString(2), dir));
+                FileInfo fileInfo = new FileInfo(cursor.getString(0), cursor.getString(1), cursor.getString(2), dir);
+                result.put(cursor.getString(1).toLowerCase(), fileInfo);
             }
             cursor.close();
         }
@@ -107,6 +111,7 @@ public class FileManager {
         }
     }
 
+    @SuppressWarnings("unused")
     public static String[] getDirectoryFileList(JuliusMainActivity activity, String dir, int type, String ext) {
         ArrayList<String> fileList = new ArrayList<>();
 
@@ -157,6 +162,7 @@ public class FileManager {
         }
     }
 
+    @SuppressWarnings("unused")
     public static int openFileDescriptor(JuliusMainActivity activity, String filePath, String mode) {
         try {
             if (baseUri == Uri.EMPTY) {
@@ -185,13 +191,15 @@ public class FileManager {
                 if (!isWrite) {
                     return 0;
                 } else {
-                    fileUri = DocumentsContract.createDocument(activity.getContentResolver(), folderInfo.getUri(), "application/octet-stream", fileName);
+                    fileUri = DocumentsContract.createDocument(activity.getContentResolver(),
+                        folderInfo.getUri(), "application/octet-stream", fileName);
                     if (fileUri == null) {
                         return 0;
                     }
                     HashMap<String, FileInfo> dirCache = directoryStructureCache.get(folderInfo.getUri());
                     if (dirCache != null) {
-                        fileInfo = new FileInfo(DocumentsContract.getDocumentId(fileUri), fileName, "application/octet-stream", folderInfo.getUri());
+                        fileInfo = new FileInfo(DocumentsContract.getDocumentId(fileUri),
+                            fileName, "application/octet-stream", folderInfo.getUri());
                         dirCache.put(fileName.toLowerCase(), fileInfo);
                     }
                 }
@@ -208,10 +216,10 @@ public class FileManager {
 
     private static class FileInfo {
         static FileInfo base;
-        private String documentId;
-        private String name;
-        private String mimeType;
-        private Uri parent;
+        private final String documentId;
+        private final String name;
+        private final String mimeType;
+        private final Uri parent;
         private Uri uri;
 
         private FileInfo(String documentId, String name, String mimeType, Uri parent) {

@@ -38,13 +38,15 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SIDEBAR_INFO, "Dodatkowe informacje w panelu sterowania"},
     {TR_CONFIG_SMOOTH_SCROLLING, "Płynne przewijanie"},
     {TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG, "Wyłącz przeciąganie mapy prawym przyciskiem"},
+    {TR_CONFIG_INVERSE_RIGHT_CLICK_MAP_DRAG, "Odwróć kierunki przy przeciąganiu mapy prawym przyciskiem"},
+    {TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING, "Wyłącz przewijanie mapy na krawędzi okna"},
     {TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE, "Pokaż wybrany obszar przy oczyszczaniu terenu"},
     {TR_CONFIG_ALLOW_CYCLING_TEMPLES, "Pozwól na budowę kolejno każdej ze świątyń"},
     {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, "Pokaż zasięg przy budowie rezerwuarów, fontann i studni"},
     {TR_CONFIG_SHOW_CONSTRUCTION_SIZE, "Pokaż rozmiar budowy przy przeciąganiu kursorem"},
     {TR_CONFIG_HIGHLIGHT_LEGIONS, "Podświetl legion przy najechaniu kursorem"},
     {TR_CONFIG_SHOW_MILITARY_SIDEBAR, "Włącz boczny panel wojskowy"},
-    {TR_CONFIG_FIX_IMMIGRATION_BUG, "Napraw błąd z imigrację na najwyższym poziomie trudności"},
+    {TR_CONFIG_FIX_IMMIGRATION_BUG, "Napraw błąd z imigracją na najwyższym poziomie trudności"},
     {TR_CONFIG_FIX_100_YEAR_GHOSTS, "Napraw 100-letnie duchy"},
     {TR_HOTKEY_TITLE, "Julius - konfiguracja skrótów klawiszowych"},
     {TR_HOTKEY_LABEL, "Skrót klawiszowy"},
@@ -104,7 +106,10 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SET_BOOKMARK_3, "Ustaw punkt skoku 3"},
     {TR_HOTKEY_SET_BOOKMARK_4, "Ustaw punkt skoku 4"},
     {TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, "Przełącz informacje o bitwach"},
-    {TR_HOTKEY_EDIT_TITLE, "Wprowadź skrót"}
+    {TR_HOTKEY_EDIT_TITLE, "Wprowadź skrót"},
+    {TR_HOTKEY_DUPLICATE_MESSAGE, "Ta kombinacja klawiszowa już jest wyznaczona dla tej czynności:"},
+    {TR_HOTKEY_DUPLICATE_TITLE, "Klawisz już użyty"},
+    {TR_WARNING_SCREENSHOT_SAVED, "Zapisano zrzut ekranu: "}, // TODO: Google translate
 };
 
 void translation_polish(const translation_string **strings, int *num_strings)

@@ -124,7 +124,7 @@ static void draw_background(void)
 
     inner_panel_draw(32, 184, 33, 15);
 
-    rich_text_set_fonts(FONT_NORMAL_WHITE, FONT_NORMAL_RED);
+    rich_text_set_fonts(FONT_NORMAL_WHITE, FONT_NORMAL_RED, 5);
     rich_text_init(msg->content.text, 64, 184, 31, 15, 0);
 
     graphics_set_clip_rectangle(35, 187, 522, 234);
@@ -151,6 +151,9 @@ static void handle_input(const mouse *m, const hotkeys *h)
 {
     const mouse *m_dialog = mouse_in_dialog(m);
 
+    if (rich_text_handle_mouse(m_dialog)) {
+        return;
+    }
     if (image_buttons_handle_mouse(m_dialog, 516, 426, &image_button_start_mission, 1, 0)) {
         return;
     }
@@ -159,7 +162,6 @@ static void handle_input(const mouse *m, const hotkeys *h)
             return;
         }
     }
-    rich_text_handle_mouse(m_dialog);
 }
 
 static void button_back(int param1, int param2)

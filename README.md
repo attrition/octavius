@@ -8,7 +8,7 @@ Download:
 
 Android version on Google Play: [install release](https://play.google.com/store/apps/details?id=com.github.bvschaik.julius) or [sign up for test builds](https://play.google.com/apps/testing/com.github.bvschaik.julius)
 
-Chat: [Discord](http://www.discord.gg/GamerZakh) (kindly hosted by GamerZakh) or [Gitter](https://gitter.im/julius-game/community)
+Chat: [Discord](http://www.discord.gg/GamerZakh) (kindly hosted by GamerZakh)
 
 ## Octavius: an open source re-implementation of Caesar III derived from [Julius](https://github.com/bvschaik/julius)
 
@@ -35,9 +35,11 @@ Supported platforms:
 - PS Vita
 - Nintendo Switch
 - Android
+- Any compatible browser (Emscripten)
 
-While Julius does not implement any gameplay changes, a fork of Julius named [Augustus](https://github.com/Keriew/augustus) is implementing many long-wanted gameplay changes, such as roadblocks.
-Beware: Augustus does not support the original Caesar 3 save files, while Julius does. So use Julius for a more vanilla experience with some visual improvements, or Augustus for a different gameplay experience.
+While Julius does not implement any gameplay changes, a fork of Julius named [Augustus](https://github.com/Keriew/augustus) is implementing many long-wanted gameplay changes, such as roadblocks. So use Julius for a more vanilla experience with some visual improvements, or Augustus for a different gameplay experience.
+
+Note: Julius save games are fully compatible with the original Caesar 3 save files and vice versa. Augustus can load original/Julius save games, but save games made with Augustus cannot be loaded in Julius or original Caesar 3.
 
 ![](res/vita/bg.png)
 

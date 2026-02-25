@@ -57,7 +57,9 @@ static const uint8_t *display_text_language(void);
 static const uint8_t *display_text_display_scale(void);
 static const uint8_t *display_text_cursor_scale(void);
 
-static scrollbar_type scrollbar = {580, ITEM_Y_OFFSET, ITEM_HEIGHT * NUM_VISIBLE_ITEMS, on_scroll, 4};
+static scrollbar_type scrollbar = {
+    580, ITEM_Y_OFFSET, ITEM_HEIGHT * NUM_VISIBLE_ITEMS, CHECKBOX_WIDTH, NUM_VISIBLE_ITEMS, on_scroll, 0, 4
+};
 
 enum {
     TYPE_NONE,
@@ -107,6 +109,7 @@ static config_widget all_widgets[MAX_WIDGETS] = {
     {TYPE_CHECKBOX, CONFIG_UI_SMOOTH_SCROLLING, TR_CONFIG_SMOOTH_SCROLLING},
     {TYPE_CHECKBOX, CONFIG_UI_DISABLE_MOUSE_EDGE_SCROLLING, TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING},
     {TYPE_CHECKBOX, CONFIG_UI_DISABLE_RIGHT_CLICK_MAP_DRAG, TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG},
+    {TYPE_CHECKBOX, CONFIG_UI_INVERSE_RIGHT_CLICK_MAP_DRAG, TR_CONFIG_INVERSE_RIGHT_CLICK_MAP_DRAG},
     {TYPE_CHECKBOX, CONFIG_UI_VISUAL_FEEDBACK_ON_DELETE, TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE},
     {TYPE_CHECKBOX, CONFIG_UI_ALLOW_CYCLING_TEMPLES, TR_CONFIG_ALLOW_CYCLING_TEMPLES},
     {TYPE_CHECKBOX, CONFIG_UI_SHOW_WATER_STRUCTURE_RANGE, TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE},
@@ -233,6 +236,7 @@ static void init(void)
     string_copy(translation_for(TR_CONFIG_LANGUAGE_DEFAULT), data.language_options_data[0], CONFIG_STRING_VALUE_MAX);
     data.language_options[0] = data.language_options_data[0];
     data.num_language_options = 1;
+    data.selected_language_option = 0;
     const dir_listing *subdirs = dir_find_all_subdirectories();
     const char *original_value = data.config_string_values[CONFIG_STRING_UI_LANGUAGE_DIR].original_value;
     for (int i = 0; i < subdirs->num_files; i++) {
@@ -249,15 +253,17 @@ static void init(void)
     }
 
     enable_all_widgets();
-    if (system_is_fullscreen_only()) {
+    if (!system_can_scale_display(0, 0)) {
         disable_widget(TYPE_NUMERICAL_DESC, RANGE_DISPLAY_SCALE);
         disable_widget(TYPE_NUMERICAL_RANGE, RANGE_DISPLAY_SCALE);
+    }
+    if (system_is_fullscreen_only()) {
         disable_widget(TYPE_NUMERICAL_DESC, RANGE_CURSOR_SCALE);
         disable_widget(TYPE_NUMERICAL_RANGE, RANGE_CURSOR_SCALE);
     }
     install_widgets();
 
-    scrollbar_init(&scrollbar, 0, data.num_widgets - NUM_VISIBLE_ITEMS);
+    scrollbar_init(&scrollbar, 0, data.num_widgets);
 }
 
 static void checkbox_draw_text(int x, int y, int value_key, translation_key description)
@@ -278,7 +284,7 @@ static void numerical_range_draw(const numerical_range_widget *w, int x, int y, 
     text_draw(value_text, x, y + 6, FONT_NORMAL_BLACK, 0);
     inner_panel_draw(x + NUMERICAL_SLIDER_X, y + 4, w->width_blocks, 1);
 
-    int width = w->width_blocks * 16 - NUMERICAL_SLIDER_PADDING * 2 - NUMERICAL_DOT_SIZE;
+    int width = w->width_blocks * BLOCK_SIZE - NUMERICAL_SLIDER_PADDING * 2 - NUMERICAL_DOT_SIZE;
     int scroll_position = (*w->value - w->min) * width / (w->max - w->min);
     image_draw(image_group(GROUP_PANEL_BUTTON) + 37,
         x + NUMERICAL_SLIDER_X + NUMERICAL_SLIDER_PADDING + scroll_position, y + 2);
@@ -311,10 +317,14 @@ static const uint8_t *display_text_cursor_scale(void)
 
 static void update_scale(void)
 {
-    int max_scale = system_get_max_display_scale();
-    scale_ranges[RANGE_DISPLAY_SCALE].max = max_scale;
-    if (*scale_ranges[RANGE_DISPLAY_SCALE].value > max_scale) {
-        *scale_ranges[RANGE_DISPLAY_SCALE].value = max_scale;
+    int min_scale = 0;
+    int max_scale = 0;
+    if (system_can_scale_display(&min_scale, &max_scale)) {
+        scale_ranges[RANGE_DISPLAY_SCALE].min = min_scale;
+        scale_ranges[RANGE_DISPLAY_SCALE].max = max_scale;
+        if (*scale_ranges[RANGE_DISPLAY_SCALE].value > max_scale) {
+            *scale_ranges[RANGE_DISPLAY_SCALE].value = max_scale;
+        }
     }
 }
 
@@ -379,7 +389,7 @@ static void draw_foreground(void)
     }
 
     if (data.num_widgets > NUM_VISIBLE_ITEMS) {
-        inner_panel_draw(scrollbar.x + 4, scrollbar.y + 28, 2, scrollbar.height / 16 - 3);
+        inner_panel_draw(scrollbar.x + 4, scrollbar.y + 28, 2, scrollbar.height / BLOCK_SIZE - 3);
         scrollbar_draw(&scrollbar);
     }
 
@@ -430,10 +440,10 @@ static int numerical_range_handle_mouse(const mouse *m, int x, int y, int numeri
             data.active_numerical_range = 0;
             return 0;
         }
-    } else if (!m->left.is_down || !is_numerical_range(m, x, y, w->width_blocks * 16)) {
+    } else if (!m->left.went_down || !is_numerical_range(m, x, y, w->width_blocks * BLOCK_SIZE)) {
         return 0;
     }
-    int slider_width = w->width_blocks * 16 - NUMERICAL_SLIDER_PADDING * 2 - NUMERICAL_DOT_SIZE;
+    int slider_width = w->width_blocks * BLOCK_SIZE - NUMERICAL_SLIDER_PADDING * 2 - NUMERICAL_DOT_SIZE;
     int pixels_per_pct = slider_width / (w->max - w->min);
     int dot_position = m->x - x - NUMERICAL_SLIDER_X - NUMERICAL_DOT_SIZE / 2 + pixels_per_pct / 2;
 
@@ -594,10 +604,10 @@ static int config_change_string_language(config_string_key key)
 {
     config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, data.config_string_values[key].new_value);
     if (!game_reload_language()) {
-        // Notify user that language dir is invalid and revert to previously selected
-        window_plain_message_dialog_show(TR_INVALID_LANGUAGE_TITLE, TR_INVALID_LANGUAGE_MESSAGE);
+        // Revert to previously selected and notify user that language dir is invalid
         config_set_string(CONFIG_STRING_UI_LANGUAGE_DIR, data.config_string_values[key].original_value);
         game_reload_language();
+        window_plain_message_dialog_show(TR_INVALID_LANGUAGE_TITLE, TR_INVALID_LANGUAGE_MESSAGE);
         return 0;
     }
     strncpy(data.config_string_values[key].original_value,
@@ -632,6 +642,7 @@ static void button_close(int save, int param2)
         return;
     }
     if (apply_changed_configs()) {
+        config_save();
         window_main_menu_show(0);
     }
 }

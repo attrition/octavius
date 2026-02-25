@@ -39,6 +39,7 @@ static translation_string all_strings[] = {
     {TR_CONFIG_SMOOTH_SCROLLING, "Ativar rolagem suave"},
     {TR_CONFIG_DISABLE_MOUSE_EDGE_SCROLLING, "Desativar rolagem do mapa no limite da tela"},
     {TR_CONFIG_DISABLE_RIGHT_CLICK_MAP_DRAG, "Desativar rolagem do mapa com botão direito do mouse"},
+    {TR_CONFIG_INVERSE_RIGHT_CLICK_MAP_DRAG, "Arrastamento invertido do mapa com o botão direito do mouse"},
     {TR_CONFIG_VISUAL_FEEDBACK_ON_DELETE, "Ativar indicador visual ao limpar o terreno"},
     {TR_CONFIG_ALLOW_CYCLING_TEMPLES, "Permitir construir cada templo em sequência"},
     {TR_CONFIG_SHOW_WATER_STRUCTURE_RANGE, "Mostrar alcance ao construir reservatórios, fontes e poços"},
@@ -105,7 +106,10 @@ static translation_string all_strings[] = {
     {TR_HOTKEY_SET_BOOKMARK_3, "Definir marcador 3"},
     {TR_HOTKEY_SET_BOOKMARK_4, "Definir marcador 4"},
     {TR_HOTKEY_EDITOR_TOGGLE_BATTLE_INFO, "Mostrar informações de batalha"},
-    {TR_HOTKEY_EDIT_TITLE, "Nova tecla de atalho"}
+    {TR_HOTKEY_EDIT_TITLE, "Nova tecla de atalho"},
+    {TR_HOTKEY_DUPLICATE_TITLE, "Atalho já utilizado"},
+    {TR_HOTKEY_DUPLICATE_MESSAGE, "Esta combinação de teclas já está designada para a seguinte ação:"},
+    {TR_WARNING_SCREENSHOT_SAVED, "Captura de tela salva: "},
 };
 
 void translation_portuguese(const translation_string **strings, int *num_strings)

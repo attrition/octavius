@@ -4,6 +4,7 @@
 #include "editor/tool.h"
 #include "graphics/graphics.h"
 #include "graphics/image.h"
+#include "graphics/panel.h"
 #include "input/scroll.h"
 #include "map/figure.h"
 #include "map/grid.h"
@@ -99,7 +100,7 @@ void widget_map_editor_draw(void)
 
     init_draw_context();
     city_view_foreach_map_tile(draw_footprint);
-    city_view_foreach_valid_map_tile(draw_flags, draw_top, 0);
+    city_view_foreach_valid_map_tile_row(draw_flags, draw_top, 0);
     map_editor_tool_draw(&data.current_tile);
 
     graphics_reset_clip_rectangle();
@@ -186,7 +187,7 @@ static int handle_cancel_construction_button(const touch *t)
     }
     int x, y, width, height;
     city_view_get_viewport(&x, &y, &width, &height);
-    int box_size = 5 * 16;
+    int box_size = 5 * BLOCK_SIZE;
     width -= box_size;
 
     if (t->current_point.x < width || t->current_point.x >= width + box_size ||

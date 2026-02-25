@@ -271,8 +271,14 @@ static int set_scroll_speed_from_drag(void)
         delta_y = -t->frame_movement.y;
     }
 
-    data.drag.delta.x += delta_x;
-    data.drag.delta.y += delta_y;
+    if (config_get(CONFIG_UI_INVERSE_RIGHT_CLICK_MAP_DRAG)) {
+        data.drag.delta.x -= delta_x;
+        data.drag.delta.y -= delta_y;
+    } else {
+        data.drag.delta.x += delta_x;
+        data.drag.delta.y += delta_y;
+    }
+
     if ((delta_x != 0 || delta_y != 0)) {
         if (!data.drag.is_touch) {
             system_mouse_set_relative_mode(1);
@@ -332,15 +338,16 @@ static int set_arrow_input(key *arrow, const key *opposite_arrow, float *modifie
 
 static int get_direction(const mouse *m)
 {
-    int is_inside_window = m->is_inside_window;
+    int is_inside_active_window = m->is_inside_window && m->window_has_focus;
     int width = screen_width();
     int height = screen_height();
-    if (setting_fullscreen() && m->x < width && m->y < height) {
+    if (setting_fullscreen() && m->window_has_focus) {
         // For Windows 10, in fullscreen mode, on HiDPI screens, this is needed
-        // to get scrolling to work
-        is_inside_window = 1;
+        // to get scrolling to work, because the mouse leaves the window on the
+        // rightmost and bottommost pixel, even though we have grabbed the mouse.
+        is_inside_active_window = 1;
     }
-    if (!is_inside_window && !m->is_touch) {
+    if (!is_inside_active_window && !m->is_touch) {
         return DIR_8_NONE;
     }
     int top = 0;

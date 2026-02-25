@@ -12,6 +12,10 @@ then
 elif [[ "$GITHUB_REF" == "refs/heads/master" ]]
 then
   REPO=development
+elif [[ "$GITHUB_REF" =~ ^refs/heads/feature/ ]]
+then
+  FEATURE=${GITHUB_REF##refs/heads/feature/}
+  VERSION=$VERSION-$FEATURE
 elif [[ "$GITHUB_REF" =~ ^refs/pull/ ]]
 then
   PR_ID=${GITHUB_REF##refs/pull/}
@@ -29,6 +33,13 @@ case "$DEPLOY" in
   DEPLOY_FILE=julius-$VERSION-linux-x86_64.zip
   cp "${build_dir}/julius.zip" "deploy/$DEPLOY_FILE"
   ;;
+"flatpak")
+  PACKAGE=linux-flatpak
+  DEPLOY_FILE=julius-$VERSION-linux.flatpak
+  flatpak build-export export repo
+  flatpak build-bundle export julius.flatpak com.github.bvschaik.julius --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+  cp julius.flatpak "deploy/$DEPLOY_FILE"
+  ;;
 "appimage")
   PACKAGE=linux-appimage
   DEPLOY_FILE=julius-$VERSION-linux.AppImage
@@ -40,8 +51,6 @@ case "$DEPLOY" in
   cp "${build_dir}/julius.dmg" "deploy/$DEPLOY_FILE"
   ;;
 "vita")
-  ls -l "${build_dir}"
-  whoami
   PACKAGE=vita
   DEPLOY_FILE=julius-$VERSION-vita.vpk
   cp "${build_dir}/julius.vpk" "deploy/$DEPLOY_FILE"
@@ -57,6 +66,14 @@ case "$DEPLOY" in
   then
     DEPLOY_FILE=julius-$VERSION-android.apk
     cp "${build_dir}/julius.apk" "deploy/$DEPLOY_FILE"
+  fi
+  ;;
+"emscripten")
+  PACKAGE=emscripten
+  if [ -f "${build_dir}/julius.zip" ]
+  then
+    DEPLOY_FILE=julius-$VERSION-emscripten.zip
+    cp "${build_dir}/julius.zip" "deploy/$DEPLOY_FILE"
   fi
   ;;
 *)

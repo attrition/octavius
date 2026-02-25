@@ -51,8 +51,14 @@ void translation_load(language_type language)
         case LANGUAGE_GERMAN:
             translation_german(&strings, &num_strings);
             break;
+        case LANGUAGE_GREEK:
+            translation_greek(&strings, &num_strings);
+            break;
         case LANGUAGE_ITALIAN:
             translation_italian(&strings, &num_strings);
+            break;
+        case LANGUAGE_JAPANESE:
+            translation_japanese(&strings, &num_strings);
             break;
         case LANGUAGE_KOREAN:
             translation_korean(&strings, &num_strings);
@@ -77,6 +83,9 @@ void translation_load(language_type language)
             break;
         case LANGUAGE_TRADITIONAL_CHINESE:
             translation_traditional_chinese(&strings, &num_strings);
+            break;
+        case LANGUAGE_CZECH:
+            translation_czech(&strings, &num_strings);
             break;
     }
 

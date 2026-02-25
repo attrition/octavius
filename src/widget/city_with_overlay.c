@@ -522,7 +522,7 @@ static int should_draw_top_before_deletion(int grid_offset)
 
 static void deletion_draw_terrain_top(int x, int y, int grid_offset)
 {
-    if (map_property_is_draw_tile(grid_offset) && should_draw_top_before_deletion(grid_offset)) {
+    if (should_draw_top_before_deletion(grid_offset)) {
         draw_top(x, y, grid_offset);
     }
 }
@@ -532,7 +532,7 @@ static void deletion_draw_animations(int x, int y, int grid_offset)
     if (map_property_is_deleted(grid_offset) || draw_building_as_deleted(building_get(map_building_at(grid_offset)))) {
         image_draw_blend(image_group(GROUP_TERRAIN_FLAT_TILE), x, y, COLOR_MASK_RED);
     }
-    if (map_property_is_draw_tile(grid_offset) && !should_draw_top_before_deletion(grid_offset)) {
+    if (!should_draw_top_before_deletion(grid_offset)) {
         draw_top(x, y, grid_offset);
     }
     draw_animation(x, y, grid_offset);
@@ -547,18 +547,18 @@ void city_with_overlay_draw(const map_tile *tile)
     int should_mark_deleting = city_building_ghost_mark_deleting(tile);
     city_view_foreach_map_tile(draw_footprint);
     if (!should_mark_deleting) {
-        city_view_foreach_valid_map_tile(
+        city_view_foreach_valid_map_tile_row(
             draw_figures,
             draw_top,
             draw_animation
         );
         city_building_ghost_draw(tile);
-        city_view_foreach_map_tile(draw_elevated_figures);
+        city_view_foreach_valid_map_tile(draw_elevated_figures);
     } else {
-        city_view_foreach_map_tile(draw_figures);
-        city_view_foreach_map_tile(deletion_draw_terrain_top);
-        city_view_foreach_map_tile(deletion_draw_animations);
-        city_view_foreach_map_tile(draw_elevated_figures);
+        city_view_foreach_valid_map_tile(draw_figures);
+        city_view_foreach_valid_map_tile(deletion_draw_terrain_top);
+        city_view_foreach_valid_map_tile(deletion_draw_animations);
+        city_view_foreach_valid_map_tile(draw_elevated_figures);
     }
 }
 
