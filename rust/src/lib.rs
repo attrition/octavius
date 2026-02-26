@@ -7,3 +7,4 @@ pub mod string;
 pub mod locale;
 pub mod io;
 pub mod lang;
+pub mod config;
