@@ -5,3 +5,4 @@ pub mod time;
 pub mod speed;
 pub mod string;
 pub mod locale;
+pub mod io;
