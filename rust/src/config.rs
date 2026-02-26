@@ -84,7 +84,7 @@ unsafe extern "C" {
     
     // Standard C library functions
     fn fgets(s: *mut c_char, n: c_int, stream: *mut c_void) -> *mut c_char;
-    fn fprintf(stream: *mut c_void, format: *const c_char, ...) -> c_int;
+    fn io_fprintf(stream: *mut c_void, format: *const c_char, ...) -> c_int;
     fn strcmp(s1: *const c_char, s2: *const c_char) -> c_int;
     fn strncpy(dest: *mut c_char, src: *const c_char, n: usize) -> *mut c_char;
     fn strlen(s: *const c_char) -> usize;
@@ -195,10 +195,10 @@ pub unsafe extern "C" fn config_save() {
             return;
         }
         for i in 0..18 {
-            fprintf(fp, "%s=%d\n\0".as_ptr() as *const c_char, INI_KEYS[i].0, VALUES[i]);
+            io_fprintf(fp, "%s=%d\n\0".as_ptr() as *const c_char, INI_KEYS[i].0, VALUES[i]);
         }
         for i in 0..1 {
-            fprintf(fp, "%s=%s\n\0".as_ptr() as *const c_char, INI_STRING_KEYS[i].0, STRING_VALUES[i].as_ptr());
+            io_fprintf(fp, "%s=%s\n\0".as_ptr() as *const c_char, INI_STRING_KEYS[i].0, STRING_VALUES[i].as_ptr());
         }
         file_close(fp);
     }
