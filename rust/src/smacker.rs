@@ -1,6 +1,6 @@
 use std::ffi::{c_int, c_void, c_long};
 use std::ptr::{self, addr_of};
-use crate::image::ColorT;
+use crate::color::ColorT;
 
 // Smacker constants
 const MAX_TRACKS: usize = 7;

@@ -1,8 +1,7 @@
-use std::ffi::{c_char, c_int};
+use std::ffi::{c_char, c_int, c_void};
 use std::ptr::{self, addr_of, addr_of_mut};
 use crate::buffer::{Buffer, buffer_init, buffer_set, buffer_skip, buffer_read_u8, buffer_read_i8, buffer_read_u16, buffer_read_i16, buffer_read_i32, buffer_read_raw};
-
-pub type ColorT = u32;
+use crate::color::ColorT;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

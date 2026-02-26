@@ -19,3 +19,6 @@ pub mod encoding_japanese;
 pub mod encoding_korean;
 pub mod encoding_simp_chinese;
 pub mod encoding_trad_chinese;
+pub mod color;
+pub mod graphics;
+pub mod screen;
