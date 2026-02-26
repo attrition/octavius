@@ -9,3 +9,4 @@ pub mod io;
 pub mod lang;
 pub mod config;
 pub mod dir;
+pub mod file;
