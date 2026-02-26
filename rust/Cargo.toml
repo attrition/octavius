@@ -7,3 +7,4 @@ edition = "2024"
 crate-type = ["staticlib", "rlib"]
 
 [dependencies]
+libc = "0.2"
