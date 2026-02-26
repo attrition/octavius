@@ -1,5 +1,11 @@
 include_directories(.)
 
+if(MSVC)
+    link_libraries(rust_octavius ws2_32 ntdll userenv)
+else()
+    link_libraries(rust_octavius)
+endif()
+
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")

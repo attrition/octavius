@@ -245,7 +245,6 @@ endif()
 set(CORE_FILES
     ${PROJECT_SOURCE_DIR}/src/core/backtrace.c
     ${PROJECT_SOURCE_DIR}/src/core/buffer.c
-    ${PROJECT_SOURCE_DIR}/src/core/calc.c
     ${PROJECT_SOURCE_DIR}/src/core/config.c
     ${PROJECT_SOURCE_DIR}/src/core/dir.c
     ${PROJECT_SOURCE_DIR}/src/core/encoding.c
@@ -933,7 +932,28 @@ else()
         )
     endif()
 
-    target_link_libraries(${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+    # Integrate Rust library
+    if(MSVC)
+        set(RUST_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/rust/target/debug/octavius_rust.lib")
+    else()
+        set(RUST_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/rust/target/debug/liboctavius_rust.a")
+    endif()
+
+    add_custom_target(rust_lib ALL
+        COMMAND cargo build
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/rust"
+        COMMENT "Building Rust library..."
+    )
+
+    add_library(rust_octavius STATIC IMPORTED)
+    set_target_properties(rust_octavius PROPERTIES IMPORTED_LOCATION "${RUST_LIB_PATH}")
+    add_dependencies(rust_octavius rust_lib)
+
+    target_link_libraries(${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} rust_octavius)
+    if(MSVC)
+        target_link_libraries(${SHORT_NAME} ws2_32 ntdll userenv)
+    endif()
+
     if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()
