@@ -11,3 +11,4 @@ pub mod config;
 pub mod dir;
 pub mod file;
 pub mod hotkey_config;
+pub mod image;
