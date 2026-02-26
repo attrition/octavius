@@ -939,8 +939,17 @@ else()
         set(RUST_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/rust/target/debug/liboctavius_rust.a")
     endif()
 
+    find_program(CARGO_EXECUTABLE cargo
+        HINTS
+            ENV CARGO_HOME
+        PATH_SUFFIXES bin
+    )
+    if(NOT CARGO_EXECUTABLE)
+        message(FATAL_ERROR "cargo executable not found. Please ensure it is in your PATH, or the CARGO_HOME environment variable is set.")
+    endif()
+
     add_custom_target(rust_lib ALL
-        COMMAND cargo build
+        COMMAND ${CARGO_EXECUTABLE} build
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/rust"
         COMMENT "Building Rust library..."
     )
