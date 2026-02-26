@@ -1,4 +1,4 @@
-use std::ffi::{c_char, c_int, c_void};
+use std::ffi::{c_char, c_int};
 use std::ptr::{self, addr_of, addr_of_mut};
 use crate::buffer::{Buffer, buffer_init, buffer_set, buffer_skip, buffer_read_u8, buffer_read_i8, buffer_read_u16, buffer_read_i16, buffer_read_i32, buffer_read_raw};
 
@@ -45,24 +45,12 @@ const MAIN_DATA_SIZE: usize = 30000000;
 const EMPIRE_DATA_SIZE: usize = 2000 * 1000 * 4;
 const ENEMY_DATA_SIZE: usize = 2400000;
 const EXTERNAL_FONT_DATA_SIZE: usize = 1500000;
-const CHINESE_FONT_DATA_SIZE: usize = 7200000;
-const KOREAN_FONT_DATA_SIZE: usize = 7500000;
-const JAPANESE_FONT_DATA_SIZE: usize = 11000000;
 const SCRATCH_DATA_SIZE: usize = 12100000;
 
-const NO_EXTRA_FONT: c_int = 0;
 const FULL_CHARSET_IN_FONT: c_int = 1;
 const MULTIBYTE_IN_FONT: c_int = 2;
 
 const IMAGE_FONT_MULTIBYTE_OFFSET: c_int = 10000;
-const IMAGE_FONT_MULTIBYTE_TRAD_CHINESE_MAX_CHARS: usize = 2188;
-const IMAGE_FONT_MULTIBYTE_SIMP_CHINESE_MAX_CHARS: usize = 2130;
-const IMAGE_FONT_MULTIBYTE_KOREAN_MAX_CHARS: usize = 2350;
-const IMAGE_FONT_MULTIBYTE_JAPANESE_MAX_CHARS: usize = 3321;
-
-const COLOR_SG2_TRANSPARENT: ColorT = 0xf700ff;
-const ALPHA_OPAQUE: ColorT = 0xff000000;
-const ALPHA_FONT_SEMI_TRANSPARENT: ColorT = 0x99000000;
 
 const GROUP_FONT: usize = 16;
 const GROUP_BUILDING_FOUNTAIN_4: usize = 53;
@@ -108,9 +96,8 @@ static mut DATA: ImageData = ImageData {
 static DUMMY_IMAGE: Image = unsafe { std::mem::zeroed() };
 
 unsafe extern "C" {
-    fn io_read_file_into_buffer(filepath: *const c_char, localizable: c_int, buffer: *mut c_void, max_size: c_int) -> c_int;
-    fn io_read_file_part_into_buffer(filepath: *const c_char, localizable: c_int, buffer: *mut c_void, size: c_int, offset_in_file: c_int) -> c_int;
-    fn log_info(msg: *const c_char, param_str: *const c_char, param_int: c_int);
+    fn io_read_file_into_buffer(filepath: *const c_char, localizable: c_int, buffer: *mut std::ffi::c_void, max_size: c_int) -> c_int;
+    fn io_read_file_part_into_buffer(filepath: *const c_char, localizable: c_int, buffer: *mut std::ffi::c_void, size: c_int, offset_in_file: c_int) -> c_int;
     fn log_error(msg: *const c_char, param_str: *const c_char, param_int: c_int);
 }
 
@@ -126,10 +113,10 @@ pub unsafe extern "C" fn image_init() -> c_int {
         
         if (*addr_of!(DATA.main_data)).is_null() || (*addr_of!(DATA.empire_data)).is_null() || 
            (*addr_of!(DATA.enemy_data)).is_null() || (*addr_of!(DATA.tmp_data)).is_null() {
-            libc::free((*addr_of!(DATA.main_data)) as *mut c_void);
-            libc::free((*addr_of!(DATA.empire_data)) as *mut c_void);
-            libc::free((*addr_of!(DATA.enemy_data)) as *mut c_void);
-            libc::free((*addr_of!(DATA.tmp_data)) as *mut c_void);
+            libc::free((*addr_of!(DATA.main_data)) as *mut libc::c_void);
+            libc::free((*addr_of!(DATA.empire_data)) as *mut libc::c_void);
+            libc::free((*addr_of!(DATA.enemy_data)) as *mut libc::c_void);
+            libc::free((*addr_of!(DATA.tmp_data)) as *mut libc::c_void);
             return 0;
         }
         1
@@ -196,7 +183,7 @@ unsafe fn read_header(buf: *mut Buffer) {
         for i in 0..300 {
             (*addr_of_mut!(DATA.group_image_ids))[i] = buffer_read_u16(buf);
         }
-        buffer_read_raw(buf, addr_of_mut!(DATA.bitmaps) as *mut c_void, 20000);
+        buffer_read_raw(buf, addr_of_mut!(DATA.bitmaps) as *mut std::ffi::c_void, 20000);
     }
 }
 
@@ -268,13 +255,13 @@ unsafe fn convert_images(images: *mut Image, size: c_int, buf: *mut Buffer, star
 unsafe fn load_empire() {
     unsafe {
         let empire_555 = "The_empire.555\0".as_ptr() as *const c_char;
-        let size = io_read_file_into_buffer(empire_555, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut c_void, EMPIRE_DATA_SIZE as i32);
+        let size = io_read_file_into_buffer(empire_555, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, EMPIRE_DATA_SIZE as i32);
         if size != (EMPIRE_DATA_SIZE / 2) as i32 {
             log_error("unable to load empire data\0".as_ptr() as *const c_char, empire_555, 0);
             return;
         }
         let mut buf = std::mem::zeroed();
-        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut c_void, size);
+        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, size);
         convert_uncompressed(&mut buf, size, *addr_of!(DATA.empire_data));
     }
 }
@@ -325,21 +312,21 @@ pub unsafe extern "C" fn image_load_climate(climate_id: c_int, is_editor: c_int,
         let filename_bmp = if is_editor != 0 { EDITOR_GRAPHICS_555[idx].0 } else { MAIN_GRAPHICS_555[idx].0 };
         let filename_idx = if is_editor != 0 { EDITOR_GRAPHICS_SG2[idx].0 } else { MAIN_GRAPHICS_SG2[idx].0 };
 
-        if MAIN_INDEX_SIZE as i32 != io_read_file_into_buffer(filename_idx, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut c_void, MAIN_INDEX_SIZE as i32) {
+        if MAIN_INDEX_SIZE as i32 != io_read_file_into_buffer(filename_idx, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, MAIN_INDEX_SIZE as i32) {
             return 0;
         }
 
         let mut buf = std::mem::zeroed();
-        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut c_void, HEADER_SIZE as i32);
+        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, HEADER_SIZE as i32);
         read_header(&mut buf);
-        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)).add(HEADER_SIZE) as *mut c_void, (ENTRY_SIZE * MAIN_ENTRIES) as i32);
+        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)).add(HEADER_SIZE) as *mut std::ffi::c_void, (ENTRY_SIZE * MAIN_ENTRIES) as i32);
         read_index(&mut buf, addr_of_mut!(DATA.main) as *mut Image, MAIN_ENTRIES as i32);
 
-        let data_size = io_read_file_into_buffer(filename_bmp, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut c_void, SCRATCH_DATA_SIZE as i32);
+        let data_size = io_read_file_into_buffer(filename_bmp, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, SCRATCH_DATA_SIZE as i32);
         if data_size == 0 {
             return 0;
         }
-        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut c_void, data_size);
+        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, data_size);
         convert_images(addr_of_mut!(DATA.main) as *mut Image, MAIN_ENTRIES as i32, &mut buf, *addr_of!(DATA.main_data));
         
         (*addr_of_mut!(DATA.current_climate)) = climate_id;
@@ -355,11 +342,11 @@ pub unsafe extern "C" fn image_load_climate(climate_id: c_int, is_editor: c_int,
 
 unsafe fn free_font_memory() {
     unsafe {
-        libc::free((*addr_of!(DATA.font)) as *mut c_void);
-        libc::free((*addr_of!(DATA.font_data)) as *mut c_void);
+        libc::free((*addr_of!(DATA.font)) as *mut libc::c_void);
+        libc::free((*addr_of!(DATA.font_data)) as *mut libc::c_void);
         (*addr_of_mut!(DATA.font)) = ptr::null_mut();
         (*addr_of_mut!(DATA.font_data)) = ptr::null_mut();
-        (*addr_of_mut!(DATA.fonts_enabled)) = NO_EXTRA_FONT;
+        (*addr_of_mut!(DATA.fonts_enabled)) = 0; // replaced NO_EXTRA_FONT constant
     }
 }
 
@@ -369,8 +356,8 @@ unsafe fn alloc_font_memory(font_entries: c_int, font_data_size: usize) -> bool 
         (*addr_of_mut!(DATA.font)) = libc::malloc(font_entries as usize * std::mem::size_of::<Image>()) as *mut Image;
         (*addr_of_mut!(DATA.font_data)) = libc::malloc(font_data_size) as *mut ColorT;
         if (*addr_of!(DATA.font)).is_null() || (*addr_of!(DATA.font_data)).is_null() {
-            libc::free((*addr_of!(DATA.font)) as *mut c_void);
-            libc::free((*addr_of!(DATA.font_data)) as *mut c_void);
+            libc::free((*addr_of!(DATA.font)) as *mut libc::c_void);
+            libc::free((*addr_of!(DATA.font_data)) as *mut libc::c_void);
             (*addr_of_mut!(DATA.font)) = ptr::null_mut();
             (*addr_of_mut!(DATA.font_data)) = ptr::null_mut();
             return false;
@@ -432,19 +419,19 @@ pub unsafe extern "C" fn image_load_enemy(enemy_id: c_int) -> c_int {
         let filename_bmp = ENEMY_GRAPHICS_555[idx].0;
         let filename_idx = ENEMY_GRAPHICS_SG2[idx].0;
 
-        if ENEMY_INDEX_SIZE as i32 != io_read_file_part_into_buffer(filename_idx, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut c_void, ENEMY_INDEX_SIZE as i32, ENEMY_INDEX_OFFSET as i32) {
+        if ENEMY_INDEX_SIZE as i32 != io_read_file_part_into_buffer(filename_idx, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, ENEMY_INDEX_SIZE as i32, ENEMY_INDEX_OFFSET as i32) {
             return 0;
         }
 
         let mut buf = std::mem::zeroed();
-        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut c_void, ENEMY_INDEX_SIZE as i32);
+        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, ENEMY_INDEX_SIZE as i32);
         read_index(&mut buf, addr_of_mut!(DATA.enemy) as *mut Image, ENEMY_ENTRIES as i32);
 
-        let data_size = io_read_file_into_buffer(filename_bmp, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut c_void, SCRATCH_DATA_SIZE as i32);
+        let data_size = io_read_file_into_buffer(filename_bmp, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, SCRATCH_DATA_SIZE as i32);
         if data_size == 0 {
             return 0;
         }
-        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut c_void, data_size);
+        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, data_size);
         convert_images(addr_of_mut!(DATA.enemy) as *mut Image, ENEMY_ENTRIES as i32, &mut buf, *addr_of!(DATA.enemy_data));
         1
     }
@@ -486,19 +473,19 @@ unsafe fn load_external_fonts(base_offset: c_int) -> c_int {
             return 0;
         }
         let sg2 = "C3_fonts.sg2\0".as_ptr() as *const c_char;
-        if EXTERNAL_FONT_INDEX_SIZE as i32 != io_read_file_part_into_buffer(sg2, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut c_void, EXTERNAL_FONT_INDEX_SIZE as i32, EXTERNAL_FONT_INDEX_OFFSET as i32) {
+        if EXTERNAL_FONT_INDEX_SIZE as i32 != io_read_file_part_into_buffer(sg2, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, EXTERNAL_FONT_INDEX_SIZE as i32, EXTERNAL_FONT_INDEX_OFFSET as i32) {
             return 0;
         }
         let mut buf = std::mem::zeroed();
-        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut c_void, EXTERNAL_FONT_INDEX_SIZE as i32);
+        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, EXTERNAL_FONT_INDEX_SIZE as i32);
         read_index(&mut buf, *addr_of!(DATA.font), EXTERNAL_FONT_ENTRIES as i32);
 
         let bmp = "C3_fonts.555\0".as_ptr() as *const c_char;
-        let data_size = io_read_file_into_buffer(bmp, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut c_void, SCRATCH_DATA_SIZE as i32);
+        let data_size = io_read_file_into_buffer(bmp, MAY_BE_LOCALIZED, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, SCRATCH_DATA_SIZE as i32);
         if data_size == 0 {
             return 0;
         }
-        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut c_void, data_size);
+        buffer_init(&mut buf, (*addr_of!(DATA.tmp_data)) as *mut std::ffi::c_void, data_size);
         convert_images(*addr_of!(DATA.font), EXTERNAL_FONT_ENTRIES as i32, &mut buf, *addr_of!(DATA.font_data));
 
         (*addr_of_mut!(DATA.fonts_enabled)) = FULL_CHARSET_IN_FONT;

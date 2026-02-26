@@ -1,5 +1,4 @@
 use std::ffi::{c_char, c_int, c_void};
-use std::ptr;
 
 unsafe extern "C" {
     fn platform_file_manager_open_file(filename: *const c_char, mode: *const c_char) -> *mut c_void;

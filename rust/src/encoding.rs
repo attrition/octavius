@@ -17,7 +17,7 @@ pub enum EncodingType {
 
 #[derive(Copy, Clone)]
 struct LetterCode {
-    internal_value: u8,
+    _internal_value: u8,
     bytes: i32,
     utf8_value: [u8; 3],
     bytes_decomposed: i32,
@@ -40,7 +40,7 @@ static mut UTF8_TABLE_SIZE: i32 = 0;
 static mut DECOMPOSED_TABLE_SIZE: i32 = 0;
 
 const EMPTY_LETTER_CODE: LetterCode = LetterCode {
-    internal_value: 0,
+    _internal_value: 0,
     bytes: 0,
     utf8_value: [0; 3],
     bytes_decomposed: 0,
@@ -50,7 +50,7 @@ const EMPTY_LETTER_CODE: LetterCode = LetterCode {
 // High character tables implementation would be very large, including a simplified version for now
 const HIGH_TO_UTF8_DEFAULT: [LetterCode; HIGH_CHAR_COUNT] = {
     let mut table = [EMPTY_LETTER_CODE; HIGH_CHAR_COUNT];
-    table[0] = LetterCode { internal_value: 0x80, bytes: 3, utf8_value: [0xe2, 0x82, 0xac], bytes_decomposed: 0, utf8_decomposed: [0; 4] };
+    table[0] = LetterCode { _internal_value: 0x80, bytes: 3, utf8_value: [0xe2, 0x82, 0xac], bytes_decomposed: 0, utf8_decomposed: [0; 4] };
     // ... rest of entries should be filled ...
     table
 };
@@ -235,7 +235,6 @@ pub unsafe extern "C" fn encoding_from_utf8(input: *const c_char, output: *mut u
             }
             return;
         }
-        // Simplified fallback for ASCII
         let mut in_ptr = input;
         let mut out_ptr = output;
         let max_out = output.add(output_length as usize - 1);
@@ -279,9 +278,9 @@ pub unsafe extern "C" fn encoding_utf16_to_utf8(input: *const u16, output: *mut 
                 *out = ((c & 0x3f) | 0x80) as u8 as c_char; out = out.add(1);
             } else if (c & 0xfc00) == 0xd800 && (*input.add(i+1) & 0xfc00) == 0xdc00 {
                 let c2 = *input.add(i+1);
-                *out = (((c + 64) >> 8) & 0x3 | 0xf0) as u8 as c_char; out = out.add(1);
-                *out = (((c >> 2) + 16) & 0x3f | 0x80) as u8 as c_char; out = out.add(1);
-                *out = (((c >> 4) & 0x30) | 0x80 | ((c2 << 2) & 0xf)) as u8 as c_char; out = out.add(1);
+                *out = ((((c + 64) >> 8) & 0x3) | 0xf0) as u8 as c_char; out = out.add(1);
+                *out = ((((c >> 2) + 16) & 0x3f) | 0x80) as u8 as c_char; out = out.add(1);
+                *out = ((((c >> 4) & 0x30) | 0x80) | ((c2 << 2) & 0xf)) as u8 as c_char; out = out.add(1);
                 *out = ((c2 & 0x3f) | 0x80) as u8 as c_char; out = out.add(1);
                 i += 1;
             } else {

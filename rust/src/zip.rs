@@ -1,12 +1,7 @@
 use std::ffi::{c_char, c_int, c_void};
-use std::ptr::{self, addr_of, addr_of_mut};
+use std::ptr;
 
 // PKWare constants
-const PK_SUCCESS: c_int = 0;
-const PK_INVALID_WINDOWSIZE: c_int = 1;
-const PK_LITERAL_ENCODING_UNSUPPORTED: c_int = 2;
-const PK_TOO_FEW_INPUT_BYTES: c_int = 3;
-const PK_ERROR_DECODING: c_int = 4;
 const PK_ERROR_VALUE: i32 = 774;
 const PK_EOF: i32 = 773;
 
@@ -34,7 +29,6 @@ struct PkCompBuffer {
     output_ptr: usize,
     analyze_offset_table: Box<[u16; 2304]>,
     analyze_index: Box<[u16; 8708]>,
-    long_matcher: Box<[i16; 518]>,
     codeword_values: Box<[u16; 774]>,
     codeword_bits: Box<[u8; 774]>,
 }
@@ -485,7 +479,6 @@ pub unsafe extern "C" fn zip_compress(
         output_ptr: 0,
         analyze_offset_table: Box::new([0; 2304]),
         analyze_index: Box::new([0; 8708]),
-        long_matcher: Box::new([0; 518]),
         codeword_values: Box::new([0; 774]),
         codeword_bits: Box::new([0; 774]),
     };
