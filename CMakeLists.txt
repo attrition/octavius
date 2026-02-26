@@ -243,27 +243,7 @@ elseif (${TARGET_PLATFORM} STREQUAL "ios")
 endif()
 
 set(CORE_FILES
-    ${PROJECT_SOURCE_DIR}/src/core/backtrace.c
-    ${PROJECT_SOURCE_DIR}/src/core/buffer.c
-    ${PROJECT_SOURCE_DIR}/src/core/calc.c
-    ${PROJECT_SOURCE_DIR}/src/core/config.c
-    ${PROJECT_SOURCE_DIR}/src/core/dir.c
-    ${PROJECT_SOURCE_DIR}/src/core/encoding.c
-    ${PROJECT_SOURCE_DIR}/src/core/encoding_japanese.c
-    ${PROJECT_SOURCE_DIR}/src/core/encoding_korean.c
-    ${PROJECT_SOURCE_DIR}/src/core/encoding_simp_chinese.c
-    ${PROJECT_SOURCE_DIR}/src/core/encoding_trad_chinese.c
-    ${PROJECT_SOURCE_DIR}/src/core/file.c
-    ${PROJECT_SOURCE_DIR}/src/core/hotkey_config.c
-    ${PROJECT_SOURCE_DIR}/src/core/image.c
-    ${PROJECT_SOURCE_DIR}/src/core/io.c
-    ${PROJECT_SOURCE_DIR}/src/core/lang.c
-    ${PROJECT_SOURCE_DIR}/src/core/locale.c
-    ${PROJECT_SOURCE_DIR}/src/core/random.c
-    ${PROJECT_SOURCE_DIR}/src/core/smacker.c
-    ${PROJECT_SOURCE_DIR}/src/core/speed.c
-    ${PROJECT_SOURCE_DIR}/src/core/string.c
-    ${PROJECT_SOURCE_DIR}/src/core/time.c
+    ${PROJECT_SOURCE_DIR}/src/core/io_wrapper.c
     ${PROJECT_SOURCE_DIR}/src/core/zip.c
 )
 
@@ -460,14 +440,11 @@ set(GRAPHICS_FILES
     ${PROJECT_SOURCE_DIR}/src/graphics/button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/font.c
     ${PROJECT_SOURCE_DIR}/src/graphics/generic_button.c
-    ${PROJECT_SOURCE_DIR}/src/graphics/graphics.c
-    ${PROJECT_SOURCE_DIR}/src/graphics/image.c
     ${PROJECT_SOURCE_DIR}/src/graphics/image_button.c
     ${PROJECT_SOURCE_DIR}/src/graphics/lang_text.c
     ${PROJECT_SOURCE_DIR}/src/graphics/menu.c
     ${PROJECT_SOURCE_DIR}/src/graphics/panel.c
     ${PROJECT_SOURCE_DIR}/src/graphics/rich_text.c
-    ${PROJECT_SOURCE_DIR}/src/graphics/screen.c
     ${PROJECT_SOURCE_DIR}/src/graphics/screenshot.c
     ${PROJECT_SOURCE_DIR}/src/graphics/scrollbar.c
     ${PROJECT_SOURCE_DIR}/src/graphics/text.c
@@ -933,7 +910,37 @@ else()
         )
     endif()
 
-    target_link_libraries(${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+    # Integrate Rust library
+    if(MSVC)
+        set(RUST_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/rust/target/debug/octavius_rust.lib")
+    else()
+        set(RUST_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/rust/target/debug/liboctavius_rust.a")
+    endif()
+
+    find_program(CARGO_EXECUTABLE cargo
+        HINTS
+            ENV CARGO_HOME
+        PATH_SUFFIXES bin
+    )
+    if(NOT CARGO_EXECUTABLE)
+        message(FATAL_ERROR "cargo executable not found. Please ensure it is in your PATH, or the CARGO_HOME environment variable is set.")
+    endif()
+
+    add_custom_target(rust_lib ALL
+        COMMAND ${CARGO_EXECUTABLE} build
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/rust"
+        COMMENT "Building Rust library..."
+    )
+
+    add_library(rust_octavius STATIC IMPORTED)
+    set_target_properties(rust_octavius PROPERTIES IMPORTED_LOCATION "${RUST_LIB_PATH}")
+    add_dependencies(rust_octavius rust_lib)
+
+    target_link_libraries(${SHORT_NAME} ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} rust_octavius)
+    if(MSVC)
+        target_link_libraries(${SHORT_NAME} ws2_32 ntdll userenv)
+    endif()
+
     if(NOT APPLE AND NOT ${TARGET_PLATFORM} STREQUAL "android")
         install(TARGETS ${SHORT_NAME} RUNTIME DESTINATION bin)
     endif()
