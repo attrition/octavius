@@ -1,17 +1,5 @@
 use std::ffi::c_int;
-
-#[repr(C)]
-pub struct Buffer {
-    pub data: *mut u8,
-    pub size: c_int,
-    pub index: c_int,
-    pub overflow: c_int,
-}
-
-unsafe extern "C" {
-    fn buffer_read_u32(buf: *mut Buffer) -> u32;
-    fn buffer_write_u32(buf: *mut Buffer, value: u32);
-}
+use crate::buffer::{Buffer, buffer_read_u32, buffer_write_u32};
 
 const MAX_RANDOM: usize = 100;
 
