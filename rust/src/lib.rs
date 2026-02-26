@@ -4,3 +4,4 @@ pub mod random;
 pub mod time;
 pub mod speed;
 pub mod string;
+pub mod locale;
