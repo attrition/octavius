@@ -8,3 +8,4 @@ pub mod locale;
 pub mod io;
 pub mod lang;
 pub mod config;
+pub mod dir;
