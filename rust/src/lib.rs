@@ -22,3 +22,4 @@ pub mod encoding_trad_chinese;
 pub mod color;
 pub mod graphics;
 pub mod screen;
+pub mod graphics_image;
