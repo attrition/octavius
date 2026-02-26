@@ -12,3 +12,5 @@ pub mod dir;
 pub mod file;
 pub mod hotkey_config;
 pub mod image;
+pub mod zip;
+pub mod encoding;
