@@ -17,6 +17,8 @@ res/*asset*
 # Build output and data directories
 /build*/
 /release
+/rust/target/
+rustup-init.exe
 out/
 cmake-build-debug
 /data
