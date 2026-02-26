@@ -14,3 +14,8 @@ pub mod hotkey_config;
 pub mod image;
 pub mod encoding;
 pub mod smacker;
+pub mod backtrace;
+pub mod encoding_japanese;
+pub mod encoding_korean;
+pub mod encoding_simp_chinese;
+pub mod encoding_trad_chinese;

@@ -243,11 +243,6 @@ elseif (${TARGET_PLATFORM} STREQUAL "ios")
 endif()
 
 set(CORE_FILES
-    ${PROJECT_SOURCE_DIR}/src/core/backtrace.c
-    ${PROJECT_SOURCE_DIR}/src/core/encoding_japanese.c
-    ${PROJECT_SOURCE_DIR}/src/core/encoding_korean.c
-    ${PROJECT_SOURCE_DIR}/src/core/encoding_simp_chinese.c
-    ${PROJECT_SOURCE_DIR}/src/core/encoding_trad_chinese.c
     ${PROJECT_SOURCE_DIR}/src/core/io_wrapper.c
     ${PROJECT_SOURCE_DIR}/src/core/zip.c
 )
